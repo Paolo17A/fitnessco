@@ -1,7 +1,10 @@
 // ignore_for_file: avoid_print
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fitnessco/screens/adminHome_screen.dart';
+import 'package:fitnessco/screens/clientHome_screen.dart';
 import 'package:fitnessco/screens/signin_screen.dart';
+import 'package:fitnessco/screens/trainerHome_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -18,11 +21,10 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Fitnessco',
       theme: ThemeData(
-        primarySwatch: Colors.purple,
-      ),
-      home: SignInScreen(),
+          primarySwatch: Colors.purple, cardColor: Colors.purpleAccent),
+      home: const TrainerHomeScreen(),
     );
   }
 }

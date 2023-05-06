@@ -15,11 +15,35 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final TextEditingController _usernameTextController = TextEditingController();
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _confirmPasswordTextController =
       TextEditingController();
+
+  Future<void> _signUp(BuildContext context) async {
+    try {
+      final userCredential =
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: _emailTextController.text,
+        password: _passwordTextController.text,
+      );
+      /*await userCredential.user
+          ?.updateDisplayName(_usernameTextController.text);*/
+      print("Success");
+      _openHomeScreen();
+    } catch (error) {
+      print("Error ${error.toString()}");
+    }
+  }
+
+  void _openHomeScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ClientHomeScreen()),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +72,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
             padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
             child: Column(
               children: [
-                fitnesscoTextField("Enter Username", Icons.person_outline,
-                    false, _usernameTextController),
+                fitnesscoTextField("Enter First Name", Icons.person_outline,
+                    false, _firstNameController),
+                const SizedBox(height: 30),
+                fitnesscoTextField("Enter Last Name", Icons.person_outline,
+                    false, _lastNameController),
                 const SizedBox(height: 30),
                 fitnesscoTextField("Enter Email Address", Icons.email, false,
                     _emailTextController),
@@ -60,21 +87,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 fitnesscoTextField("Confirm Password", Icons.lock_outline, true,
                     _confirmPasswordTextController),
                 const SizedBox(height: 40),
-                ovalButton(context, "REGISTER", () {
-                  FirebaseAuth.instance
-                      .createUserWithEmailAndPassword(
-                          email: _emailTextController.text,
-                          password: _passwordTextController.text)
-                      .then((value) {
-                    print("Success");
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const ClientHomeScreen()));
-                  }).onError((error, stackTrace) {
-                    print("Error${error.toString()}");
-                  });
-                }),
+                ovalButton(context, "REGISTER", () => _signUp(context)),
               ],
             ),
           ),

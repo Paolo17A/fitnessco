@@ -7,14 +7,14 @@ import 'package:flutter/material.dart';
 import '../widgets/LogOut_Widget.dart';
 import '../widgets/SquareIconButton_widget.dart';
 
-class ClientHomeScreen extends StatelessWidget {
-  const ClientHomeScreen({super.key});
+class TrainerHomeScreen extends StatelessWidget {
+  const TrainerHomeScreen({super.key});
+
+  final double _buttonWidth = 250;
 
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
-    final double itemWidth = (screenSize.width - 60) / 2;
-    final double itemHeight = itemWidth * 0.8;
 
     return Scaffold(
       body: Container(
@@ -45,7 +45,7 @@ class ClientHomeScreen extends StatelessWidget {
                         ),
                         SizedBox(height: 15),
                         Text(
-                          "membershipStatus",
+                          "Total Revenue: 69420",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
@@ -60,27 +60,31 @@ class ClientHomeScreen extends StatelessWidget {
               ),
             ),
             Expanded(
-              child: GridView.count(
-                padding: EdgeInsets.all(screenSize.width * 0.05),
-                crossAxisCount: 2,
-                crossAxisSpacing: screenSize.width * 0.05,
-                mainAxisSpacing: screenSize.width * 0.05,
-                childAspectRatio: itemWidth / itemHeight,
-                children: [
-                  squareIconButton_Widget(
-                      context, 'View All Trainers', Icons.people),
-                  squareIconButton_Widget(
-                      context, 'View My Workout Plan', Icons.list),
-                  squareIconButton_Widget(
-                      context, 'My Training Session', Icons.fitness_center),
-                  squareIconButton_Widget(
-                      context, 'Workout History', Icons.history),
-                  squareIconButton_Widget(context, 'Edit Profile', Icons.edit),
-                  squareIconButton_Widget(context, 'Settings', Icons.settings),
-                ],
+              child: Container(
+                padding: const EdgeInsets.all(15),
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      squareIconButton_Widget(
+                          context, 'View My Clients', Icons.people,
+                          buttonWidth: _buttonWidth),
+                      squareIconButton_Widget(
+                          context, 'View My Schedule', Icons.calendar_month,
+                          buttonWidth: _buttonWidth),
+                      squareIconButton_Widget(
+                          context, 'Edit Profile', Icons.edit,
+                          buttonWidth: _buttonWidth),
+                      squareIconButton_Widget(
+                          context, 'Settings', Icons.settings,
+                          buttonWidth: _buttonWidth),
+                      LogOutWidget(screenSize: screenSize)
+                    ],
+                  ),
+                ),
               ),
             ),
-            LogOutWidget(screenSize: screenSize)
           ],
         ),
       ),
