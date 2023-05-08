@@ -1,9 +1,6 @@
 // ignore_for_file: file_names
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/signin_screen.dart';
 import 'package:flutter/material.dart';
-
 import '../widgets/LogOut_Widget.dart';
 import '../widgets/SquareIconButton_widget.dart';
 
@@ -68,17 +65,29 @@ class TrainerHomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       squareIconButton_Widget(
-                          context, 'View My Clients', Icons.people,
-                          buttonWidth: _buttonWidth),
+                          context,
+                          'View My Clients',
+                          Icons.people,
+                          buttonWidth: _buttonWidth,
+                          () {}),
                       squareIconButton_Widget(
-                          context, 'View My Schedule', Icons.calendar_month,
-                          buttonWidth: _buttonWidth),
+                          context,
+                          'View My Schedule',
+                          Icons.calendar_month,
+                          buttonWidth: _buttonWidth,
+                          () {}),
                       squareIconButton_Widget(
-                          context, 'Edit Profile', Icons.edit,
-                          buttonWidth: _buttonWidth),
+                          context,
+                          'Edit Profile',
+                          Icons.edit,
+                          buttonWidth: _buttonWidth,
+                          () {}),
                       squareIconButton_Widget(
-                          context, 'Settings', Icons.settings,
-                          buttonWidth: _buttonWidth),
+                          context,
+                          'Settings',
+                          Icons.settings,
+                          buttonWidth: _buttonWidth,
+                          () {}),
                       LogOutWidget(screenSize: screenSize)
                     ],
                   ),
