@@ -78,11 +78,13 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
             }
 
             final List<QueryDocumentSnapshot> users = snapshot.data!.docs;
-
+            List<String> trainerUids = users.map((doc) => doc.id).toList();
             return ListView.builder(
               itemCount: users.length,
               itemBuilder: (BuildContext context, int index) {
                 return UserOverview(
+                  uid: trainerUids[index],
+                  accountType: users[index]['accountType'],
                   firstName: users[index]['firstName'],
                   lastName: users[index]['lastName'],
                 );

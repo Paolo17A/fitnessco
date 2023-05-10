@@ -37,9 +37,9 @@ class SignInScreen extends StatelessWidget {
       firstName = dataMap['firstName'];
       lastName = dataMap['lastName'];
       if (dataMap['accountType'] == "CLIENT") {
-        _goToClientHomeScreen(context, firstName, lastName);
+        _goToClientHomeScreen(context, userCredential.user!.uid);
       } else if (dataMap['accountType'] == "TRAINER") {
-        _goToTrainerHomeScreen(context, firstName, lastName);
+        _goToTrainerHomeScreen(context, userCredential.user!.uid);
       } else if (dataMap['accountType'] == "ADMIN") {
         _goToAdminHomeScreen(context);
       }
@@ -48,19 +48,18 @@ class SignInScreen extends StatelessWidget {
     }
   }
 
-  void _goToClientHomeScreen(
-      BuildContext context, String firstName, String lastName) {
+  void _goToClientHomeScreen(BuildContext context, String uid) {
     final route = MaterialPageRoute(
-      builder: (context) =>
-          ClientHomeScreen(firstName: firstName, lastName: lastName),
+      builder: (context) => ClientHomeScreen(uid: uid),
     );
     Navigator.of(context).push(route);
   }
 
-  void _goToTrainerHomeScreen(
-      BuildContext context, String firstName, String lastName) {
+  void _goToTrainerHomeScreen(BuildContext context, String uid) {
     final route = MaterialPageRoute(
-      builder: (context) => const TrainerHomeScreen(),
+      builder: (context) => TrainerHomeScreen(
+        uid: uid,
+      ),
     );
     Navigator.of(context).push(route);
   }

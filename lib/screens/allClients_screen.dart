@@ -43,10 +43,14 @@ class AllClientsScreenState extends State<AllClientsScreen> {
               return Center(child: Text('Error: ${snapshot.error}'));
             } else {
               final List<QueryDocumentSnapshot> users = snapshot.data!;
+              List<String> clientUids = users.map((doc) => doc.id).toList();
+
               return ListView.builder(
                 itemCount: users.length,
                 itemBuilder: (BuildContext context, int index) {
                   return UserOverview(
+                    uid: clientUids[index],
+                    accountType: users[index]['accountType'],
                     firstName: users[index]['firstName'],
                     lastName: users[index]['lastName'],
                   );

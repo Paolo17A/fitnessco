@@ -43,20 +43,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
       });
 
       print("Success");
-      _openHomeScreen();
+      _openHomeScreen(userCredential.user!.uid);
     } catch (error) {
       print("Error ${error.toString()}");
     }
   }
 
-  void _openHomeScreen() {
+  void _openHomeScreen(String uid) {
     Navigator.push(
       context,
-      MaterialPageRoute(
-          builder: (context) => ClientHomeScreen(
-                firstName: _firstNameController.text,
-                lastName: _lastNameController.text,
-              )),
+      MaterialPageRoute(builder: (context) => ClientHomeScreen(uid: uid)),
     );
   }
 

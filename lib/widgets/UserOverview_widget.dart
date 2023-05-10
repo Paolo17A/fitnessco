@@ -1,11 +1,19 @@
+import 'package:fitnessco/screens/selectedClientProfile_screen.dart';
+import 'package:fitnessco/screens/selectedTrainerProfile_screen.dart';
 import 'package:flutter/material.dart';
 
 class UserOverview extends StatelessWidget {
+  final String uid;
+  final String accountType;
   final String firstName;
   final String lastName;
 
   const UserOverview(
-      {Key? key, required this.firstName, required this.lastName})
+      {Key? key,
+      required this.uid,
+      required this.accountType,
+      required this.firstName,
+      required this.lastName})
       : super(key: key);
 
   @override
@@ -21,6 +29,19 @@ class UserOverview extends StatelessWidget {
         trailing: ElevatedButton(
           child: const Text("View Profile"),
           onPressed: () {
+            if (accountType == "TRAINER") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SelectedTrainerProfile(uid: uid)),
+              );
+            } else if (accountType == "CLIENT") {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                    builder: (context) => SelectedClientProfile(uid: uid)),
+              );
+            }
             // Navigate to user profile screen
           },
         ),
