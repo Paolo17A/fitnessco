@@ -11,16 +11,34 @@ import 'package:fitnessco/widgets/OvalButton_widget.dart';
 import 'package:fitnessco/widgets/FitnesscoTextField_widget.dart';
 import 'package:flutter/material.dart';
 
-class SignInScreen extends StatelessWidget {
-  SignInScreen({super.key});
+class SignInScreen extends StatefulWidget {
+  const SignInScreen({super.key});
 
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
   String firstName = "";
   String lastName = "";
+  bool _isLoading = false;
 
   Future<void> signIn(BuildContext context) async {
+    if (_emailTextController.text.isEmpty ||
+        _passwordTextController.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please fill up all provided fields"),
+        backgroundColor: Colors.purple,
+      ));
+      return;
+    }
+
     try {
+      setState(() {
+        _isLoading = true;
+      });
       UserCredential userCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
               email: _emailTextController.text,
@@ -43,8 +61,20 @@ class SignInScreen extends StatelessWidget {
       } else if (dataMap['accountType'] == "ADMIN") {
         _goToAdminHomeScreen(context);
       }
+      setState(() {
+        _isLoading = false;
+      });
     } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
       print(error.toString());
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Invalid email or password."),
+        backgroundColor: Colors.purple,
+      ));
+      _emailTextController.clear();
+      _passwordTextController.clear();
     }
   }
 
@@ -74,40 +104,69 @@ class SignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(colors: [
-            hexStringToColor("CB2B93"),
-            hexStringToColor("9546C4"),
-            hexStringToColor("5E61F4")
-          ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-        ),
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-                20, MediaQuery.of(context).size.height * 0.1, 20, 0),
-            child: Column(
-              children: [
-                const CircleAvatar(
-                  backgroundColor: Colors.white,
-                  radius: 100,
+      body: Stack(
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  hexStringToColor("CB2B93"),
+                  hexStringToColor("9546C4"),
+                  hexStringToColor("5E61F4"),
+                ],
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+              ),
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  20,
+                  MediaQuery.of(context).size.height * 0.1,
+                  20,
+                  0,
                 ),
-                const SizedBox(height: 100),
-                fitnesscoTextField("Enter Email Address", Icons.email_outlined,
-                    false, _emailTextController),
-                const SizedBox(height: 30),
-                fitnesscoTextField("Enter Password", Icons.lock_outline, true,
-                    _passwordTextController),
-                const SizedBox(height: 50),
-                ovalButton(context, "LOG IN", () => signIn(context)),
-                const SizedBox(height: 10),
-                _signUpOption(context)
-              ],
+                child: Column(
+                  children: [
+                    const CircleAvatar(
+                      backgroundColor: Colors.white,
+                      radius: 100,
+                    ),
+                    const SizedBox(height: 100),
+                    fitnesscoTextField(
+                      "Enter Email Address",
+                      Icons.email_outlined,
+                      false,
+                      _emailTextController,
+                    ),
+                    const SizedBox(height: 30),
+                    fitnesscoTextField(
+                      "Enter Password",
+                      Icons.lock_outline,
+                      true,
+                      _passwordTextController,
+                    ),
+                    const SizedBox(height: 50),
+                    ovalButton(context, "LOG IN", () => signIn(context)),
+                    const SizedBox(height: 10),
+                    _signUpOption(context),
+                  ],
+                ),
+              ),
             ),
           ),
-        ),
+          if (_isLoading)
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
       ),
     );
   }
