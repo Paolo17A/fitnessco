@@ -20,7 +20,7 @@ class MyApp extends StatelessWidget {
       title: 'Fitnessco',
       theme: ThemeData(
           primarySwatch: Colors.purple, cardColor: Colors.purpleAccent),
-      home: SignInScreen(),
+      home: const SignInScreen(),
     );
   }
 }

@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:fitnessco/screens/addTrainer_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,9 +7,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/UserOverview_widget.dart';
 
 class AllTrainersScreen extends StatefulWidget {
-  final bool showActions;
+  final bool isBeingViewedByAdmin;
 
-  const AllTrainersScreen({super.key, this.showActions = false});
+  const AllTrainersScreen({super.key, this.isBeingViewedByAdmin = false});
 
   @override
   AllTrainersScreenState createState() => AllTrainersScreenState();
@@ -21,6 +23,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
     _trainersStream = FirebaseFirestore.instance
         .collection('users')
         .where('accountType', isEqualTo: 'TRAINER')
+        .where('isDeleted', isEqualTo: false)
         .snapshots();
   }
 
@@ -46,7 +49,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
             Navigator.pop(context);
           },
         ),
-        actions: widget.showActions
+        actions: widget.isBeingViewedByAdmin
             ? [
                 IconButton(
                   icon: const Icon(Icons.add),
@@ -87,6 +90,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
                   accountType: users[index]['accountType'],
                   firstName: users[index]['firstName'],
                   lastName: users[index]['lastName'],
+                  isBeingViewedByAdmin: widget.isBeingViewedByAdmin,
                 );
               },
             );

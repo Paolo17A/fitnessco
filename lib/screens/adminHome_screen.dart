@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:fitnessco/screens/allClients_screen.dart';
+import 'package:fitnessco/screens/manageGym_screen.dart';
 import 'package:fitnessco/widgets/LogOut_Widget.dart';
 import 'package:flutter/material.dart';
 import '../widgets/SquareIconButton_widget.dart';
@@ -13,7 +14,7 @@ class AdminHomeScreen extends StatelessWidget {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const AllTrainersScreen(
-          showActions: true,
+          isBeingViewedByAdmin: true,
         ),
       ),
     );
@@ -25,6 +26,11 @@ class AdminHomeScreen extends StatelessWidget {
         builder: (context) => const AllClientsScreen(),
       ),
     );
+  }
+
+  void _goToManageGymScreen(BuildContext context) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const ManageGymScreen()));
   }
 
   @override
@@ -73,7 +79,7 @@ class AdminHomeScreen extends StatelessWidget {
                         'Manage Gym',
                         Icons.fitness_center,
                         buttonWidth: 300,
-                        () {}),
+                        () => _goToManageGymScreen(context)),
                     LogOutWidget(screenSize: screenSize)
                   ],
                 )),

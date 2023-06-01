@@ -20,6 +20,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   bool _isLoading = true;
   late String _firstName;
   late String _lastName;
+  late String _membershipStatus;
 
   @override
   void initState() {
@@ -37,6 +38,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       setState(() {
         _firstName = userData['firstName'] as String;
         _lastName = userData['lastName'] as String;
+        _membershipStatus = userData['membershipStatus'] as String;
         _isLoading = false;
       });
     }
@@ -53,7 +55,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const AllTrainersScreen(
-          showActions: false,
+          isBeingViewedByAdmin: false,
         ),
       ),
     );
@@ -107,9 +109,9 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                                 ),
                               ),
                               const SizedBox(height: 15),
-                              const Text(
-                                "membershipStatus",
-                                style: TextStyle(
+                              Text(
+                                "membershipStatus: $_membershipStatus",
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                   color: Colors.grey,

@@ -44,7 +44,6 @@ class _SignInScreenState extends State<SignInScreen> {
               email: _emailTextController.text,
               password: _passwordTextController.text);
 
-      print("SUCCESS LOG IN");
       DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
@@ -68,7 +67,6 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         _isLoading = false;
       });
-      print(error.toString());
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Invalid email or password."),
         backgroundColor: Colors.purple,
@@ -78,20 +76,48 @@ class _SignInScreenState extends State<SignInScreen> {
     }
   }
 
-  void _goToClientHomeScreen(BuildContext context, String uid) {
-    final route = MaterialPageRoute(
-      builder: (context) => ClientHomeScreen(uid: uid),
-    );
-    Navigator.of(context).push(route);
+  void _goToClientHomeScreen(BuildContext context, String uid) async {
+    final docSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final userData = docSnapshot.data();
+
+    if (userData!['membershipStatus'] == 'UNPAID') {
+      _emailTextController.clear();
+      _passwordTextController.clear();
+      FirebaseAuth.instance.signOut();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Your membership is expired. Please pay at the counter."),
+        backgroundColor: Colors.purple,
+      ));
+    } else {
+      final route = MaterialPageRoute(
+        builder: (context) => ClientHomeScreen(uid: uid),
+      );
+      Navigator.of(context).push(route);
+    }
   }
 
-  void _goToTrainerHomeScreen(BuildContext context, String uid) {
-    final route = MaterialPageRoute(
-      builder: (context) => TrainerHomeScreen(
-        uid: uid,
-      ),
-    );
-    Navigator.of(context).push(route);
+  void _goToTrainerHomeScreen(BuildContext context, String uid) async {
+    final docSnapshot =
+        await FirebaseFirestore.instance.collection('users').doc(uid).get();
+    final userData = docSnapshot.data();
+
+    if (userData!['isDeleted'] == true) {
+      _emailTextController.clear();
+      _passwordTextController.clear();
+      FirebaseAuth.instance.signOut();
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Your account has been deleted by the admin."),
+        backgroundColor: Colors.purple,
+      ));
+    } else {
+      final route = MaterialPageRoute(
+        builder: (context) => TrainerHomeScreen(
+          uid: uid,
+        ),
+      );
+      Navigator.of(context).push(route);
+    }
   }
 
   void _goToAdminHomeScreen(BuildContext context) {

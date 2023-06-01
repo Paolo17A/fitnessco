@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, avoid_print
+// ignore_for_file: file_names, avoid_print, use_build_context_synchronously
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -36,7 +36,8 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         'idNumber': _idNumberController.text,
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
-        'accountType': 'TRAINER'
+        'accountType': 'TRAINER',
+        'isDeleted': false
       });
 
       print("Success");

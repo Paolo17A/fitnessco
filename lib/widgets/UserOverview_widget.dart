@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:fitnessco/screens/selectedClientProfile_screen.dart';
 import 'package:fitnessco/screens/selectedTrainerProfile_screen.dart';
 import 'package:flutter/material.dart';
@@ -7,13 +9,15 @@ class UserOverview extends StatelessWidget {
   final String accountType;
   final String firstName;
   final String lastName;
+  final bool isBeingViewedByAdmin;
 
   const UserOverview(
       {Key? key,
       required this.uid,
       required this.accountType,
       required this.firstName,
-      required this.lastName})
+      required this.lastName,
+      required this.isBeingViewedByAdmin})
       : super(key: key);
 
   @override
@@ -33,7 +37,10 @@ class UserOverview extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                    builder: (context) => SelectedTrainerProfile(uid: uid)),
+                    builder: (context) => SelectedTrainerProfile(
+                          uid: uid,
+                          isBeingViewedByAdmin: isBeingViewedByAdmin,
+                        )),
               );
             } else if (accountType == "CLIENT") {
               Navigator.push(

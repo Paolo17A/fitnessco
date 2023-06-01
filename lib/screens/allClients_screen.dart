@@ -1,3 +1,5 @@
+// ignore_for_file: file_names
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -53,6 +55,7 @@ class AllClientsScreenState extends State<AllClientsScreen> {
                     accountType: users[index]['accountType'],
                     firstName: users[index]['firstName'],
                     lastName: users[index]['lastName'],
+                    isBeingViewedByAdmin: true,
                   );
                 },
               );

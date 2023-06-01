@@ -1,10 +1,31 @@
+// ignore_for_file: use_build_context_synchronously, file_names
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class SelectedTrainerProfile extends StatelessWidget {
   final String uid;
+  final bool isBeingViewedByAdmin;
 
-  const SelectedTrainerProfile({Key? key, required this.uid}) : super(key: key);
+  const SelectedTrainerProfile(
+      {Key? key, required this.uid, required this.isBeingViewedByAdmin})
+      : super(key: key);
+
+  void _deleteTrainer(BuildContext context) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .update({'isDeleted': true});
+
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error saving membership status: $e"),
+        backgroundColor: Colors.purple,
+      ));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +99,11 @@ class SelectedTrainerProfile extends StatelessWidget {
                       ),
                     ),
                   ),
+                  if (isBeingViewedByAdmin)
+                    ElevatedButton.icon(
+                        onPressed: () => _deleteTrainer(context),
+                        icon: const Icon(Icons.delete),
+                        label: const Text('Delete Trainer'))
                 ],
               );
             } else if (snapshot.hasError) {
