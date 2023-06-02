@@ -39,7 +39,7 @@ class _ManageGymScreenState extends State<ManageGymScreen> {
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error saving membership statis: $e"),
+        content: Text("Error saving membership status: $e"),
         backgroundColor: Colors.purple,
       ));
     } finally {

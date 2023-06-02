@@ -67,8 +67,8 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Invalid email or password."),
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Invalid email or password: $error"),
         backgroundColor: Colors.purple,
       ));
       _emailTextController.clear();

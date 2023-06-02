@@ -41,7 +41,7 @@ class _MembershipStatusDropdownState extends State<MembershipStatusDropdown> {
           const SizedBox(width: 10),
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: widget.selectedMembershipStatus,
+              value: _selectedMembershipStatus,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 contentPadding: EdgeInsets.symmetric(horizontal: 10),
