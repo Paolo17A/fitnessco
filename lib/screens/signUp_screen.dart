@@ -61,7 +61,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           .set({
         'firstName': firstName,
         'lastName': lastName,
-        'accountType': 'CLIENT'
+        'accountType': 'CLIENT',
+        'currentTrainer': '',
+        'isConfirmed': false
       });
 
       print("Success");

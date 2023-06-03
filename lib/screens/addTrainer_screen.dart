@@ -1,4 +1,4 @@
-// ignore_for_file: file_names, avoid_print, use_build_context_synchronously
+// ignore_for_file: file_names, use_build_context_synchronously
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -37,13 +37,15 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'accountType': 'TRAINER',
-        'isDeleted': false
+        'isDeleted': false,
+        'trainingRequests': []
       });
-
-      print("Success");
       Navigator.pop(context);
     } catch (error) {
-      print("Error ${error.toString()}");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error ${error.toString()}"),
+        backgroundColor: Colors.purple,
+      ));
     }
   }
 

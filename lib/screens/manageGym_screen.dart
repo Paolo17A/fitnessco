@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../screens/addWorkout_screen.dart';
 
 class ManageGymScreen extends StatefulWidget {
   const ManageGymScreen({super.key});
@@ -76,6 +77,13 @@ class _ManageGymScreenState extends State<ManageGymScreen> {
     }
   }
 
+  void _navigateToAddWorkoutScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AddWorkoutScreen()),
+    );
+  }
+
   @override
   void dispose() {
     _membershipRateController.dispose();
@@ -94,7 +102,7 @@ class _ManageGymScreenState extends State<ManageGymScreen> {
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   TextField(
                     controller: _membershipRateController,
@@ -114,6 +122,10 @@ class _ManageGymScreenState extends State<ManageGymScreen> {
                         const TextInputType.numberWithOptions(decimal: true),
                   ),
                   const SizedBox(height: 16.0),
+                  ElevatedButton(
+                    onPressed: _navigateToAddWorkoutScreen,
+                    child: const Text('Create New Workout'),
+                  ),
                   ElevatedButton(
                     onPressed: _saveGymSettings,
                     child: const Text('Save Gym Settings'),
