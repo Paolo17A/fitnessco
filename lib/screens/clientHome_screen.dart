@@ -21,6 +21,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   late String _firstName;
   late String _lastName;
   late String _membershipStatus;
+  late bool _isConfirmed;
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         _firstName = userData['firstName'] as String;
         _lastName = userData['lastName'] as String;
         _membershipStatus = userData['membershipStatus'] as String;
+        _isConfirmed = userData['isConfirmed'] as bool;
         _isLoading = false;
       });
     }
@@ -132,11 +134,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       mainAxisSpacing: screenSize.width * 0.05,
                       childAspectRatio: itemWidth / itemHeight,
                       children: [
-                        squareIconButton_Widget(
-                            context,
-                            'View All Trainers',
-                            Icons.people,
-                            () => _goToAllTrainersScreen(context)),
+                        if (_isConfirmed)
+                          squareIconButton_Widget(
+                              context, 'Chat My Trainer', Icons.person, () {})
+                        else
+                          squareIconButton_Widget(
+                              context,
+                              'View All Trainers',
+                              Icons.people,
+                              () => _goToAllTrainersScreen(context)),
                         squareIconButton_Widget(
                             context, 'View My Workout Plan', Icons.list, () {}),
                         squareIconButton_Widget(context, 'My Training Session',

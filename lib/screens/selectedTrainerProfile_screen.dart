@@ -1,4 +1,4 @@
-// ignore_for_file: use_build_context_synchronously, file_names
+// ignore_for_file: use_build_context_synchronously, file_names, library_private_types_in_public_api
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -49,11 +49,13 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
             isTrainingRequestSent = true;
           }
         }
-        print('isViewingCurrentTrainer: $isViewingCurrentTrainer');
-        print('isTrainingRequestSent: $isTrainingRequestSent');
       }
     }).catchError((error) {
-      print('Error checking training request status: $error');
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Error saving membership status: $error"),
+        backgroundColor: Colors.purple,
+      ));
+      Navigator.pop(context);
     });
   }
 

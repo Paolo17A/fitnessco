@@ -130,69 +130,73 @@ class _SignInScreenState extends State<SignInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  hexStringToColor("CB2B93"),
-                  hexStringToColor("9546C4"),
-                  hexStringToColor("5E61F4"),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  MediaQuery.of(context).size.height * 0.1,
-                  20,
-                  0,
-                ),
-                child: Column(
-                  children: [
-                    const CircleAvatar(
-                      backgroundColor: Colors.white,
-                      radius: 100,
-                    ),
-                    const SizedBox(height: 100),
-                    fitnesscoTextField(
-                      "Enter Email Address",
-                      Icons.email_outlined,
-                      false,
-                      _emailTextController,
-                    ),
-                    const SizedBox(height: 30),
-                    fitnesscoTextField(
-                      "Enter Password",
-                      Icons.lock_outline,
-                      true,
-                      _passwordTextController,
-                    ),
-                    const SizedBox(height: 50),
-                    ovalButton(context, "LOG IN", () => signIn(context)),
-                    const SizedBox(height: 10),
-                    _signUpOption(context),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          if (_isLoading)
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Stack(
+          children: [
             Container(
               width: MediaQuery.of(context).size.width,
               height: MediaQuery.of(context).size.height,
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    hexStringToColor("CB2B93"),
+                    hexStringToColor("9546C4"),
+                    hexStringToColor("5E61F4"),
+                  ],
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                ),
+              ),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    MediaQuery.of(context).size.height * 0.1,
+                    20,
+                    0,
+                  ),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: Colors.white,
+                        radius: 100,
+                        child: Image.asset('assets/images/fitnessco_logo.png'),
+                      ),
+                      const SizedBox(height: 100),
+                      fitnesscoTextField(
+                        "Enter Email Address",
+                        Icons.email_outlined,
+                        false,
+                        _emailTextController,
+                      ),
+                      const SizedBox(height: 30),
+                      fitnesscoTextField(
+                        "Enter Password",
+                        Icons.lock_outline,
+                        true,
+                        _passwordTextController,
+                      ),
+                      const SizedBox(height: 50),
+                      ovalButton(context, "LOG IN", () => signIn(context)),
+                      const SizedBox(height: 10),
+                      _signUpOption(context),
+                    ],
+                  ),
+                ),
               ),
             ),
-        ],
+            if (_isLoading)
+              Container(
+                width: MediaQuery.of(context).size.width,
+                height: MediaQuery.of(context).size.height,
+                color: Colors.black.withOpacity(0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

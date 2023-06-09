@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/screens/editTrainerProfile_screen.dart';
+import 'package:fitnessco/screens/trainerCurrentClients_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/LogOut_Widget.dart';
 import '../widgets/SquareIconButton_widget.dart';
@@ -58,6 +59,14 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
           uid: widget.uid,
           onProfileUpdated: _onProfileUpdated,
         ),
+      ),
+    );
+  }
+
+  void _goToTrainerCurrentClientsScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const TrainerCurrentClients(),
       ),
     );
   }
@@ -126,7 +135,8 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
                                 'View My Clients',
                                 Icons.people,
                                 buttonWidth: _buttonWidth,
-                                () {}),
+                                () =>
+                                    _goToTrainerCurrentClientsScreen(context)),
                             squareIconButton_Widget(
                                 context,
                                 'View My Schedule',

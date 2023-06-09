@@ -38,7 +38,8 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         'lastName': _lastNameController.text,
         'accountType': 'TRAINER',
         'isDeleted': false,
-        'trainingRequests': []
+        'trainingRequests': [],
+        'currentClients': []
       });
       Navigator.pop(context);
     } catch (error) {
