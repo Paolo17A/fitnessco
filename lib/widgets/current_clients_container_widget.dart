@@ -86,9 +86,11 @@ class CurrentClientContainerState extends State<CurrentClientContainer> {
               String lastName = documentSnapshot['lastName'];
 
               return CurrentClientCard(
-                  clientUID: _clientSnapshots[index].id,
-                  firstName: firstName,
-                  lastName: lastName);
+                clientUID: _clientSnapshots[index].id,
+                firstName: firstName,
+                lastName: lastName,
+                isClient: false,
+              );
             },
           ),
         );

@@ -1,15 +1,17 @@
+import 'package:fitnessco/screens/chat_screen.dart';
 import 'package:flutter/material.dart';
 
 class CurrentClientCard extends StatelessWidget {
   final String clientUID;
   final String firstName;
   final String lastName;
-  const CurrentClientCard({
-    super.key,
-    required this.clientUID,
-    required this.firstName,
-    required this.lastName,
-  });
+  final bool isClient;
+  const CurrentClientCard(
+      {super.key,
+      required this.clientUID,
+      required this.firstName,
+      required this.lastName,
+      required this.isClient});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +24,16 @@ class CurrentClientCard extends StatelessWidget {
                 fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500),
           ),
           trailing: ElevatedButton(
-              onPressed: () {}, child: const Text('Send Message'))),
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ChatScreen(
+                              otherPersonUID: clientUID,
+                              isClient: isClient,
+                            )));
+              },
+              child: const Text('Send Message'))),
     );
   }
 }

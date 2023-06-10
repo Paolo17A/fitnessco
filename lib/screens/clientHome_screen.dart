@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../widgets/LogOut_Widget.dart';
 import '../widgets/SquareIconButton_widget.dart';
+import 'chat_screen.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   final String uid;
@@ -22,6 +23,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   late String _lastName;
   late String _membershipStatus;
   late bool _isConfirmed;
+  late String _trainerUID;
 
   @override
   void initState() {
@@ -42,6 +44,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         _membershipStatus = userData['membershipStatus'] as String;
         _isConfirmed = userData['isConfirmed'] as bool;
         _isLoading = false;
+        _trainerUID = userData['currentTrainer'] as String;
       });
     }
   }
@@ -50,6 +53,14 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     setState(() {
       _firstName = newFirstName;
       _lastName = newLastName;
+    });
+  }
+
+  void _onTrainerRemoved() {
+    Navigator.pop(context);
+    setState(() {
+      _isConfirmed = false;
+      _trainerUID = '';
     });
   }
 
@@ -136,7 +147,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       children: [
                         if (_isConfirmed)
                           squareIconButton_Widget(
-                              context, 'Chat My Trainer', Icons.person, () {})
+                              context, 'Chat My Trainer', Icons.person, () {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => ChatScreen(
+                                        otherPersonUID: _trainerUID,
+                                        isClient: true,
+                                        onCallback: _onTrainerRemoved)));
+                          })
                         else
                           squareIconButton_Widget(
                               context,

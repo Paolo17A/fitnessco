@@ -63,7 +63,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'lastName': lastName,
         'accountType': 'CLIENT',
         'currentTrainer': '',
-        'isConfirmed': false
+        'isConfirmed': false,
+        'membershipStatus': 'UNPAID'
       });
 
       print("Success");
@@ -84,10 +85,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   void _openHomeScreen(String uid) {
-    Navigator.push(
+    Navigator.pop(context);
+    /*Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => ClientHomeScreen(uid: uid)),
-    );
+    );*/
   }
 
   @override
@@ -102,53 +104,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),
-      body: Stack(children: [
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.height,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(colors: [
-              hexStringToColor("CB2B93"),
-              hexStringToColor("9546C4"),
-              hexStringToColor("5E61F4")
-            ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-          ),
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
-              child: Column(
-                children: [
-                  fitnesscoTextField("Enter First Name", Icons.person_outline,
-                      false, _firstNameController),
-                  const SizedBox(height: 30),
-                  fitnesscoTextField("Enter Last Name", Icons.person_outline,
-                      false, _lastNameController),
-                  const SizedBox(height: 30),
-                  fitnesscoTextField("Enter Email Address", Icons.email, false,
-                      _emailTextController),
-                  const SizedBox(height: 30),
-                  fitnesscoTextField("Enter Password", Icons.lock_outline, true,
-                      _passwordTextController),
-                  const SizedBox(height: 40),
-                  fitnesscoTextField("Confirm Password", Icons.lock_outline,
-                      true, _confirmPasswordTextController),
-                  const SizedBox(height: 40),
-                  ovalButton(context, "REGISTER", () => _signUp(context)),
-                ],
-              ),
-            ),
-          ),
-        ),
-        if (_isLoading)
+      body: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: Stack(children: [
           Container(
             width: MediaQuery.of(context).size.width,
             height: MediaQuery.of(context).size.height,
-            color: Colors.black.withOpacity(0.5),
-            child: const Center(
-              child: CircularProgressIndicator(),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(colors: [
+                hexStringToColor("CB2B93"),
+                hexStringToColor("9546C4"),
+                hexStringToColor("5E61F4")
+              ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
+            ),
+            child: SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
+                child: Column(
+                  children: [
+                    fitnesscoTextField("Enter First Name", Icons.person_outline,
+                        false, _firstNameController),
+                    const SizedBox(height: 30),
+                    fitnesscoTextField("Enter Last Name", Icons.person_outline,
+                        false, _lastNameController),
+                    const SizedBox(height: 30),
+                    fitnesscoTextField("Enter Email Address", Icons.email,
+                        false, _emailTextController),
+                    const SizedBox(height: 30),
+                    fitnesscoTextField("Enter Password", Icons.lock_outline,
+                        true, _passwordTextController),
+                    const SizedBox(height: 40),
+                    fitnesscoTextField("Confirm Password", Icons.lock_outline,
+                        true, _confirmPasswordTextController),
+                    const SizedBox(height: 40),
+                    ovalButton(context, "REGISTER", () => _signUp(context)),
+                  ],
+                ),
+              ),
             ),
           ),
-      ]),
+          if (_isLoading)
+            Container(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              color: Colors.black.withOpacity(0.5),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ]),
+      ),
     );
   }
 }
