@@ -26,7 +26,9 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
   @override
   void initState() {
     super.initState();
-    _checkTrainingRequestStatus();
+    if (!widget.isBeingViewedByAdmin) {
+      _checkTrainingRequestStatus();
+    }
   }
 
   void _checkTrainingRequestStatus() {

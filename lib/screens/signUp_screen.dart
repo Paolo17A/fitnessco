@@ -2,7 +2,6 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fitnessco/screens/clientHome_screen.dart';
 import 'package:flutter/material.dart';
 import '../utils/color_utils.dart';
 import '../widgets/OvalButton_widget.dart';
