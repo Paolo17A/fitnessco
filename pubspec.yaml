@@ -66,6 +66,8 @@ flutter:
   assets:
      - assets/images/fitnessco_logo.png
      - assets/images/speakify_logo.png
+     - assets/images/defaultProfile.png
+     - lib/models/muscles.json
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

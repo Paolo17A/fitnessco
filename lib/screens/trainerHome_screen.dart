@@ -92,9 +92,10 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 50,
-                            backgroundColor: Colors.red,
+                            child:
+                                Image.asset('assets/images/defaultProfile.png'),
                           ),
                           Column(
                             children: [

@@ -101,19 +101,21 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
+                    height: 150,
                     color: Colors.purpleAccent.withOpacity(0.1),
                     child: Padding(
                       padding: EdgeInsets.all(screenSize.width * 0.04),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const CircleAvatar(
+                          CircleAvatar(
                             radius: 50,
-                            backgroundColor: Colors.red,
+                            child:
+                                Image.asset('assets/images/defaultProfile.png'),
                           ),
                           Column(
                             children: [
-                              const SizedBox(height: 15),
+                              const SizedBox(height: 25),
                               Text(
                                 '$_firstName $_lastName',
                                 style: const TextStyle(
@@ -138,44 +140,50 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                     ),
                   ),
                   Expanded(
-                    child: GridView.count(
-                      padding: EdgeInsets.all(screenSize.width * 0.05),
-                      crossAxisCount: 2,
-                      crossAxisSpacing: screenSize.width * 0.05,
-                      mainAxisSpacing: screenSize.width * 0.05,
-                      childAspectRatio: itemWidth / itemHeight,
-                      children: [
-                        if (_isConfirmed)
-                          squareIconButton_Widget(
-                              context, 'Chat My Trainer', Icons.person, () {
-                            Navigator.push(
+                    child: Center(
+                      child: GridView.count(
+                        padding: EdgeInsets.all(screenSize.width * 0.05),
+                        crossAxisCount: 2,
+                        crossAxisSpacing: screenSize.width * 0.05,
+                        mainAxisSpacing: screenSize.width * 0.05,
+                        childAspectRatio: itemWidth / itemHeight,
+                        shrinkWrap: true,
+                        children: [
+                          if (_isConfirmed)
+                            squareIconButton_Widget(
+                                context, 'Chat My Trainer', Icons.person, () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                          otherPersonUID: _trainerUID,
+                                          isClient: true,
+                                          onCallback: _onTrainerRemoved)));
+                            })
+                          else
+                            squareIconButton_Widget(
                                 context,
-                                MaterialPageRoute(
-                                    builder: (context) => ChatScreen(
-                                        otherPersonUID: _trainerUID,
-                                        isClient: true,
-                                        onCallback: _onTrainerRemoved)));
-                          })
-                        else
+                                'View All Trainers',
+                                Icons.people,
+                                () => _goToAllTrainersScreen(context)),
+                          squareIconButton_Widget(context,
+                              'View My Workout Plan', Icons.list, () {}),
                           squareIconButton_Widget(
                               context,
-                              'View All Trainers',
-                              Icons.people,
-                              () => _goToAllTrainersScreen(context)),
-                        squareIconButton_Widget(
-                            context, 'View My Workout Plan', Icons.list, () {}),
-                        squareIconButton_Widget(context, 'My Training Session',
-                            Icons.fitness_center, () {}),
-                        squareIconButton_Widget(
-                            context, 'Workout History', Icons.history, () {}),
-                        squareIconButton_Widget(
-                            context,
-                            'Edit Profile',
-                            Icons.edit,
-                            () => _goToEditClientProfileScreen(context)),
-                        squareIconButton_Widget(
-                            context, 'Settings', Icons.settings, () {}),
-                      ],
+                              'My Training Session',
+                              Icons.fitness_center,
+                              () {}),
+                          squareIconButton_Widget(
+                              context, 'Workout History', Icons.history, () {}),
+                          squareIconButton_Widget(
+                              context,
+                              'Edit Profile',
+                              Icons.edit,
+                              () => _goToEditClientProfileScreen(context)),
+                          squareIconButton_Widget(
+                              context, 'Settings', Icons.settings, () {}),
+                        ],
+                      ),
                     ),
                   ),
                   LogOutWidget(screenSize: screenSize)

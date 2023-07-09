@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/screens/prescribe_workout_screen.dart';
 import 'package:flutter/material.dart';
 import '../widgets/chat_messages.dart';
 import '../widgets/new_message_widget.dart';
@@ -120,6 +121,14 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  void _goToPrescribeWorkoutScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const PrescribeWorkoutScreen(),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -131,7 +140,11 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: _showConfirmationDialog,
                     icon: const Icon(Icons.delete))
               ]
-            : null,
+            : [
+                IconButton(
+                    onPressed: () => _goToPrescribeWorkoutScreen(context),
+                    icon: const Icon(Icons.fitness_center_rounded))
+              ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
