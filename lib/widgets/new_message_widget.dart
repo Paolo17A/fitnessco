@@ -16,19 +16,20 @@ class _NewMessageState extends State<NewMessage> {
 
   @override
   void dispose() {
-    _messageController.dispose();
     super.dispose();
+    _messageController.dispose();
   }
 
   void _submitMessage() async {
     final enteredMessage = _messageController.text;
-
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     if (enteredMessage.trim().isEmpty) {
       return;
     }
     FocusScope.of(context).unfocus();
     _messageController.clear();
 
+    //  If the current user is a client, we will get the trainer's data and check if their account has been deleted by the admin
     if (widget.isClient) {
       await FirebaseFirestore.instance
           .collection('users')
@@ -36,20 +37,24 @@ class _NewMessageState extends State<NewMessage> {
           .get()
           .then((value) {
         if (value.data()!['isDeleted'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('This trainer has been deleted')));
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('This trainer has been deleted by the admin')));
+
+          _deleteTrainer();
           Navigator.pop(context);
           return;
         }
       });
-    } else {
+    }
+    //  If the current user is a trainer, we will get the client's current data and check if we are still their current trainer
+    else {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.otherUID)
           .get()
           .then((value) {
-        if (value.data()!['currentTrainer'] == '' ||
-            value.data()!['isConfirmed'] == false) {
+        if (value.data()!['currentTrainer'] !=
+            FirebaseAuth.instance.currentUser!.uid) {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
               content: Text('Your client has removed you as their trainer')));
           Navigator.pop(context);
@@ -78,8 +83,45 @@ class _NewMessageState extends State<NewMessage> {
       });
       return;
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
+      scaffoldMessenger.showSnackBar(
           SnackBar(content: Text('Error Sending Message: $error')));
+    }
+  }
+
+  void _deleteTrainer() async {
+    try {
+      //  Delete the message thread
+      final messageThread = await FirebaseFirestore.instance
+          .collection('messages')
+          .where('trainerUID', isEqualTo: widget.otherUID)
+          .where('clientUID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+          .get();
+      if (messageThread.docs.isNotEmpty) {
+        await FirebaseFirestore.instance
+            .collection('messages')
+            .doc(messageThread.docs[0].id)
+            .delete();
+      } else {
+        return;
+      }
+
+      //  Remove the trainer from the current user's data
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'currentTrainer': '', 'isConfirmed': false});
+
+      //  Remove the client from the trainer's current clients
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.otherUID)
+          .update({
+        'currentClients':
+            FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid]),
+      });
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error removing trainer: $error')));
     }
   }
 

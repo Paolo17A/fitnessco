@@ -1,7 +1,10 @@
-// ignore_for_file: use_build_context_synchronously, file_names, library_private_types_in_public_api
+// ignore_for_file: file_names, library_private_types_in_public_api
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/screens/allTrainers_screen.dart';
+import 'package:fitnessco/screens/clientHome_screen.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:flutter/material.dart';
 
 class SelectedTrainerProfile extends StatefulWidget {
@@ -21,7 +24,7 @@ class SelectedTrainerProfile extends StatefulWidget {
 class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
   bool isTrainingRequestSent = false;
   bool isViewingCurrentTrainer = false;
-  late String currentUserUID;
+  //late String currentUserUID;
 
   @override
   void initState() {
@@ -32,11 +35,13 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
   }
 
   void _checkTrainingRequestStatus() {
-    currentUserUID = FirebaseAuth.instance.currentUser!.uid;
     CollectionReference usersCollection =
         FirebaseFirestore.instance.collection('users');
 
-    usersCollection.doc(currentUserUID).get().then((DocumentSnapshot snapshot) {
+    usersCollection
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .get()
+        .then((DocumentSnapshot snapshot) {
       if (snapshot.exists) {
         var userData = snapshot.data() as Map<String, dynamic>;
         String currentTrainerUID = userData['currentTrainer'];
@@ -62,145 +67,129 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
   }
 
   void _deleteTrainer(BuildContext context) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.uid)
-          .update({'isDeleted': true});
-
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.uid)
+        .update({'isDeleted': true}).then((value) {
       Navigator.pop(context);
-    } catch (e) {
+    }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error saving membership status: $e"),
+        content: Text("Error saving membership status: $error"),
         backgroundColor: Colors.purple,
       ));
-    }
+    });
   }
 
   void _sendTrainerRequest(BuildContext context) async {
-    if (FirebaseAuth.instance.currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("No current user logged in."),
-        backgroundColor: Colors.purple,
-      ));
-      Navigator.pop(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigatorState = Navigator.of(context);
+
+    final trainerData = await getThisUserData(widget.uid);
+
+    if (trainerData.data()!['isConfirmed'] == true) {
+      scaffoldMessenger.showSnackBar(const SnackBar(
+          content: Text(
+              'This training request has already been accepted by the trainer')));
+      navigatorState.pushAndRemoveUntil(
+          MaterialPageRoute(
+              builder: (context) => const AllTrainersScreen(
+                    isBeingViewedByAdmin: false,
+                  )),
+          (Route<dynamic> route) => false);
+      return;
+    } else if (trainerData.data()!['isDeleted'] == true) {
+      scaffoldMessenger.showSnackBar(const SnackBar(
+          content: Text('This trainer has been deleted by the admin')));
+      navigatorState.pop();
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.uid)
-        .get()
-        .then((value) {
-      if (value.data()!['isConfirmed'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text(
-                'This training request has already been accepted by the trainer')));
-        Navigator.pop(context);
-        return;
-      } else if (value.data()!['isDeleted'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('This trainer has been deleted by the admin')));
-        Navigator.pop(context);
-        return;
-      }
-    });
-
-    currentUserUID = FirebaseAuth.instance.currentUser!.uid;
-    CollectionReference usersCollection =
-        FirebaseFirestore.instance.collection('users');
-
-    try {
-      await FirebaseFirestore.instance
+    /*  These lines of code first update the trainingRequests array of the trainer's data by adding a new entry to the list.
+    Next, we update the update inside the client's data; namely the currentTrainer parameter and the isConfirmed parameter.
+    We assign a current trainer but set isConfirmed to be false because the trainer must then confirm the request on their end.*/
+    FirebaseFirestore.instance.collection('users').doc(widget.uid).update({
+      'trainingRequests':
+          FieldValue.arrayUnion([FirebaseAuth.instance.currentUser!.uid])
+    }).then((value) {
+      FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.uid)
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .update({
-        'trainingRequests': FieldValue.arrayUnion([currentUserUID])
-      });
-
-      // Update currentTrainer field for the current user
-      await usersCollection.doc(currentUserUID).update({
         'currentTrainer': widget.uid,
         'isConfirmed': false,
+      }).then((value) {
+        setState(() {
+          isTrainingRequestSent = true;
+          isViewingCurrentTrainer = true;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Training request sent"),
+        ));
+      }).onError((error, stackTrace) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Error sending training request: $error"),
+          backgroundColor: Colors.purple,
+        ));
       });
-
-      setState(() {
-        isTrainingRequestSent = true;
-        isViewingCurrentTrainer = true;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Training request sent"),
-      ));
-    } catch (e) {
+    }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error sending training request: $e"),
+        content: Text("Error sending training request: $error"),
         backgroundColor: Colors.purple,
       ));
-    }
+    });
   }
 
   void _cancelTrainerRequest(BuildContext context) async {
-    if (FirebaseAuth.instance.currentUser == null) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("No current user logged in."),
-        backgroundColor: Colors.purple,
-      ));
-      Navigator.pop(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigatorState = Navigator.of(context);
+
+    //  Get the current user data from Firebase first. Don't use the .then() callback because return statements don't work in there.
+    final currentUserDoc =
+        await getThisUserData(FirebaseAuth.instance.currentUser!.uid);
+
+    if (currentUserDoc.data()!['isConfirmed'] == true) {
+      scaffoldMessenger.showSnackBar(const SnackBar(
+          content: Text(
+              'This training request has already been accepted by the trainer')));
+      navigatorState.pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const ClientHomeScreen()),
+          (Route<dynamic> route) => false);
       return;
     }
 
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(widget.uid)
-        .get()
-        .then((value) {
-      if (value.data()!['isConfirmed'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text(
-                'This training request has already been accepted by the trainer')));
-        Navigator.pop(context);
-        return;
-      } else if (value.data()!['isDeleted'] == true) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text('This trainer has been deleted by the admin')));
-        Navigator.pop(context);
-        return;
-      }
-    });
-
-    currentUserUID = FirebaseAuth.instance.currentUser!.uid;
-    CollectionReference usersCollection =
-        FirebaseFirestore.instance.collection('users');
-
-    try {
-      await FirebaseFirestore.instance
+    //  Upon cancellation, we will first remove the client UID from the trainer's trainingRequests list in Firebase
+    FirebaseFirestore.instance.collection('users').doc(widget.uid).update({
+      'trainingRequests':
+          FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+    }).then((value) {
+      // After removing the client UID from the trainingRequests list, we will set the client's trainer parameters back to its default empty values
+      FirebaseFirestore.instance
           .collection('users')
-          .doc(widget.uid)
+          .doc(FirebaseAuth.instance.currentUser!.uid)
           .update({
-        'trainingRequests': FieldValue.arrayRemove([currentUserUID])
-      });
-
-      // Update currentTrainer field for the current user
-      await usersCollection.doc(currentUserUID).update({
         'currentTrainer': '',
         'isConfirmed': false,
+      }).then((value) {
+        //  No training request has been sent and there is no more current trainer. We must refresh the build to display the update values in the visuals
+        setState(() {
+          isTrainingRequestSent = false;
+          isViewingCurrentTrainer = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Training request canceled"),
+        ));
+      }).onError((error, stackTrace) {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Error canceling training request: $error"),
+          backgroundColor: Colors.purple,
+        ));
       });
-
-      setState(() {
-        isTrainingRequestSent = false;
-        isViewingCurrentTrainer = false;
-      });
-
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Training request canceled"),
-      ));
-    } catch (e) {
+    }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error canceling training request: $e"),
+        content: Text("Error canceling training request: $error"),
         backgroundColor: Colors.purple,
       ));
-    }
+    });
   }
 
   @override

@@ -20,10 +20,9 @@ class LogOutWidget extends StatelessWidget {
       child: ElevatedButton(
           onPressed: () {
             FirebaseAuth.instance.signOut().then((value) {
-              Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const SignInScreen()));
+              Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (context) => const SignInScreen()),
+                  (Route<dynamic> route) => false);
             });
           },
           child: const Text("LOG OUT")),

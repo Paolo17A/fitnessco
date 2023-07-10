@@ -91,7 +91,7 @@ class _SignInScreenState extends State<SignInScreen> {
       ));
     } else {
       final route = MaterialPageRoute(
-        builder: (context) => ClientHomeScreen(uid: uid),
+        builder: (context) => const ClientHomeScreen(),
       );
       Navigator.of(context).push(route);
     }
@@ -125,6 +125,13 @@ class _SignInScreenState extends State<SignInScreen> {
       builder: (context) => const AdminHomeScreen(),
     );
     Navigator.of(context).push(route);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _emailTextController.dispose();
+    _passwordTextController.dispose();
   }
 
   @override

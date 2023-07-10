@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/widgets/client_request_card_widget.dart';
 import 'package:flutter/material.dart';
 
@@ -20,20 +21,32 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
   @override
   initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     getAllClientRequests();
   }
 
   void getAllClientRequests() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     try {
-      String? currentUID = FirebaseAuth.instance.currentUser?.uid;
+      //  Get the current trainer's user data
       final docSnapshot = await FirebaseFirestore.instance
           .collection('users')
-          .doc(currentUID)
+          .doc(FirebaseAuth.instance.currentUser?.uid)
           .get();
-      final userData = docSnapshot.data();
-      if (userData != null && userData.containsKey('trainingRequests')) {
-        _requestedClients = List<String>.from(userData['trainingRequests']);
+      if (docSnapshot.data() == null ||
+          !docSnapshot.data()!.containsKey('trainingRequests')) {
+        scaffoldMessenger.showSnackBar(
+            const SnackBar(content: Text('Error getting training requests')));
+        return;
       }
+      _requestedClients =
+          List<String>.from(docSnapshot.data()!['trainingRequests']);
+
       if (_requestedClients.isEmpty) {
         setState(() {
           _isLoading = false;
@@ -58,48 +71,40 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
 
   void _approveRequest(BuildContext context, String clientUID) async {
     try {
+      final scaffoldMessenger = ScaffoldMessenger.of(context);
+
       setState(() {
         _isLoading = true;
       });
-      //  Check if the client is still in the current trainer's list of training requests
-      FirebaseFirestore.instance
+
+      //  Get the current trainer's user data
+      final currentUserDoc = await FirebaseFirestore.instance
           .collection('users')
           .doc(FirebaseAuth.instance.currentUser!.uid)
-          .get()
-          .then((value) {
-        List<String> currentRequestingClients =
-            List<String>.from(value.data()!['trainingRequests']);
-        if (!currentRequestingClients.contains(clientUID)) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('This training request is no longer available')));
-          setState(() {
-            _isLoading = true;
-            getAllClientRequests();
-          });
-          return;
-        }
-      });
+          .get();
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(clientUID)
-          .update({'isConfirmed': true});
+      //  Once we get the current trainer's user data, we check if the selected client's UID is still in the trainer's trainingRequests list
+      List<String> currentRequestingClients =
+          List<String>.from(currentUserDoc.data()!['trainingRequests']);
+      if (!currentRequestingClients.contains(clientUID)) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content: Text('This training request is no longer available')));
+        setState(() {
+          _isLoading = true;
+          getAllClientRequests();
+        });
+        return;
+      }
 
-      // Remove clientUID from current user's trainingRequests array
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .update({
+      //  If the selected client is still in the trainer's trainingRequests list, then we will proceed to approving the request
+      await updateThisUserData(clientUID, {'isConfirmed': true});
+
+      // Remove clientUID from current trainer's trainingRequests array and add it to the currentClients array
+      await updateThisUserData(FirebaseAuth.instance.currentUser!.uid, {
         'trainingRequests': FieldValue.arrayRemove([clientUID]),
-      });
-
-      // Add clientUID to current user's currentUsers array
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .update({
         'currentClients': FieldValue.arrayUnion([clientUID]),
       });
+
       widget.refreshParent();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -110,39 +115,34 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
   }
 
   void _denyRequest(BuildContext context, String clientUID) async {
+    final scaffoldMesseger = ScaffoldMessenger.of(context);
     try {
       setState(() {
         _isLoading = true;
       });
-//  Check if the client is still in the current trainer's list of training requests
-      FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .get()
-          .then((value) {
-        List<String> currentRequestingClients =
-            List<String>.from(value.data()!['trainingRequests']);
-        if (!currentRequestingClients.contains(clientUID)) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('This training request is no longer available')));
-          setState(() {
-            _isLoading = true;
-            getAllClientRequests();
-          });
-          return;
-        }
-      });
 
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(clientUID)
-          .update({'currentTrainer': ''});
+      //  Check if the client is still in the current trainer's list of training requests
+      final currentUserDoc =
+          await getThisUserData(FirebaseAuth.instance.currentUser!.uid);
+
+      //  Once we get the current trainer's user data, we check if the selected client's UID is still in the trainer's trainingRequests list
+      List<String> currentRequestingClients =
+          List<String>.from(currentUserDoc.data()!['trainingRequests']);
+      if (!currentRequestingClients.contains(clientUID)) {
+        scaffoldMesseger.showSnackBar(const SnackBar(
+            content: Text('This training request is no longer available')));
+        setState(() {
+          _isLoading = true;
+          getAllClientRequests();
+        });
+        return;
+      }
+
+      //  Set the currentTrainer of the client to empty
+      await updateThisUserData(clientUID, {'currentTrainer': ''});
 
       // Remove clientUID from current user's trainingRequests array
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser?.uid)
-          .update({
+      await updateThisUserData(FirebaseAuth.instance.currentUser!.uid, {
         'trainingRequests': FieldValue.arrayRemove([clientUID]),
       });
 

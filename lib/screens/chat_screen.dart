@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/prescribe_workout_screen.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:flutter/material.dart';
 import '../widgets/chat_messages.dart';
 import '../widgets/new_message_widget.dart';
@@ -26,13 +27,43 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _otherUserFirstName = '';
   String _otherUserLastName = '';
+
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _getOtherUser();
   }
 
   void _getOtherUser() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigatorState = Navigator.of(context);
+    //  If the current user is a client, we will get the trainer's data and check if their account has been deleted by the admin
+    if (widget.isClient) {
+      final trainerData = await getThisUserData(widget.otherPersonUID);
+      if (trainerData.data()!['isDeleted'] == true) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content: Text('Your trainer has been removed by the admin')));
+        _deleteTrainer();
+      }
+    }
+    //  If the current user is a trainer, we will get the client's current data and check if we are still their current trainer
+    else {
+      final clientData = await getThisUserData(widget.otherPersonUID);
+      if (clientData.data()!['currentTrainer'] !=
+          FirebaseAuth.instance.currentUser!.uid) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content:
+                Text('Your client has opted to select a different trainer')));
+        navigatorState.pop();
+        return;
+      }
+    }
+
     await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.otherPersonUID)

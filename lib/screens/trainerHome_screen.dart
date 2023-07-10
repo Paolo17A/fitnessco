@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/screens/editTrainerProfile_screen.dart';
 import 'package:fitnessco/screens/trainerCurrentClients_screen.dart';
 import 'package:flutter/material.dart';
+import '../utils/quit_dialogue_util.dart';
 import '../widgets/LogOut_Widget.dart';
 import '../widgets/SquareIconButton_widget.dart';
 
@@ -75,96 +76,97 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
 
-    return _isLoading
-        ? const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          )
-        : Scaffold(
-            body: Container(
-              color: Colors.white,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    color: Colors.purpleAccent.withOpacity(0.1),
-                    child: Padding(
-                      padding: EdgeInsets.all(screenSize.width * 0.04),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          CircleAvatar(
-                            radius: 50,
-                            child:
-                                Image.asset('assets/images/defaultProfile.png'),
-                          ),
-                          Column(
-                            children: [
-                              const SizedBox(height: 15),
-                              Text(
-                                '$_firstName $_lastName',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Text(
-                                "ID Number: $_idNumber",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.all(15),
-                      child: Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
+    return WillPopScope(
+      onWillPop: () => displayQuitDialogue(context),
+      child: Scaffold(
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Container(
+                color: Colors.white,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Container(
+                      color: Colors.purpleAccent.withOpacity(0.1),
+                      child: Padding(
+                        padding: EdgeInsets.all(screenSize.width * 0.04),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            squareIconButton_Widget(
-                                context,
-                                'View My Clients',
-                                Icons.people,
-                                buttonWidth: _buttonWidth,
-                                () =>
-                                    _goToTrainerCurrentClientsScreen(context)),
-                            squareIconButton_Widget(
-                                context,
-                                'View My Schedule',
-                                Icons.calendar_month,
-                                buttonWidth: _buttonWidth,
-                                () {}),
-                            squareIconButton_Widget(
-                                context,
-                                'Edit Profile',
-                                Icons.edit,
-                                buttonWidth: _buttonWidth,
-                                () => _goToEditTrainerProfileScreen(context)),
-                            squareIconButton_Widget(
-                                context,
-                                'Settings',
-                                Icons.settings,
-                                buttonWidth: _buttonWidth,
-                                () {}),
-                            LogOutWidget(screenSize: screenSize)
+                            CircleAvatar(
+                              radius: 50,
+                              child: Image.asset(
+                                  'assets/images/defaultProfile.png'),
+                            ),
+                            Column(
+                              children: [
+                                const SizedBox(height: 15),
+                                Text(
+                                  '$_firstName $_lastName',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                Text(
+                                  "ID Number: $_idNumber",
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                                const SizedBox(height: 20),
+                              ],
+                            )
                           ],
                         ),
                       ),
                     ),
-                  ),
-                ],
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(15),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              squareIconButton_Widget(
+                                  context,
+                                  'View My Clients',
+                                  Icons.people,
+                                  buttonWidth: _buttonWidth,
+                                  () => _goToTrainerCurrentClientsScreen(
+                                      context)),
+                              squareIconButton_Widget(
+                                  context,
+                                  'View My Schedule',
+                                  Icons.calendar_month,
+                                  buttonWidth: _buttonWidth,
+                                  () {}),
+                              squareIconButton_Widget(
+                                  context,
+                                  'Edit Profile',
+                                  Icons.edit,
+                                  buttonWidth: _buttonWidth,
+                                  () => _goToEditTrainerProfileScreen(context)),
+                              squareIconButton_Widget(
+                                  context,
+                                  'Settings',
+                                  Icons.settings,
+                                  buttonWidth: _buttonWidth,
+                                  () {}),
+                              LogOutWidget(screenSize: screenSize)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          );
+      ),
+    );
   }
 }

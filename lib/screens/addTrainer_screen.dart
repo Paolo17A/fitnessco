@@ -39,7 +39,8 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         'accountType': 'TRAINER',
         'isDeleted': false,
         'trainingRequests': [],
-        'currentClients': []
+        'currentClients': [],
+        'profileImageURL': ''
       });
       Navigator.pop(context);
     } catch (error) {
