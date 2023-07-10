@@ -33,25 +33,22 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   void _getOtherUser() async {
-    try {
-      DocumentSnapshot<Map<String, dynamic>> otherUserDoc =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.otherPersonUID)
-              .get();
-
-      Map<String, dynamic>? otherUserData = otherUserDoc.data();
-      if (otherUserData != null) {
-        _otherUserFirstName = otherUserData['firstName'] as String;
-        _otherUserLastName = otherUserData['lastName'] as String;
-        setState(() {
-          _isLoading = false;
-        });
-      } else {}
-    } catch (error) {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.otherPersonUID)
+        .get()
+        .then((value) {
+      _otherUserFirstName = value.data()!['firstName'] as String;
+      _otherUserLastName = value.data()!['lastName'] as String;
+      setState(() {
+        _isLoading = false;
+      });
+    }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error getting message thread: $error')));
-    }
+      Navigator.pop(context);
+      return;
+    });
   }
 
   void _deleteTrainer() async {

@@ -53,7 +53,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       Navigator.pop(context);
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error saving membership statis: $error"),
+        content: Text("Error saving membership status: $error"),
         backgroundColor: Colors.purple,
       ));
     }

@@ -87,6 +87,25 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
       return;
     }
 
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.uid)
+        .get()
+        .then((value) {
+      if (value.data()!['isConfirmed'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'This training request has already been accepted by the trainer')));
+        Navigator.pop(context);
+        return;
+      } else if (value.data()!['isDeleted'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('This trainer has been deleted by the admin')));
+        Navigator.pop(context);
+        return;
+      }
+    });
+
     currentUserUID = FirebaseAuth.instance.currentUser!.uid;
     CollectionReference usersCollection =
         FirebaseFirestore.instance.collection('users');
@@ -130,6 +149,25 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
       Navigator.pop(context);
       return;
     }
+
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(widget.uid)
+        .get()
+        .then((value) {
+      if (value.data()!['isConfirmed'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text(
+                'This training request has already been accepted by the trainer')));
+        Navigator.pop(context);
+        return;
+      } else if (value.data()!['isDeleted'] == true) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('This trainer has been deleted by the admin')));
+        Navigator.pop(context);
+        return;
+      }
+    });
 
     currentUserUID = FirebaseAuth.instance.currentUser!.uid;
     CollectionReference usersCollection =

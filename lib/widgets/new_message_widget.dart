@@ -29,6 +29,35 @@ class _NewMessageState extends State<NewMessage> {
     FocusScope.of(context).unfocus();
     _messageController.clear();
 
+    if (widget.isClient) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.otherUID)
+          .get()
+          .then((value) {
+        if (value.data()!['isDeleted'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('This trainer has been deleted')));
+          Navigator.pop(context);
+          return;
+        }
+      });
+    } else {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.otherUID)
+          .get()
+          .then((value) {
+        if (value.data()!['currentTrainer'] == '' ||
+            value.data()!['isConfirmed'] == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Your client has removed you as their trainer')));
+          Navigator.pop(context);
+          return;
+        }
+      });
+    }
+
     try {
       final user = FirebaseAuth.instance.currentUser!;
 
@@ -39,12 +68,9 @@ class _NewMessageState extends State<NewMessage> {
           .where('clientUID',
               isEqualTo: widget.isClient ? user.uid : widget.otherUID)
           .get();
-      print('aaa');
       final chatDocument = checkMessages.docs.first;
-      print('lll');
       final messageThreadCollection =
           chatDocument.reference.collection('messageThread');
-      print('bbb');
       await messageThreadCollection.add({
         'sender': user.uid,
         'dateTimeSent': DateTime.now(),

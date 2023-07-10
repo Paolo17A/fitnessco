@@ -61,6 +61,25 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
       setState(() {
         _isLoading = true;
       });
+      //  Check if the client is still in the current trainer's list of training requests
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get()
+          .then((value) {
+        List<String> currentRequestingClients =
+            List<String>.from(value.data()!['trainingRequests']);
+        if (!currentRequestingClients.contains(clientUID)) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('This training request is no longer available')));
+          setState(() {
+            _isLoading = true;
+            getAllClientRequests();
+          });
+          return;
+        }
+      });
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(clientUID)
@@ -82,7 +101,6 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
         'currentClients': FieldValue.arrayUnion([clientUID]),
       });
       widget.refreshParent();
-      //_getAllClientRequests();
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error approving training request: $e"),
@@ -96,6 +114,25 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
       setState(() {
         _isLoading = true;
       });
+//  Check if the client is still in the current trainer's list of training requests
+      FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .get()
+          .then((value) {
+        List<String> currentRequestingClients =
+            List<String>.from(value.data()!['trainingRequests']);
+        if (!currentRequestingClients.contains(clientUID)) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('This training request is no longer available')));
+          setState(() {
+            _isLoading = true;
+            getAllClientRequests();
+          });
+          return;
+        }
+      });
+
       await FirebaseFirestore.instance
           .collection('users')
           .doc(clientUID)
