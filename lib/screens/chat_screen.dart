@@ -2,7 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/prescribe_workout_screen.dart';
+import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:flutter/material.dart';
 import '../widgets/chat_messages.dart';
@@ -149,10 +149,11 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _goToPrescribeWorkoutScreen(BuildContext context) {
+  void _goToClientWorkoutsScreen(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const PrescribeWorkoutScreen(),
+        builder: (context) =>
+            ClientWorkoutsScreen(clientUID: widget.otherPersonUID),
       ),
     );
   }
@@ -170,7 +171,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ]
             : [
                 IconButton(
-                    onPressed: () => _goToPrescribeWorkoutScreen(context),
+                    onPressed: () => _goToClientWorkoutsScreen(context),
                     icon: const Icon(Icons.fitness_center_rounded))
               ],
       ),

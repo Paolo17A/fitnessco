@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/allTrainers_screen.dart';
+import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/screens/editClientProfile_screen.dart';
 import 'package:fitnessco/utils/quit_dialogue_util.dart';
 import 'package:flutter/material.dart';
@@ -25,6 +26,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
   late bool _isConfirmed;
   late String _trainerUID;
   late String _profileImageURL;
+  late bool _hasPrescribedWorkout;
 
   @override
   void initState() {
@@ -46,6 +48,8 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
         _isConfirmed = userData['isConfirmed'] as bool;
         _isLoading = false;
         _trainerUID = userData['currentTrainer'] as String;
+        _hasPrescribedWorkout =
+            (userData['prescribedWorkout'] as Map<String, dynamic>).isNotEmpty;
       });
     }
 
@@ -79,6 +83,15 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const EditClientProfile(),
+      ),
+    );
+  }
+
+  void _goToClientWorkoutScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ClientWorkoutsScreen(
+            clientUID: FirebaseAuth.instance.currentUser!.uid),
       ),
     );
   }
@@ -182,8 +195,13 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                                     'View All Trainers',
                                     Icons.people,
                                     () => _goToAllTrainersScreen(context)),
-                              squareIconButton_Widget(context,
-                                  'View My Workout Plan', Icons.list, () {}),
+                              squareIconButton_Widget(
+                                  context,
+                                  'View My Workout Plan',
+                                  Icons.list,
+                                  _hasPrescribedWorkout
+                                      ? () => _goToClientWorkoutScreen(context)
+                                      : null),
                               squareIconButton_Widget(
                                   context,
                                   'My Training Session',

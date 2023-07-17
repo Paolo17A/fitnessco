@@ -3,14 +3,16 @@
 import 'package:flutter/material.dart';
 
 Widget squareIconButton_Widget(
-    BuildContext context, String title, IconData icon, Function onTap,
+    BuildContext context, String title, IconData icon, Function? onTap,
     {double iconSize = 50.0,
     double buttonWidth = 100,
     double buttonHeight = 100}) {
   return ElevatedButton(
-    onPressed: () {
-      onTap();
-    },
+    onPressed: onTap != null
+        ? () {
+            onTap();
+          }
+        : null,
     style: ElevatedButton.styleFrom(
       backgroundColor: Theme.of(context).primaryColor,
       minimumSize: Size(buttonWidth, buttonHeight),

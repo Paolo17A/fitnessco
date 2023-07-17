@@ -64,7 +64,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'currentTrainer': '',
         'isConfirmed': false,
         'membershipStatus': 'UNPAID',
-        'profileImageURL': ''
+        'profileImageURL': '',
+        'prescribedWorkout': {}
       });
 
       print("Success");
