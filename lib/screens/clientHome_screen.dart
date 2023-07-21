@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/allTrainers_screen.dart';
+import 'package:fitnessco/screens/camera_workout_screen.dart';
 import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/screens/editClientProfile_screen.dart';
 import 'package:fitnessco/utils/quit_dialogue_util.dart';
@@ -88,10 +89,28 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   void _goToClientWorkoutScreen(BuildContext context) {
+    if (_trainerUID == '') {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You have no assigned trainer yet')));
+      return;
+    }
+    if (_hasPrescribedWorkout == false) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Your trainer has not yet prescribed a workout')));
+      return;
+    }
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => ClientWorkoutsScreen(
             clientUID: FirebaseAuth.instance.currentUser!.uid),
+      ),
+    );
+  }
+
+  void _goToCameraWorkoutScreen(BuildContext context) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => const CameraWorkoutScreen(),
       ),
     );
   }
@@ -199,14 +218,12 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                                   context,
                                   'View My Workout Plan',
                                   Icons.list,
-                                  _hasPrescribedWorkout
-                                      ? () => _goToClientWorkoutScreen(context)
-                                      : null),
+                                  () => _goToClientWorkoutScreen(context)),
                               squareIconButton_Widget(
                                   context,
                                   'My Training Session',
                                   Icons.fitness_center,
-                                  () {}),
+                                  () => _goToCameraWorkoutScreen(context)),
                               squareIconButton_Widget(context,
                                   'Workout History', Icons.history, () {}),
                               squareIconButton_Widget(

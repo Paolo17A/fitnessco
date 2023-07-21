@@ -4,11 +4,13 @@ class WorkoutCardWidget extends StatefulWidget {
   final String muscle;
   final Map<String, dynamic> workouts;
   final bool viewedByTrainer;
+  final void Function(String, String) onDeleteCallback;
   const WorkoutCardWidget(
       {super.key,
       required this.muscle,
       required this.workouts,
-      required this.viewedByTrainer});
+      required this.viewedByTrainer,
+      required this.onDeleteCallback});
 
   @override
   State<WorkoutCardWidget> createState() => _WorkoutCardWidgetState();
@@ -99,7 +101,10 @@ class _WorkoutCardWidgetState extends State<WorkoutCardWidget> {
                                 ),
                                 if (widget.viewedByTrainer)
                                   IconButton(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        widget.onDeleteCallback(
+                                            widget.muscle, workoutNames[index]);
+                                      },
                                       icon: const Icon(
                                         Icons.delete,
                                         color: Colors.white,

@@ -52,6 +52,30 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
     ));
   }
 
+  void _deleteWorkout(String muscle, String workout) async {
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+      Map<String, dynamic> selectedMuscle = prescribedWorkouts[muscle];
+      if (selectedMuscle.length == 1) {
+        prescribedWorkouts.remove(muscle);
+      } else {
+        selectedMuscle.remove(workout);
+        prescribedWorkouts[muscle] = selectedMuscle;
+      }
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.clientUID)
+          .update({'prescribedWorkout': prescribedWorkouts});
+
+      _getPrescribedWorkout();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Error deleting workout: ${error.toString()}')));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     List<String> muscleKeys = prescribedWorkouts.keys.toList();
@@ -99,6 +123,7 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
                                     workouts:
                                         prescribedWorkouts[muscleKeys[index]],
                                     viewedByTrainer: _isTrainer,
+                                    onDeleteCallback: _deleteWorkout,
                                   );
                                 })),
                       ],
