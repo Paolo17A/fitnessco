@@ -54,6 +54,17 @@ class _SignInScreenState extends State<SignInScreen> {
       firstName = dataMap['firstName'];
       lastName = dataMap['lastName'];
       if (dataMap['accountType'] == "CLIENT") {
+        if (userCredential.user!.emailVerified == false) {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text('Please verify your email before signing in')));
+          setState(() {
+            _isLoading = false;
+          });
+          await userCredential.user!.sendEmailVerification();
+          _emailTextController.clear();
+          _passwordTextController.clear();
+          return;
+        }
         _goToClientHomeScreen(context, userCredential.user!.uid);
       } else if (dataMap['accountType'] == "TRAINER") {
         _goToTrainerHomeScreen(context, userCredential.user!.uid);
@@ -90,10 +101,9 @@ class _SignInScreenState extends State<SignInScreen> {
         backgroundColor: Colors.purple,
       ));
     } else {
-      final route = MaterialPageRoute(
+      Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => const ClientHomeScreen(),
-      );
-      Navigator.of(context).push(route);
+      ));
     }
   }
 
@@ -111,20 +121,18 @@ class _SignInScreenState extends State<SignInScreen> {
         backgroundColor: Colors.purple,
       ));
     } else {
-      final route = MaterialPageRoute(
+      Navigator.of(context).push(MaterialPageRoute(
         builder: (context) => TrainerHomeScreen(
           uid: uid,
         ),
-      );
-      Navigator.of(context).push(route);
+      ));
     }
   }
 
   void _goToAdminHomeScreen(BuildContext context) {
-    final route = MaterialPageRoute(
+    Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => const AdminHomeScreen(),
-    );
-    Navigator.of(context).push(route);
+    ));
   }
 
   @override

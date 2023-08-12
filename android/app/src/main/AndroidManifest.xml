@@ -1,5 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.fitnessco">
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <!-- Add other permissions as needed -->
+
+    <!-- Features -->
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
    <application
         android:label="Fitnessco"
         android:name="${applicationName}"

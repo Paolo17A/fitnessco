@@ -4,9 +4,9 @@ void removeProfilePicDialogue(BuildContext context) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
-      title: const Text('Confirm Quit'),
+      title: const Text('Confirm Remove Profile Picture'),
       content:
-          const Text('Are you sure you want to renove your profile picture?'),
+          const Text('Are you sure you want to remove your profile picture?'),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),

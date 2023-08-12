@@ -68,6 +68,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'prescribedWorkout': {}
       });
 
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userCredential.user!.uid)
+          .collection('workoutHistory')
+          .add({});
+
+      // Send email confirmation link to user
+      await userCredential.user!.sendEmailVerification();
+
       print("Success");
       _openHomeScreen(userCredential.user!.uid);
       setState(() {
