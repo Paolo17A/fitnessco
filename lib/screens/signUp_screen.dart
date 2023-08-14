@@ -65,14 +65,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'isConfirmed': false,
         'membershipStatus': 'UNPAID',
         'profileImageURL': '',
-        'prescribedWorkout': {}
+        'prescribedWorkout': {},
+        'bmiHistory': [],
+        'workoutHistory': []
       });
 
-      await FirebaseFirestore.instance
+      /*await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .collection('workoutHistory')
-          .add({});
+          .add({});*/
 
       // Send email confirmation link to user
       await userCredential.user!.sendEmailVerification();

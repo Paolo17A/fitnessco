@@ -2,6 +2,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/allTrainers_screen.dart';
+import 'package:fitnessco/screens/bmi_history_screen.dart';
 import 'package:fitnessco/screens/camera_workout_screen.dart';
 import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/screens/editClientProfile_screen.dart';
@@ -224,8 +225,35 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                                   'My Training Session',
                                   Icons.fitness_center,
                                   () => _goToCameraWorkoutScreen(context)),
-                              squareIconButton_Widget(context,
-                                  'Workout History', Icons.history, () {}),
+                              squareIconButton_Widget(
+                                  context, 'Personal History', Icons.history,
+                                  () {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) => AlertDialog(
+                                          title: const Text('CHOOSE'),
+                                          content: const Text(
+                                              'Choose which History you would like to view'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context),
+                                              child: const Text('WORKOUT'),
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            const BMIHistoryScreen()));
+                                              },
+                                              child: const Text('BMI'),
+                                            ),
+                                          ],
+                                        ));
+                              }),
                               squareIconButton_Widget(
                                   context,
                                   'Edit Profile',
