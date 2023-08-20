@@ -5,7 +5,8 @@ import 'package:fitnessco/screens/allTrainers_screen.dart';
 import 'package:fitnessco/screens/bmi_history_screen.dart';
 import 'package:fitnessco/screens/camera_workout_screen.dart';
 import 'package:fitnessco/screens/client_workout_screen.dart';
-import 'package:fitnessco/screens/editClientProfile_screen.dart';
+import 'package:fitnessco/screens/edit_client_profile_screen.dart';
+import 'package:fitnessco/screens/workout_history_screen.dart';
 import 'package:fitnessco/utils/quit_dialogue_util.dart';
 import 'package:flutter/material.dart';
 
@@ -135,6 +136,38 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
     await fetchUserData();
   }
 
+  void _settingModalBottomSheet(context) {
+    showModalBottomSheet(
+        context: context,
+        builder: (BuildContext bc) {
+          return Wrap(
+            children: <Widget>[
+              ListTile(
+                  leading: const Icon(Icons.list),
+                  title: const Text('BMI'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const BMIHistoryScreen()));
+                  }),
+              ListTile(
+                leading: const Icon(Icons.fitness_center),
+                title: const Text('Workout'),
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const WorkoutHistoryScreen()));
+                },
+              ),
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -228,31 +261,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                               squareIconButton_Widget(
                                   context, 'Personal History', Icons.history,
                                   () {
-                                showDialog(
-                                    context: context,
-                                    builder: (context) => AlertDialog(
-                                          title: const Text('CHOOSE'),
-                                          content: const Text(
-                                              'Choose which History you would like to view'),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                              child: const Text('WORKOUT'),
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                                Navigator.push(
-                                                    context,
-                                                    MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            const BMIHistoryScreen()));
-                                              },
-                                              child: const Text('BMI'),
-                                            ),
-                                          ],
-                                        ));
+                                _settingModalBottomSheet(context);
                               }),
                               squareIconButton_Widget(
                                   context,

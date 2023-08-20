@@ -1,7 +1,7 @@
 // ignore_for_file: file_names
 
-import 'package:fitnessco/screens/allClients_screen.dart';
-import 'package:fitnessco/screens/manageGym_screen.dart';
+import 'package:fitnessco/screens/all_clients_screen.dart';
+import 'package:fitnessco/screens/manage_gym_screen.dart';
 import 'package:fitnessco/widgets/LogOut_Widget.dart';
 import 'package:flutter/material.dart';
 import '../utils/quit_dialogue_util.dart';

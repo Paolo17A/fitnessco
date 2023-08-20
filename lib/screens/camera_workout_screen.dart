@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/screens/clientHome_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
@@ -33,17 +34,22 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   int currentMuscleGroupIndex = 0;
   List<String> workouts = [];
   int currentWorkoutIndex = 0;
+  List<int> _repsDone = [];
   int _currentRep = 0;
   int _repsQuota = 0;
   int _currentSet = 0;
   int _setQuota = 0;
+
+  //  Accomplished Workout Variables
+  List<dynamic> workoutHistory = [];
+  Map<String, dynamic> accomplishedWorkouts = {};
 
   //declare detector
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _getClientWorkouts();
-    _initializeCamera();
+    //_initializeCamera();
   }
 
   Future<void> _getClientWorkouts() async {
@@ -62,6 +68,8 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           [workouts[currentWorkoutIndex]]['reps'];
       _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
           [workouts[currentWorkoutIndex]]['sets'];
+      _repsDone = List<int>.filled(_setQuota, 0);
+      workoutHistory = currentUserData.data()!['workoutHistory'];
       setState(() {
         isLoading = false;
       });
@@ -106,8 +114,8 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   @override
   void dispose() {
     if (mounted) {
-      poseDetector.close();
-      cameraController.dispose();
+      //poseDetector.close();
+      //cameraController.dispose();
     }
     super.dispose();
   }
@@ -186,89 +194,185 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   //WORKOUT RELATED FUNCTIONS
   //===============================================================================================
   void _addRepToCurrentSet() {
-    _currentRep++;
-    if (_currentRep == _repsQuota) {
-      _currentSet++;
-      _currentRep = 0;
-      if (_currentSet == _setQuota) {
-        //  Check if this is the last workout for this muscle group.
-        if (currentWorkoutIndex + 1 == workouts.length) {
-          currentWorkoutIndex = 0;
-          //  Check if this is the final muscle group in the prescribed workout
-          if (currentMuscleGroupIndex + 1 == muscleGroups.length) {
-            _addWorkoutToFirebase();
+    setState(() {
+      _currentRep++;
+      _repsDone[_currentSet] = _currentRep;
+
+      //  This is the first rep for this specific muscle group, hence also the first workout of this muscle group
+      if (!accomplishedWorkouts
+          .containsKey(muscleGroups[currentMuscleGroupIndex])) {
+        accomplishedWorkouts[muscleGroups[currentMuscleGroupIndex]] = {
+          workouts[currentWorkoutIndex]: {
+            'repsQuota': _repsQuota,
+            'repsDone': _repsDone
           }
-          //  If this isn't the last muscle group, simply proceed to the next muscle group in the prescribed workout
-          else {
-            currentMuscleGroupIndex++;
-          }
-        }
-        //  If this isn't the last muscle workout, simply proceed to the next workout for this muscle
-        else {
+        };
+      }
+      //  The current muscle group already exists but the current workout does not
+      else if (!(accomplishedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+              as Map<dynamic, dynamic>)
+          .containsKey(workouts[currentWorkoutIndex])) {
+        accomplishedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+            [workouts[currentWorkoutIndex]] = {
+          'repsQuota': _repsQuota,
+          'repsDone': _repsDone
+        };
+      }
+      //  This is the nth rep to be updated to an existing muscle group and workout group
+      else {
+        accomplishedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+            [workouts[currentWorkoutIndex]]['repsDone'] = _repsDone;
+      }
+
+      //  User has met the reps quota for the current sets
+      if (_currentRep == _repsQuota) {
+        _currentSet++;
+        _currentRep = 0;
+
+        //  User has met the sets quota for the current workout
+        if (_currentSet == _setQuota) {
+          _currentSet = 0;
           currentWorkoutIndex++;
+
+          //  User has done all the workouts for the given muscle group
+          if (currentWorkoutIndex == workouts.length) {
+            currentWorkoutIndex = 0;
+            currentMuscleGroupIndex++;
+
+            //  User has trained all the muscles in the prescribed workout plan
+            if (currentMuscleGroupIndex == muscleGroups.length) {
+              _addWorkoutToFirebase();
+            } else {
+              workouts =
+                  (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+                          as Map<String, dynamic>)
+                      .keys
+                      .toList();
+              _resetWorkoutVariables();
+            }
+          } else {
+            _resetWorkoutVariables();
+          }
         }
       }
-    }
-    setState(() {
-      _currentRep;
-      _currentSet;
-      currentWorkoutIndex;
-      currentMuscleGroupIndex;
     });
   }
 
-  void _skipWorkout() {
-    if (currentWorkoutIndex + 1 == workouts.length) {
-      if (currentMuscleGroupIndex + 1 == muscleGroups.length) {
-        showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-                  title: const Text('Confirm Skip Workout'),
-                  content: const Text(
-                      'Are you sure you want to skip this workout? This is the only workout you have been prescribed'),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Cancel'),
-                    ),
-                    TextButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: const Text('Skip'),
-                    ),
-                  ],
-                ));
-      } else {
-        setState(() {
-          currentMuscleGroupIndex++;
-          currentWorkoutIndex = 0;
-          _currentRep = 0;
-          _currentSet = 0;
-        });
-      }
-    } else {
-      setState(() {
-        currentWorkoutIndex++;
-        _currentRep = 0;
-        _currentSet = 0;
-      });
-    }
+  void _resetWorkoutVariables() {
+    _repsQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+        [workouts[currentWorkoutIndex]]['reps'];
+    _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+        [workouts[currentWorkoutIndex]]['sets'];
+    _repsDone = List<int>.filled(_setQuota, 0);
   }
 
-  void _skipMuscle() {
-    if (currentMuscleGroupIndex + 1 == muscleGroups.length) {
+  void _skipWorkout() {
+    //  If there is only one workout, we display a confirmation pop-up dialogue
+    if (workouts.length == 1) {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
                 title: const Text('Confirm Skip Workout'),
                 content: const Text(
-                    'Are you sure you want to skip this muscle? This is the only muscle you have been prescribed to train'),
+                    'Are you sure you want to skip this workout? This is the only workout prescribed for this muscle'),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(context).pop(),
                     child: const Text('Cancel'),
                   ),
                   TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      setState(() {
+                        currentMuscleGroupIndex++;
+                        currentWorkoutIndex = 0;
+                        _currentRep = 0;
+                        _currentSet = 0;
+                        //  This is either the last or the only muscle to be trained
+                        if (currentMuscleGroupIndex == muscleGroups.length) {
+                          _addWorkoutToFirebase();
+                        }
+                        //  Move on to the next muscle
+                        else {
+                          workouts = (prescribedWorkouts[
+                                      muscleGroups[currentMuscleGroupIndex]]
+                                  as Map<String, dynamic>)
+                              .keys
+                              .toList();
+                          _resetWorkoutVariables();
+                        }
+                      });
+                    },
+                    child: const Text('Skip'),
+                  ),
+                ],
+              ));
+      return;
+    }
+    //  There are multiple prescribed workouts for this muscle group
+    else {
+      setState(() {
+        currentWorkoutIndex++;
+        _currentRep = 0;
+        _currentSet = 0;
+        //  This is the last workout for this muscle group
+        if (currentWorkoutIndex == workouts.length) {
+          currentMuscleGroupIndex++;
+          currentWorkoutIndex = 0;
+          //  If this is the final muscle group, time to updated the workout history in Firebase
+          if (currentMuscleGroupIndex == muscleGroups.length) {
+            _addWorkoutToFirebase();
+          }
+          //  Load the next workout of the same muscle group and set the proper related variables
+          else {
+            workouts =
+                (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+                        as Map<String, dynamic>)
+                    .keys
+                    .toList();
+            _resetWorkoutVariables();
+          }
+        }
+        //  We proceed to the next prescribed workout for this muscle group
+        else {
+          _resetWorkoutVariables();
+        }
+      });
+    }
+  }
+
+  void _skipMuscle() {
+    if (!accomplishedWorkouts
+        .containsKey(muscleGroups[currentMuscleGroupIndex])) {
+      showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+                title: const Text('Confirm Skip Workout'),
+                content: const Text(
+                    'Are you sure you want to skip this muscle? You have not trained this muscle yet'),
+                actions: [
+                  TextButton(
                     onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('Cancel'),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      currentMuscleGroupIndex++;
+                      currentWorkoutIndex = 0;
+                      _currentRep = 0;
+                      _currentSet = 0;
+                      if (currentMuscleGroupIndex == muscleGroups.length) {
+                        _addWorkoutToFirebase();
+                      } else {
+                        workouts = (prescribedWorkouts[
+                                    muscleGroups[currentMuscleGroupIndex]]
+                                as Map<String, dynamic>)
+                            .keys
+                            .toList();
+                        _resetWorkoutVariables();
+                      }
+                    },
                     child: const Text('Skip'),
                   ),
                 ],
@@ -279,14 +383,66 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
         currentWorkoutIndex = 0;
         _currentRep = 0;
         _currentSet = 0;
+        //  Proceed to updating workouts in Firebase if all muscles have been elapsed
+        if (currentMuscleGroupIndex == muscleGroups.length) {
+          _addWorkoutToFirebase();
+        }
+        //  Reset workout variables to make way for the next workout
+        else {
+          workouts = (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+                  as Map<String, dynamic>)
+              .keys
+              .toList();
+          _resetWorkoutVariables();
+        }
       });
     }
   }
 
-  void _addWorkoutToFirebase() {
+  void _addWorkoutToFirebase() async {
     setState(() {
       isLoading = true;
     });
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    try {
+      //  Make a checker for if the  user did not do any workouts at all
+      if (accomplishedWorkouts.isEmpty) {
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content: Text(
+                'You skipped all your workouts. No history will be recorded')));
+
+        navigator.pop();
+        navigator.pushReplacement(MaterialPageRoute(
+            builder: ((context) => const ClientHomeScreen())));
+      }
+      //  There is SOMETHING in the accomplishedWorkouts map
+      else {
+        Map<dynamic, dynamic> newWorkoutEntry = {
+          'dateTime': {
+            'month': DateTime.now().month,
+            'year': DateTime.now().year,
+            'day': DateTime.now().day
+          },
+          'workout': accomplishedWorkouts
+        };
+        workoutHistory.add(newWorkoutEntry);
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .update({'workoutHistory': workoutHistory});
+
+        scaffoldMessenger.showSnackBar(const SnackBar(
+            content: Text('Successfully updated Workout History')));
+
+        navigator.pop();
+        navigator.pushReplacement(MaterialPageRoute(
+            builder: ((context) => const ClientHomeScreen())));
+      }
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(SnackBar(
+          content: Text('Error adding workout history: ${error.toString()}')));
+    }
   }
   //===============================================================================================
 
@@ -340,7 +496,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                   child: Container(
                     width: double.infinity,
                     decoration: BoxDecoration(
-                        color: Colors.purpleAccent.withOpacity(0.6),
+                        color: Colors.purple.withOpacity(0.4),
                         borderRadius: BorderRadius.circular(10)),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
@@ -373,7 +529,9 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                                 child: const Icon(Icons.add),
                               ),
                               ElevatedButton(
-                                  onPressed: _skipMuscle,
+                                  onPressed: muscleGroups.length == 1
+                                      ? null
+                                      : _skipMuscle,
                                   child: const Text('Skip Muscle'))
                             ],
                           ),

@@ -14,7 +14,8 @@ class AddBMIEntryScreen extends StatefulWidget {
 class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
   //===============================================================================================
   bool _isLoading = false;
-  final bmiController = TextEditingController();
+  final heightController = TextEditingController();
+  final weightController = TextEditingController();
   List<dynamic> localBMIEntries = [];
   //===============================================================================================
 
@@ -27,7 +28,8 @@ class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
   @override
   void dispose() {
     super.dispose();
-    bmiController.dispose();
+    heightController.dispose();
+    weightController.dispose();
   }
 
   void _addBMIEntry() async {
@@ -35,11 +37,18 @@ class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     try {
+      if (heightController.text.isEmpty || weightController.text.isEmpty) {
+        scaffoldMessenger.showSnackBar(
+            const SnackBar(content: Text('Please fill up all values')));
+        heightController.clear();
+        weightController.clear();
+        return;
+      }
       //  First we must check if the input is valid
-      if (bmiController.text.isEmpty || double.parse(bmiController.text) <= 0) {
+      if (double.parse(heightController.text) <= 0 ||
+          double.parse(weightController.text) <= 0) {
         scaffoldMessenger.showSnackBar(const SnackBar(
-            content: Text('The entered BMI value must be higher than zero')));
-        bmiController.clear();
+            content: Text('The entered values must be higher than zero')));
         return;
       }
 
@@ -47,13 +56,16 @@ class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
       setState(() {
         _isLoading = true;
       });
+      double height = double.parse(heightController.text);
+      double weight = double.parse(weightController.text);
       Map<String, dynamic> newBMI = {
         'dateTime': {
           'month': DateTime.now().month,
           'year': DateTime.now().year,
           'day': DateTime.now().day
         },
-        'bmiValue': double.parse(bmiController.text)
+        'bmiValue':
+            double.parse((weight / (height * height)).toStringAsFixed(2))
       };
 
       //  We must check if the new BMI entry is a new one or is updating an earlier inputted entry
@@ -89,7 +101,8 @@ class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
           content: Text('Error adding BMI entry: ${error.toString()}')));
       setState(() {
         _isLoading = false;
-        bmiController.clear();
+        heightController.clear();
+        weightController.clear();
       });
     }
   }
@@ -107,10 +120,16 @@ class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
                 child: Column(
               children: [
                 TextField(
-                  controller: bmiController,
+                  controller: weightController,
                   keyboardType: TextInputType.number,
-                  decoration:
-                      const InputDecoration(labelText: 'Enter your BMI today'),
+                  decoration: const InputDecoration(
+                      labelText: 'Enter your weight in KILOGRAMS'),
+                ),
+                TextField(
+                  controller: heightController,
+                  keyboardType: TextInputType.number,
+                  decoration: const InputDecoration(
+                      labelText: 'Enter your height in METERS'),
                 ),
                 ElevatedButton(
                     onPressed: _addBMIEntry, child: const Text('Add BMI Entry'))
