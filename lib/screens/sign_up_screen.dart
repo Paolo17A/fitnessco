@@ -67,19 +67,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'profileImageURL': '',
         'prescribedWorkout': {},
         'bmiHistory': [],
-        'workoutHistory': []
+        'workoutHistory': [],
+        'gymHistory': [],
+        'appointment': {}
       });
-
-      /*await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .collection('workoutHistory')
-          .add({});*/
 
       // Send email confirmation link to user
       await userCredential.user!.sendEmailVerification();
 
-      print("Success");
       _openHomeScreen(userCredential.user!.uid);
       setState(() {
         _isLoading = false;
@@ -88,7 +83,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _isLoading = false;
       });
-      print("Error ${error.toString()}");
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text(error.toString()),
         backgroundColor: Colors.purple,

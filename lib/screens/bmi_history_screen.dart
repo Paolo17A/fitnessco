@@ -90,42 +90,47 @@ class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 30),
                             )
-                          : Expanded(
-                              child: ListView.builder(
-                                  itemCount: bmiHistory.length,
-                                  itemBuilder: (context, index) {
-                                    return Padding(
-                                      padding: const EdgeInsets.all(7),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                            color: Colors.deepPurple
-                                                .withOpacity(0.5),
-                                            borderRadius:
-                                                BorderRadius.circular(20)),
-                                        child: Column(children: [
-                                          Padding(
-                                            padding: const EdgeInsets.all(9),
-                                            child: Text(
-                                              '${(bmiHistory[index]['dateTime']['month']).toString()} - ${(bmiHistory[index]['dateTime']['day']).toString()} - ${(bmiHistory[index]['dateTime']['year']).toString()}',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                  color: Colors.white),
+                          : Column(
+                              children: [
+                                ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: bmiHistory.length,
+                                    itemBuilder: (context, index) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(7),
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                              color: Colors.deepPurple
+                                                  .withOpacity(0.5),
+                                              borderRadius:
+                                                  BorderRadius.circular(20)),
+                                          child: Column(children: [
+                                            Padding(
+                                              padding: const EdgeInsets.all(9),
+                                              child: Text(
+                                                '${(bmiHistory[index]['dateTime']['month']).toString()} - ${(bmiHistory[index]['dateTime']['day']).toString()} - ${(bmiHistory[index]['dateTime']['year']).toString()}',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                    color: Colors.white),
+                                              ),
                                             ),
-                                          ),
-                                          Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: Text(
-                                              'BMI: ${bmiHistory[index]['bmiValue'].toString()}',
-                                              style: const TextStyle(
-                                                  fontSize: 15,
-                                                  color: Colors.white),
-                                            ),
-                                          )
-                                        ]),
-                                      ),
-                                    );
-                                  })),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                'BMI: ${bmiHistory[index]['bmiValue'].toString()}',
+                                                style: const TextStyle(
+                                                    fontSize: 15,
+                                                    color: Colors.white),
+                                              ),
+                                            )
+                                          ]),
+                                        ),
+                                      );
+                                    }),
+                              ],
+                            ),
                     ),
                   ));
   }

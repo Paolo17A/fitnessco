@@ -53,13 +53,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
         _trainerUID = userData['currentTrainer'] as String;
         _hasPrescribedWorkout =
             (userData['prescribedWorkout'] as Map<String, dynamic>).isNotEmpty;
-      });
-    }
-
-    final String profileImageURL = userData!['profileImageURL'] as String;
-    if (profileImageURL.isNotEmpty) {
-      setState(() {
-        _profileImageURL = profileImageURL;
+        _profileImageURL = userData['profileImageURL'] as String;
       });
     }
   }
@@ -220,60 +214,58 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                           ),
                         ),
                       ),
-                      Expanded(
-                        child: Center(
-                          child: GridView.count(
-                            padding: EdgeInsets.all(screenSize.width * 0.05),
-                            crossAxisCount: 2,
-                            crossAxisSpacing: screenSize.width * 0.05,
-                            mainAxisSpacing: screenSize.width * 0.05,
-                            childAspectRatio: itemWidth / itemHeight,
-                            shrinkWrap: true,
-                            children: [
-                              if (_isConfirmed)
-                                squareIconButton_Widget(
-                                    context, 'Chat My Trainer', Icons.person,
-                                    () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => ChatScreen(
-                                              otherPersonUID: _trainerUID,
-                                              isClient: true,
-                                              onCallback: _onTrainerRemoved)));
-                                })
-                              else
-                                squareIconButton_Widget(
+                      Center(
+                        child: GridView.count(
+                          padding: EdgeInsets.all(screenSize.width * 0.05),
+                          crossAxisCount: 2,
+                          crossAxisSpacing: screenSize.width * 0.05,
+                          mainAxisSpacing: screenSize.width * 0.05,
+                          childAspectRatio: itemWidth / itemHeight,
+                          shrinkWrap: true,
+                          children: [
+                            if (_isConfirmed)
+                              squareIconButton_Widget(
+                                  context, 'Chat My Trainer', Icons.person, () {
+                                Navigator.push(
                                     context,
-                                    'View All Trainers',
-                                    Icons.people,
-                                    () => _goToAllTrainersScreen(context)),
+                                    MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                            otherPersonUID: _trainerUID,
+                                            isClient: true,
+                                            onCallback: _onTrainerRemoved)));
+                              })
+                            else
                               squareIconButton_Widget(
                                   context,
-                                  'View My Workout Plan',
-                                  Icons.list,
-                                  () => _goToClientWorkoutScreen(context)),
-                              squareIconButton_Widget(
-                                  context,
-                                  'My Training Session',
-                                  Icons.fitness_center,
-                                  () => _goToCameraWorkoutScreen(context)),
-                              squareIconButton_Widget(
-                                  context, 'Personal History', Icons.history,
-                                  () {
-                                _settingModalBottomSheet(context);
-                              }),
-                              squareIconButton_Widget(
-                                  context,
-                                  'Edit Profile',
-                                  Icons.edit,
-                                  () => _goToEditClientProfileScreen(context)),
-                              squareIconButton_Widget(
-                                  context, 'Settings', Icons.settings, () {}),
-                            ],
-                          ),
+                                  'View All Trainers',
+                                  Icons.people,
+                                  () => _goToAllTrainersScreen(context)),
+                            squareIconButton_Widget(
+                                context,
+                                'View My Workout Plan',
+                                Icons.list,
+                                () => _goToClientWorkoutScreen(context)),
+                            squareIconButton_Widget(
+                                context,
+                                'My Training Session',
+                                Icons.fitness_center,
+                                () => _goToCameraWorkoutScreen(context)),
+                            squareIconButton_Widget(
+                                context, 'Personal History', Icons.history, () {
+                              _settingModalBottomSheet(context);
+                            }),
+
+                            /*squareIconButton_Widget(
+                                context, 'Settings', Icons.settings, () {}),*/
+                          ],
                         ),
                       ),
+                      squareIconButton_Widget(
+                          context,
+                          'Profile Settings',
+                          Icons.edit,
+                          () => _goToEditClientProfileScreen(context)),
+                      const SizedBox(height: 100),
                       LogOutWidget(screenSize: screenSize)
                     ],
                   ),

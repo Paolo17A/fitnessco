@@ -52,11 +52,9 @@ class _EditClientProfileState extends State<EditClientProfile> {
       _lastNameController.text = _lastName;
 
       final String profileImageURL = userData['profileImageURL'] as String;
-      if (profileImageURL.isNotEmpty) {
-        setState(() {
-          _profileImageURL = profileImageURL;
-        });
-      }
+      setState(() {
+        _profileImageURL = profileImageURL;
+      });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error saving membership status: $e"),

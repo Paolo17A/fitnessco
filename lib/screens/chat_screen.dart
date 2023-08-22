@@ -2,7 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/client_workout_screen.dart';
+//import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:flutter/material.dart';
 import '../widgets/chat_messages.dart';
@@ -27,6 +27,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
   String _otherUserFirstName = '';
   String _otherUserLastName = '';
+
+  //  SCHEDULING
+  int day = 0;
+  int month = 0;
+  int year = 0;
+  int hour = 0;
+  int minute = 0;
 
   @override
   void initState() {
@@ -82,6 +89,8 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+//  CLIENT DELETE FEATURES
+//==========================================================================================================================
   void _deleteTrainer() async {
     try {
       //  Delete the message thread
@@ -148,15 +157,104 @@ class _ChatScreenState extends State<ChatScreen> {
       },
     );
   }
+//==========================================================================================================================
 
-  void _goToClientWorkoutsScreen(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) =>
-            ClientWorkoutsScreen(clientUID: widget.otherPersonUID),
-      ),
+//  SCHEDULE FUNCTIONS
+//==========================================================================================================================
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2101),
+    );
+    if (picked != null && picked != DateTime.now()) {
+      year = picked.year;
+      month = picked.month;
+      day = picked.day;
+      // ignore: use_build_context_synchronously
+      _selectTime(context);
+    }
+  }
+
+  Future<void> _selectTime(BuildContext context) async {
+    const TimeOfDay initialTime = TimeOfDay(hour: 7, minute: 0);
+    const TimeOfDay lastTime = TimeOfDay(hour: 20, minute: 0);
+
+    final TimeOfDay? picked = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+        builder: (context, child) {
+          return Theme(
+            data: ThemeData.light().copyWith(
+                colorScheme: const ColorScheme.light(primary: Colors.purple)),
+            child: child!,
+          );
+        });
+    if (picked != null && !_isTimeInRange(picked, initialTime, lastTime)) {
+      // ignore: use_build_context_synchronously
+      _showTimeOutOfRangeDialog(context);
+    } else if (picked != null) {
+      hour = picked.hour;
+      minute = picked.minute;
+
+      _setAppointmentFirebase(DateTime(year, month, day, hour, minute));
+    }
+  }
+
+  bool _isTimeInRange(TimeOfDay time, TimeOfDay start, TimeOfDay end) {
+    final currentTime = DateTime(2023, 1, 1, time.hour, time.minute);
+    final startTime = DateTime(2023, 1, 1, start.hour, start.minute);
+    final endTime = DateTime(2023, 1, 1, end.hour, end.minute);
+
+    return currentTime.isAfter(startTime) && currentTime.isBefore(endTime);
+  }
+
+  void _showTimeOutOfRangeDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Time Selection Error'),
+          content: const Text('Please select a time between 7am and 8pm.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
     );
   }
+
+  void _setAppointmentFirebase(DateTime appointment) async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      Map<String, int> appointmentDate = {
+        'day': appointment.day,
+        'month': appointment.month,
+        'year': appointment.year,
+        'hour': appointment.hour,
+        'minute': appointment.minute
+      };
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.otherPersonUID)
+          .update({'appointment': appointmentDate});
+
+      scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Successfully set appointment')));
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(SnackBar(
+          content: Text('Error setting gym appointment: ${error.toString()}')));
+    }
+  }
+
+  //==========================================================================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -171,8 +269,8 @@ class _ChatScreenState extends State<ChatScreen> {
               ]
             : [
                 IconButton(
-                    onPressed: () => _goToClientWorkoutsScreen(context),
-                    icon: const Icon(Icons.fitness_center_rounded))
+                    onPressed: () => _selectDate(context),
+                    icon: const Icon(Icons.calendar_month))
               ],
       ),
       body: _isLoading

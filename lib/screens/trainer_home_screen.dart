@@ -23,6 +23,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   late String _firstName;
   late String _lastName;
   late String _idNumber;
+  late String _profileImageURL;
 
   @override
   void initState() {
@@ -41,6 +42,8 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
         _firstName = userData['firstName'] as String;
         _lastName = userData['lastName'] as String;
         _idNumber = userData['idNumber'] as String;
+        _profileImageURL = userData['profileImageURL'] as String;
+
         _isLoading = false;
       });
     }
@@ -72,6 +75,17 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
     );
   }
 
+  Widget _buildProfileImage() {
+    if (_profileImageURL != '') {
+      return CircleAvatar(
+        radius: 50,
+        backgroundImage: NetworkImage(_profileImageURL),
+      );
+    } else {
+      return const CircleAvatar(radius: 50, child: Icon(Icons.person));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
@@ -93,11 +107,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            CircleAvatar(
-                              radius: 50,
-                              child: Image.asset(
-                                  'assets/images/defaultProfile.png'),
-                            ),
+                            _buildProfileImage(),
                             Column(
                               children: [
                                 const SizedBox(height: 15),
@@ -147,16 +157,10 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
                                   () {}),
                               squareIconButton_Widget(
                                   context,
-                                  'Edit Profile',
+                                  'Profile Settings',
                                   Icons.edit,
                                   buttonWidth: _buttonWidth,
                                   () => _goToEditTrainerProfileScreen(context)),
-                              squareIconButton_Widget(
-                                  context,
-                                  'Settings',
-                                  Icons.settings,
-                                  buttonWidth: _buttonWidth,
-                                  () {}),
                               LogOutWidget(screenSize: screenSize)
                             ],
                           ),

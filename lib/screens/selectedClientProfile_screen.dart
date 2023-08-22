@@ -2,6 +2,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/widgets/MembershipStatusDropdown_widget.dart';
+import 'package:fitnessco/widgets/gym_history_entry_widget.dart';
 import 'package:flutter/material.dart';
 
 class SelectedClientProfile extends StatefulWidget {
@@ -15,6 +16,8 @@ class SelectedClientProfile extends StatefulWidget {
 
 class _SelectedClientProfileState extends State<SelectedClientProfile> {
   String _selectedMembershipStatus = 'UNPAID';
+  bool _currentlyUsingGym = false;
+  List<dynamic> gymHistory = [];
 
   @override
   void initState() {
@@ -35,6 +38,13 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
         } else {
           _selectedMembershipStatus = userData['membershipStatus'] as String;
         }
+
+        gymHistory = userData['gymHistory'];
+        _currentlyUsingGym = (gymHistory[gymHistory.length - 1]['timeOut']
+                    as Map<dynamic, dynamic>)
+                .isEmpty
+            ? true
+            : false;
       });
     }
   }
@@ -58,6 +68,70 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       ));
     }
   }
+
+  //  TIMING IN/OUT
+  //========================================================================================================================
+  void _timeInClient() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      Map<String, dynamic> timeEntry = {
+        'timeIn': {
+          'month': DateTime.now().month,
+          'year': DateTime.now().year,
+          'day': DateTime.now().day,
+          'hour': DateTime.now().hour,
+          'minute': DateTime.now().minute,
+          'second': DateTime.now().second
+        },
+        'timeOut': {}
+      };
+
+      gymHistory.add(timeEntry);
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .update({'gymHistory': gymHistory});
+
+      scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Successfully timed user in')));
+      setState(() {
+        _currentlyUsingGym = true;
+      });
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error timing in: ${error.toString()}')));
+    }
+  }
+
+  void _timeOutClient() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      gymHistory[gymHistory.length - 1]['timeOut'] = {
+        'month': DateTime.now().month,
+        'year': DateTime.now().year,
+        'day': DateTime.now().day,
+        'hour': DateTime.now().hour,
+        'minute': DateTime.now().minute,
+        'second': DateTime.now().second
+      };
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(widget.uid)
+          .update({'gymHistory': gymHistory});
+
+      scaffoldMessenger.showSnackBar(
+          const SnackBar(content: Text('Successfully timed user out')));
+      setState(() {
+        _currentlyUsingGym = false;
+      });
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error timing in: ${error.toString()}')));
+    }
+  }
+//========================================================================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -146,6 +220,49 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                            color: Colors.deepPurple.withOpacity(0.5),
+                            borderRadius: BorderRadius.circular(10)),
+                        child: Column(
+                          children: [
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Gym Usage History',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold)),
+                            ),
+                            ElevatedButton(
+                                onPressed: () {
+                                  _currentlyUsingGym
+                                      ? _timeOutClient()
+                                      : _timeInClient();
+                                },
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Colors.deepPurple.withOpacity(0.6)),
+                                child: Text(
+                                  _currentlyUsingGym ? 'TIME OUT' : 'TIME IN',
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
+                                )),
+                            ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: gymHistory.length,
+                                itemBuilder: (context, index) {
+                                  return gymHistoryEntryWidget(
+                                      gymHistory[index]['timeIn'],
+                                      gymHistory[index]['timeOut']);
+                                })
+                          ],
+                        )),
+                  )
                 ],
               );
             } else if (snapshot.hasError) {
