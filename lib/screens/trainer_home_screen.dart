@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
+import 'package:fitnessco/screens/trainer_schedule_screen.dart';
 import 'package:flutter/material.dart';
 import '../utils/quit_dialogue_util.dart';
 import '../widgets/LogOut_Widget.dart';
@@ -65,6 +66,11 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
         ),
       ),
     );
+  }
+
+  void _goToTrainerScheduleScreen(BuildContext context) {
+    Navigator.of(context).push(
+        MaterialPageRoute(builder: (context) => const TrainerScheduleScreen()));
   }
 
   void _goToTrainerCurrentClientsScreen(BuildContext context) {
@@ -154,7 +160,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
                                   'View My Schedule',
                                   Icons.calendar_month,
                                   buttonWidth: _buttonWidth,
-                                  () {}),
+                                  () => _goToTrainerScheduleScreen(context)),
                               squareIconButton_Widget(
                                   context,
                                   'Profile Settings',

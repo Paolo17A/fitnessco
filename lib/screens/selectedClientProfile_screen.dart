@@ -18,6 +18,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
   String _selectedMembershipStatus = 'UNPAID';
   bool _currentlyUsingGym = false;
   List<dynamic> gymHistory = [];
+  String _profileImageURL = '';
 
   @override
   void initState() {
@@ -40,11 +41,14 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
         }
 
         gymHistory = userData['gymHistory'];
-        _currentlyUsingGym = (gymHistory[gymHistory.length - 1]['timeOut']
-                    as Map<dynamic, dynamic>)
-                .isEmpty
-            ? true
-            : false;
+        _profileImageURL = userData['profileImageURL'] as String;
+        if (gymHistory.isNotEmpty) {
+          _currentlyUsingGym = (gymHistory[gymHistory.length - 1]['timeOut']
+                      as Map<dynamic, dynamic>)
+                  .isEmpty
+              ? true
+              : false;
+        }
       });
     }
   }
@@ -131,6 +135,17 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
           SnackBar(content: Text('Error timing in: ${error.toString()}')));
     }
   }
+
+  Widget _buildProfileImage() {
+    if (_profileImageURL != '') {
+      return CircleAvatar(
+        radius: 50,
+        backgroundImage: NetworkImage(_profileImageURL),
+      );
+    } else {
+      return const CircleAvatar(radius: 50, child: Icon(Icons.person));
+    }
+  }
 //========================================================================================================================
 
   @override
@@ -175,10 +190,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.red,
-                          ),
+                          _buildProfileImage(),
                           Column(
                             children: [
                               const SizedBox(height: 15),

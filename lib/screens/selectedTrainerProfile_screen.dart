@@ -24,6 +24,7 @@ class SelectedTrainerProfile extends StatefulWidget {
 class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
   bool isTrainingRequestSent = false;
   bool isViewingCurrentTrainer = false;
+  String _profileImageURL = '';
   //late String currentUserUID;
 
   @override
@@ -56,6 +57,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
             isTrainingRequestSent = true;
           }
         }
+        _profileImageURL = userData['profileImageURL'] as String;
       }
     }).catchError((error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
@@ -192,6 +194,17 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
     });
   }
 
+  Widget _buildProfileImage() {
+    if (_profileImageURL != '') {
+      return CircleAvatar(
+        radius: 50,
+        backgroundImage: NetworkImage(_profileImageURL),
+      );
+    } else {
+      return const CircleAvatar(radius: 50, child: Icon(Icons.person));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     CollectionReference trainers =
@@ -234,10 +247,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          const CircleAvatar(
-                            radius: 50,
-                            backgroundColor: Colors.red,
-                          ),
+                          _buildProfileImage(),
                           Column(
                             children: [
                               const SizedBox(height: 15),
