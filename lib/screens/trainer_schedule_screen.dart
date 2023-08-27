@@ -50,7 +50,6 @@ class _TrainerScheduleScreenState extends State<TrainerScheduleScreen> {
         }
       }
 
-      print(userDataList);
       setState(() {
         _isLoading = false;
       });

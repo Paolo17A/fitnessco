@@ -1,17 +1,24 @@
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 
-class PosePainter extends CustomPainter {
-  PosePainter(this.absoluteImageSize, this.poses);
+import 'coordinates_translator.dart';
 
-  final Size absoluteImageSize;
+class PosePainter extends CustomPainter {
+  PosePainter(
+    this.poses,
+    this.imageSize,
+    this.rotation,
+    this.cameraLensDirection,
+  );
+
   final List<Pose> poses;
+  final Size imageSize;
+  final InputImageRotation rotation;
+  final CameraLensDirection cameraLensDirection;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final double scaleX = size.width / absoluteImageSize.width;
-    final double scaleY = size.height / absoluteImageSize.height;
-
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0
@@ -30,23 +37,63 @@ class PosePainter extends CustomPainter {
     for (final pose in poses) {
       pose.landmarks.forEach((_, landmark) {
         canvas.drawCircle(
-            Offset(landmark.x * scaleX, landmark.y * scaleY), 1, paint);
+            Offset(
+              translateX(
+                landmark.x,
+                size,
+                imageSize,
+                rotation,
+                cameraLensDirection,
+              ),
+              translateY(
+                landmark.y,
+                size,
+                imageSize,
+                rotation,
+                cameraLensDirection,
+              ),
+            ),
+            1,
+            paint);
       });
 
       void paintLine(
           PoseLandmarkType type1, PoseLandmarkType type2, Paint paintType) {
         final PoseLandmark joint1 = pose.landmarks[type1]!;
         final PoseLandmark joint2 = pose.landmarks[type2]!;
-        canvas.drawLine(Offset(joint1.x * scaleX, joint1.y * scaleY),
-            Offset(joint2.x * scaleX, joint2.y * scaleY), paintType);
+        canvas.drawLine(
+            Offset(
+                translateX(
+                  joint1.x,
+                  size,
+                  imageSize,
+                  rotation,
+                  cameraLensDirection,
+                ),
+                translateY(
+                  joint1.y,
+                  size,
+                  imageSize,
+                  rotation,
+                  cameraLensDirection,
+                )),
+            Offset(
+                translateX(
+                  joint2.x,
+                  size,
+                  imageSize,
+                  rotation,
+                  cameraLensDirection,
+                ),
+                translateY(
+                  joint2.y,
+                  size,
+                  imageSize,
+                  rotation,
+                  cameraLensDirection,
+                )),
+            paintType);
       }
-
-      //Draw shoulders
-      paintLine(
-          PoseLandmarkType.leftShoulder, PoseLandmarkType.rightShoulder, paint);
-
-      //Draw hips
-      paintLine(PoseLandmarkType.leftHip, PoseLandmarkType.rightHip, paint);
 
       //Draw arms
       paintLine(
@@ -63,6 +110,9 @@ class PosePainter extends CustomPainter {
           PoseLandmarkType.leftShoulder, PoseLandmarkType.leftHip, leftPaint);
       paintLine(PoseLandmarkType.rightShoulder, PoseLandmarkType.rightHip,
           rightPaint);
+      paintLine(
+          PoseLandmarkType.leftShoulder, PoseLandmarkType.rightShoulder, paint);
+      paintLine(PoseLandmarkType.leftHip, PoseLandmarkType.rightHip, paint);
 
       //Draw legs
       paintLine(PoseLandmarkType.leftHip, PoseLandmarkType.leftKnee, leftPaint);
@@ -76,8 +126,7 @@ class PosePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(PosePainter oldDelegate) {
-    return oldDelegate.absoluteImageSize != absoluteImageSize ||
-        oldDelegate.poses != poses;
+  bool shouldRepaint(covariant PosePainter oldDelegate) {
+    return oldDelegate.imageSize != imageSize || oldDelegate.poses != poses;
   }
 }
