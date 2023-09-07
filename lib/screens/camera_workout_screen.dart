@@ -1,12 +1,14 @@
+import 'dart:io';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/clientHome_screen.dart';
+import 'package:flutter/services.dart';
 
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import '../utils/pose_painter_util.dart';
-import '../view/camera_view.dart';
 
 late List<CameraDescription> cameras;
 
@@ -18,19 +20,21 @@ class CameraWorkoutScreen extends StatefulWidget {
 }
 
 class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
+  bool isLoading = true;
+
   //  ML Variables
   final PoseDetector _poseDetector =
       PoseDetector(options: PoseDetectorOptions());
   bool _canProcess = true;
   bool _isBusy = false;
   CustomPaint? _customPaint;
-  var _cameraLensDirection = CameraLensDirection.back;
+  final _cameraLensDirection = CameraLensDirection.back;
 
-  bool mayAddRep = true;
-
-  //  Detector Variables
-
-  bool isLoading = true;
+  //  Camera variables
+  static List<CameraDescription> _cameras = [];
+  CameraController? _controller;
+  int _cameraIndex = -1;
+  bool _changingCameraLens = false;
 
   //  Current Workout Variables
   Map<String, dynamic> prescribedWorkouts = {};
@@ -43,6 +47,8 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   int _repsQuota = 0;
   int _currentSet = 0;
   int _setQuota = 0;
+  bool mayAddRep = true;
+  String _currentWorkoutInstruction = '';
 
   //  Accomplished Workout Variables
   List<dynamic> workoutHistory = [];
@@ -53,12 +59,14 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   void initState() {
     super.initState();
     _getClientWorkouts();
+    _initialize();
   }
 
   @override
   void dispose() {
     _canProcess = false;
     _poseDetector.close();
+    _stopLiveFeed();
     super.dispose();
   }
 
@@ -90,13 +98,156 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     }
   }
 
+  //  CAMERA FUNCTIONS
+  //===============================================================================================
+  void _initialize() async {
+    if (_cameras.isEmpty) {
+      _cameras = await availableCameras();
+    }
+    for (var i = 0; i < _cameras.length; i++) {
+      if (_cameras[i].lensDirection == _cameraLensDirection) {
+        _cameraIndex = i;
+        break;
+      }
+    }
+    if (_cameraIndex != -1) {
+      _startLiveFeed();
+    }
+  }
+
+  Future _startLiveFeed() async {
+    final camera = _cameras[_cameraIndex];
+    _controller = CameraController(
+      camera,
+      // Set to ResolutionPreset.high. Do NOT set it to ResolutionPreset.max because for some phones does NOT work.
+      ResolutionPreset.high,
+      enableAudio: false,
+      imageFormatGroup: Platform.isAndroid
+          ? ImageFormatGroup.nv21
+          : ImageFormatGroup.bgra8888,
+    );
+    _controller?.initialize().then((_) {
+      if (!mounted) {
+        return;
+      }
+
+      _controller?.startImageStream(_processCameraImage);
+      setState(() {});
+    });
+  }
+
+  Future _stopLiveFeed() async {
+    await _controller?.stopImageStream();
+    await _controller?.dispose();
+    _controller = null;
+  }
+
+  void _processCameraImage(CameraImage image) {
+    final inputImage = _inputImageFromCameraImage(image);
+    if (inputImage == null) return;
+    _processImage(inputImage);
+  }
+
+  Future _switchLiveCamera() async {
+    setState(() => _changingCameraLens = true);
+    _cameraIndex = (_cameraIndex + 1) % _cameras.length;
+
+    await _stopLiveFeed();
+    await _startLiveFeed();
+    setState(() => _changingCameraLens = false);
+  }
+
+  final _orientations = {
+    DeviceOrientation.portraitUp: 0,
+    DeviceOrientation.landscapeLeft: 90,
+    DeviceOrientation.portraitDown: 180,
+    DeviceOrientation.landscapeRight: 270,
+  };
+
+  InputImage? _inputImageFromCameraImage(CameraImage image) {
+    if (_controller == null) return null;
+
+    // get image rotation
+    // it is used in android to convert the InputImage from Dart to Java: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/google_mlkit_commons/android/src/main/java/com/google_mlkit_commons/InputImageConverter.java
+    // `rotation` is not used in iOS to convert the InputImage from Dart to Obj-C: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/google_mlkit_commons/ios/Classes/MLKVisionImage%2BFlutterPlugin.m
+    // in both platforms `rotation` and `camera.lensDirection` can be used to compensate `x` and `y` coordinates on a canvas: https://github.com/flutter-ml/google_ml_kit_flutter/blob/master/packages/example/lib/vision_detector_views/painters/coordinates_translator.dart
+    final camera = _cameras[_cameraIndex];
+    final sensorOrientation = camera.sensorOrientation;
+    // print(
+    //     'lensDirection: ${camera.lensDirection}, sensorOrientation: $sensorOrientation, ${_controller?.value.deviceOrientation} ${_controller?.value.lockedCaptureOrientation} ${_controller?.value.isCaptureOrientationLocked}');
+    InputImageRotation? rotation;
+    if (Platform.isIOS) {
+      rotation = InputImageRotationValue.fromRawValue(sensorOrientation);
+    } else if (Platform.isAndroid) {
+      var rotationCompensation =
+          _orientations[_controller!.value.deviceOrientation];
+      if (rotationCompensation == null) return null;
+      if (camera.lensDirection == CameraLensDirection.front) {
+        // front-facing
+        rotationCompensation = (sensorOrientation + rotationCompensation) % 360;
+      } else {
+        // back-facing
+        rotationCompensation =
+            (sensorOrientation - rotationCompensation + 360) % 360;
+      }
+      rotation = InputImageRotationValue.fromRawValue(rotationCompensation);
+      // print('rotationCompensation: $rotationCompensation');
+    }
+    if (rotation == null) return null;
+    // print('final rotation: $rotation');
+
+    // get image format
+    final format = InputImageFormatValue.fromRawValue(image.format.raw);
+    // validate format depending on platform
+    // only supported formats:
+    // * nv21 for Android
+    // * bgra8888 for iOS
+    if (format == null ||
+        (Platform.isAndroid && format != InputImageFormat.nv21) ||
+        (Platform.isIOS && format != InputImageFormat.bgra8888)) return null;
+
+    // since format is constraint to nv21 or bgra8888, both only have one plane
+    if (image.planes.length != 1) return null;
+    final plane = image.planes.first;
+
+    // compose InputImage using bytes
+    return InputImage.fromBytes(
+        bytes: plane.bytes,
+        inputImageData: InputImageData(
+            size: Size(image.width.toDouble(), image.height.toDouble()),
+            imageRotation: rotation,
+            inputImageFormat: format,
+            planeData: [
+              InputImagePlaneMetadata(bytesPerRow: plane.bytesPerRow)
+            ]));
+  }
+  //===============================================================================================
+
   //  POSE ESTIMATION FUNCTIONS
   //===============================================================================================
   Future<void> _processImage(InputImage inputImage) async {
     if (!_canProcess) return;
     if (_isBusy) return;
     _isBusy = true;
-    setState(() {});
+    setState(() {
+      switch (workouts[currentWorkoutIndex]) {
+        case 'Sit-ups':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Put your left hand above your nose'
+              : 'Put your left hand below your left hip';
+          break;
+        case 'Squats':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Sit into a squat position until your knees are bent to a 90 degree angle'
+              : 'Straighten your legs to return to a standing position';
+          break;
+        default:
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Put your left hand above your nose'
+              : 'Put your left hand below your left hip';
+          break;
+      }
+    });
     final poses = await _poseDetector.processImage(inputImage);
 
     if (inputImage.inputImageData == null) {
@@ -111,12 +262,33 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     );
     _customPaint = CustomPaint(painter: painter);
 
-    for (var pose in poses) {
-      if (_isLeftHandAboveHead(pose) && mayAddRep) {
-        // Handle the case where the left hand is above the head
-        mayAddRep = false;
-        _addRepToCurrentSet();
-      }
+    switch (workouts[currentWorkoutIndex]) {
+      case 'Sit-ups':
+        for (var pose in poses) {
+          if (mayAddRep && _isLeftHandAboveHead(pose)) {
+            // Handle the case where the left hand is above the head
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && _isLeftHandBelowHip(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      default:
+        for (var pose in poses) {
+          if (mayAddRep && _isLeftHandAboveHead(pose)) {
+            // Handle the case where the left hand is above the head
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && _isLeftHandBelowHip(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
     }
 
     _isBusy = false;
@@ -158,6 +330,23 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
 
     return false;
   }
+
+  bool _isLeftHandBelowHip(Pose pose) {
+    // Assuming landmarks are stored in PoseLandmarkType enum
+    PoseLandmark? leftHand = pose.landmarks[PoseLandmarkType.leftWrist];
+    PoseLandmark? hip = pose.landmarks[PoseLandmarkType.leftHip];
+
+    if (leftHand != null && hip != null) {
+      double leftHandToHipDistance = leftHand.y - hip.y;
+
+      // Define a threshold distance to determine if the hand is below the hip
+      double belowHipThreshold = 0.1; // Adjust this value as needed
+
+      return leftHandToHipDistance > belowHipThreshold;
+    }
+
+    return false;
+  }
   //===============================================================================================
 
   //WORKOUT RELATED FUNCTIONS
@@ -166,6 +355,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     setState(() {
       _currentRep++;
       _repsDone[_currentSet] = _currentRep;
+      //mayAddRep = false;
 
       //  This is the first rep for this specific muscle group, hence also the first workout of this muscle group
       if (!accomplishedWorkouts
@@ -422,20 +612,33 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
         title: const Text(
           "Pose Estimation",
         ),
+        actions: [
+          IconButton(
+              onPressed: _switchLiveCamera,
+              icon: const Icon(Icons.cameraswitch))
+        ],
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Stack(
               children: [
+                Align(alignment: Alignment.topCenter, child: _liveFeedBody()),
                 Align(
-                    alignment: Alignment.topCenter,
-                    child: CameraView(
-                      customPaint: _customPaint,
-                      onImage: _processImage,
-                      initialCameraLensDirection: _cameraLensDirection,
-                      onCameraLensDirectionChanged: (value) =>
-                          _cameraLensDirection = value,
+                  alignment: Alignment.topCenter,
+                  child: Container(
+                    width: double.infinity,
+                    height: 100,
+                    color: Colors.black.withOpacity(0.75),
+                    child: Center(
+                        child: Text(
+                      _currentWorkoutInstruction,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold),
                     )),
+                  ),
+                ),
                 Align(
                   alignment: Alignment.bottomCenter,
                   child: Padding(
@@ -497,5 +700,27 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   TextStyle _textStyle() {
     return const TextStyle(
         fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white);
+  }
+
+  Widget _liveFeedBody() {
+    if (_cameras.isEmpty) return Container();
+    if (_controller == null) return Container();
+    if (_controller?.value.isInitialized == false) return Container();
+    return Container(
+      color: Colors.white,
+      height: MediaQuery.of(context).size.height * 0.7,
+      width: double.infinity,
+      child: _changingCameraLens
+          ? const Center(
+              child: Text('Changing camera lens'),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: CameraPreview(
+                _controller!,
+                child: _customPaint,
+              ),
+            ),
+    );
   }
 }

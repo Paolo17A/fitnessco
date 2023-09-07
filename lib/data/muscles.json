@@ -1,94 +1,53 @@
 {
-    "Abs": [
-      "Sit-ups",
-      "Pull-ups",
-      "Squats",
-      "Crunches",
-      "Russian Twists",
-      "Mountain Climbers"
-    ],
-    "Back": [
-      "Deadlifts",
-      "Pull-Ups",
-      "Bent-Over Row",
-      "T-Bar Row",
-      "Seated Row",
-      "Single-Arm Smith Machine Row",
-      "Lateral Pull-Down",
-      "Single-Arm Dumbell Row"
-    ],
-    "Biceps": [
-      "Close Grip Pull-Up",
-      "Dumbbell Curl",
-      "Pullups",
-      "Barbell Curls",
-      "Bar Cable Curls",
-      "EZ Bar Preacher Curls",
-      "Incline Dumbbell Curls",
-      "Reverse Barbell Curls",
-      "One Arm Dumbbell Preacher Curls",
-      "Seated Dumbbell Curls",
-      "Standing Biceps Cable Curl"
-    ],
-    "Calves": [
-      "Jump rope",
-      "Dumbbell jump squat",
-      "Calf Raises"
-    ],
-    "Chest": [
-      "Flat Barbell Bench Press",
-      "Inclined Dumbell Bench Press",
-      "Declined Dumbell Bench Press",
-      "Chest Pushups",
-      "Chest Dips",
-      "Resistance Band Pullover"
-    ],
-    "Forearms": [
-      "Palms-up Wrist Curl",
-      "Palms-down Wrist Curl",
-      "Grip Crush",
-      "Towel Cable Row",
-      "Behind-the-back cable curl",
-      "Pullups",
-      "Dead Hangs",
-      "Forearm Pulls",
-      "Plank with Shoulder Taps",
-      "Fingertip Pushups"
-    ],
-    "Hamstrings": [
-      "Squats",
-      "Deadlift",
-      "Prone Leg Curls",
-      "Romanian Deadlifts",
-      "Kettlebell Swings"
-    ],
-    "Shoulders": [
-      "Overhead Press",
-      "Dumbell Front Raise",
-      "Dumbbell Lateral Raise",
-      "Reverse Fly",
-      "Seated Military Press",
-      "Standing Dumbell Shoulder Press",
-      "One-arm Dumbell Push Press",
-      "Plank Dumbell Shoulder Raise",
-      "Shoulder Push-ups"
-    ],
-    "Trapezius": [
-      "Barbell Deadlifts",
-      "Shrugs",
-      "Rack Pulls",
-      "Upright Rows",
-      "Face Pulls"
-    ],
-    "Triceps": [
-      "Reverse Grip",
-      "Bench Dip",
-      "Dumbbell Triceps Extension",
-      "Tricep Pushups",
-      "Reverse Grip Triceps Pushdown",
-      "Skull Crashers",
-      "Tricep Rope Pushdown",
-      "Tricep Press Machine"
-    ]
-  }
-  
+  "Abs": [
+    "Sit-ups",
+    "Squats",
+    "Crunches",
+    "Russian Twists"
+
+  ],
+  "Back": [
+    "Deadlifts",
+    "Bent-Over Row",
+    "Lateral Pull-Down"
+  ],
+  "Biceps": [
+    "Dumbbell Curl",
+    "Barbell Curls",
+    "Seated Dumbbell Curls"
+  ],
+  "Calves": [
+    "Calf Raises"
+  ],
+  "Chest": [
+    "Flat Barbell Bench Press",
+    "Inclined Dumbell Bench Press",
+    "Chest Pushups"
+  ],
+  "Forearms": [
+    "Palms-up Wrist Curl",
+    "Palms-down Wrist Curl"
+
+  ],
+  "Hamstrings": [
+    "Squats",
+    "Deadlift",
+    "Kettlebell Swings"
+  ],
+  "Shoulders": [
+    "Overhead Press",
+    "Dumbell Front Raise",
+    "Dumbbell Lateral Raise"
+
+  ],
+  "Trapezius": [
+    "Shrugs",
+    "Upright Rows"
+  ],
+  "Triceps": [
+    "Dumbbell Triceps Extension",
+    "Tricep Pushups",
+    "Tricep Rope Pushdown"
+
+  ]
+}

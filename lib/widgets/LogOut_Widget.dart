@@ -3,7 +3,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-import '../screens/signin_screen.dart';
+import '../screens/sign_in_screen.dart';
 
 class LogOutWidget extends StatelessWidget {
   const LogOutWidget({

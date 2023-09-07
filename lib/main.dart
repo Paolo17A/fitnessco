@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fitnessco/screens/signin_screen.dart';
+import 'package:fitnessco/screens/sign_in_screen.dart';
 import 'package:flutter/material.dart';
 
 late List<CameraDescription> cameras;
