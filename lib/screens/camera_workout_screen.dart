@@ -8,6 +8,7 @@ import 'package:fitnessco/screens/clientHome_screen.dart';
 import 'package:flutter/services.dart';
 
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
+import '../utils/pose_detector_util.dart';
 import '../utils/pose_painter_util.dart';
 
 late List<CameraDescription> cameras;
@@ -231,15 +232,47 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     _isBusy = true;
     setState(() {
       switch (workouts[currentWorkoutIndex]) {
+        //  AB WORKOUTS
         case 'Sit-ups':
           _currentWorkoutInstruction = mayAddRep
-              ? 'Put your left hand above your nose'
-              : 'Put your left hand below your left hip';
+              ? 'Lie in the floor,  bend your knees so your feet are flat on the floor, to lift your back'
+              : 'Lower your back to the starting position';
           break;
         case 'Squats':
           _currentWorkoutInstruction = mayAddRep
-              ? 'Sit into a squat position until your knees are bent to a 90 degree angle'
+              ? 'Stand with your feet with hip-distance apart,  hips back and bend your knees'
               : 'Straighten your legs to return to a standing position';
+          break;
+        case 'Crunches':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Lie in the floor, bend your knees so your feet are flat on the floor, lift your chest '
+              : 'Lower your back to the starting position';
+          break;
+        case 'Russian Twists':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Sit on the floor with your knees bent and feet flat on the floor'
+              : 'Twist your torso to the right or to the left';
+          break;
+        // BICEP WORKOUTS
+        case 'Left Arm Dumbell Curl':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Pull your left wrist upward'
+              : 'Stretch out your left arm';
+          break;
+        case 'Right Arm Dumbell Curl':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Pull your right wrist upward'
+              : 'Stretch out your right arm';
+          break;
+        case 'Barbell Curl':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Lift the barbell towards your chest'
+              : 'Slowly lower the barbell as you stretch out your arms';
+          break;
+        case 'Lunges':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Step forward as you put one knee downward. Form a right angle with your knee'
+              : 'Slowly return to a standing position';
           break;
         default:
           _currentWorkoutInstruction = mayAddRep
@@ -265,11 +298,98 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     switch (workouts[currentWorkoutIndex]) {
       case 'Sit-ups':
         for (var pose in poses) {
-          if (mayAddRep && _isLeftHandAboveHead(pose)) {
-            // Handle the case where the left hand is above the head
+          if (mayAddRep && isFinishedSitUpPosition(pose)) {
             mayAddRep = false;
             _addRepToCurrentSet();
-          } else if (!mayAddRep && _isLeftHandBelowHip(pose)) {
+          } else if (!mayAddRep && isStartingSitUpPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Crunches':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishedCrunchPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingCrunchPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Squats':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishedSquatPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStandingPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Russian Twists':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishedRussianTwistPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingSitUpPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Left Arm Dumbell Curl':
+        for (var pose in poses) {
+          if (mayAddRep && (isFinishingLeftArmWristCurl(pose))) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && (isStartingLeftArmWristCurl(pose))) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Right Arm Dumbell Curl':
+        for (var pose in poses) {
+          if (mayAddRep && (isFinishingRightArmWristCurl(pose))) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && (isStartingRightArmWristCurl(pose))) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Barbell Curl':
+        for (var pose in poses) {
+          if (mayAddRep &&
+              (isFinishingRightArmWristCurl(pose) &&
+                  isFinishingLeftArmWristCurl(pose))) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep &&
+              (isStartingRightArmWristCurl(pose) &&
+                  isStartingLeftArmWristCurl(pose))) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Lunges':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingLungePosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingLungePosition(pose)) {
             setState(() {
               mayAddRep = true;
             });
@@ -278,11 +398,11 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
         break;
       default:
         for (var pose in poses) {
-          if (mayAddRep && _isLeftHandAboveHead(pose)) {
+          if (mayAddRep && isLeftHandAboveHead(pose)) {
             // Handle the case where the left hand is above the head
             mayAddRep = false;
             _addRepToCurrentSet();
-          } else if (!mayAddRep && _isLeftHandBelowHip(pose)) {
+          } else if (!mayAddRep && isLeftHandBelowHip(pose)) {
             setState(() {
               mayAddRep = true;
             });
@@ -297,56 +417,6 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     }
   }
 
-  bool _isLeftHandAboveHead(Pose pose) {
-    // Assuming landmarks are stored in PoseLandmarkType enum
-    PoseLandmark? leftHand = pose.landmarks[PoseLandmarkType.leftWrist];
-    PoseLandmark? head = pose.landmarks[PoseLandmarkType.nose];
-
-    if (leftHand != null && head != null) {
-      double leftHandToHeadDistance = leftHand.y - head.y;
-
-      // Define a threshold distance to determine if the hand is above the head
-      double aboveHeadThreshold = -0.1; // Adjust this value as needed
-
-      return leftHandToHeadDistance < aboveHeadThreshold;
-    }
-
-    return false;
-  }
-
-  bool isRightHandAboveHead(Pose pose) {
-    // Assuming landmarks are stored in PoseLandmarkType enum
-    PoseLandmark? rightHand = pose.landmarks[PoseLandmarkType.rightWrist];
-    PoseLandmark? head = pose.landmarks[PoseLandmarkType.nose];
-
-    if (rightHand != null && head != null) {
-      double rightHandToHeadDistance = rightHand.y - head.y;
-
-      // Define a threshold distance to determine if the hand is above the head
-      double aboveHeadThreshold = -0.1; // Adjust this value as needed
-
-      return rightHandToHeadDistance < aboveHeadThreshold;
-    }
-
-    return false;
-  }
-
-  bool _isLeftHandBelowHip(Pose pose) {
-    // Assuming landmarks are stored in PoseLandmarkType enum
-    PoseLandmark? leftHand = pose.landmarks[PoseLandmarkType.leftWrist];
-    PoseLandmark? hip = pose.landmarks[PoseLandmarkType.leftHip];
-
-    if (leftHand != null && hip != null) {
-      double leftHandToHipDistance = leftHand.y - hip.y;
-
-      // Define a threshold distance to determine if the hand is below the hip
-      double belowHipThreshold = 0.1; // Adjust this value as needed
-
-      return leftHandToHipDistance > belowHipThreshold;
-    }
-
-    return false;
-  }
   //===============================================================================================
 
   //WORKOUT RELATED FUNCTIONS
@@ -517,20 +587,22 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                   TextButton(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      currentMuscleGroupIndex++;
-                      currentWorkoutIndex = 0;
-                      _currentRep = 0;
-                      _currentSet = 0;
-                      if (currentMuscleGroupIndex == muscleGroups.length) {
-                        _addWorkoutToFirebase();
-                      } else {
-                        workouts = (prescribedWorkouts[
-                                    muscleGroups[currentMuscleGroupIndex]]
-                                as Map<String, dynamic>)
-                            .keys
-                            .toList();
-                        _resetWorkoutVariables();
-                      }
+                      setState(() {
+                        currentMuscleGroupIndex++;
+                        currentWorkoutIndex = 0;
+                        _currentRep = 0;
+                        _currentSet = 0;
+                        if (currentMuscleGroupIndex == muscleGroups.length) {
+                          _addWorkoutToFirebase();
+                        } else {
+                          workouts = (prescribedWorkouts[
+                                      muscleGroups[currentMuscleGroupIndex]]
+                                  as Map<String, dynamic>)
+                              .keys
+                              .toList();
+                          _resetWorkoutVariables();
+                        }
+                      });
                     },
                     child: const Text('Skip'),
                   ),
@@ -676,7 +748,10 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                                     onPressed: _skipWorkout,
                                     child: const Text('Skip Workout')),
                                 FloatingActionButton(
-                                  onPressed: _addRepToCurrentSet,
+                                  onPressed: () {
+                                    mayAddRep = true;
+                                    _addRepToCurrentSet();
+                                  },
                                   child: const Icon(Icons.add),
                                 ),
                                 ElevatedButton(

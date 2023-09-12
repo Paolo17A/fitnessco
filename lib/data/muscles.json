@@ -2,9 +2,7 @@
   "Abs": [
     "Sit-ups",
     "Squats",
-    "Crunches",
-    "Russian Twists"
-
+    "Crunches"
   ],
   "Back": [
     "Deadlifts",
@@ -12,24 +10,19 @@
     "Lateral Pull-Down"
   ],
   "Biceps": [
-    "Dumbbell Curl",
-    "Barbell Curls",
-    "Seated Dumbbell Curls"
+    "Left Arm Dumbbell Curl",
+    "Right Arm Dumbbell Curl",
+    "Barbell Curl"
   ],
   "Calves": [
-    "Calf Raises"
+    "Lunges"
   ],
   "Chest": [
     "Flat Barbell Bench Press",
     "Inclined Dumbell Bench Press",
     "Chest Pushups"
   ],
-  "Forearms": [
-    "Palms-up Wrist Curl",
-    "Palms-down Wrist Curl"
-
-  ],
-  "Hamstrings": [
+  "Legs": [
     "Squats",
     "Deadlift",
     "Kettlebell Swings"
@@ -37,17 +30,12 @@
   "Shoulders": [
     "Overhead Press",
     "Dumbell Front Raise",
-    "Dumbbell Lateral Raise"
-
-  ],
-  "Trapezius": [
-    "Shrugs",
+    "Dumbbell Lateral Raise",
     "Upright Rows"
   ],
   "Triceps": [
     "Dumbbell Triceps Extension",
     "Tricep Pushups",
     "Tricep Rope Pushdown"
-
   ]
 }
