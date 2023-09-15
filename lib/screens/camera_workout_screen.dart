@@ -227,8 +227,20 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   //  POSE ESTIMATION FUNCTIONS
   //===============================================================================================
   Future<void> _processImage(InputImage inputImage) async {
-    if (!_canProcess) return;
-    if (_isBusy) return;
+    if (!_canProcess) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'An error occured while initializing pose estimation. Please try again.')));
+      Navigator.of(context).pop();
+      return;
+    }
+    if (_isBusy) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text(
+              'An error occured while initializing pose estimation. Please try again.')));
+      Navigator.of(context).pop();
+      return;
+    }
     _isBusy = true;
     setState(() {
       switch (workouts[currentWorkoutIndex]) {
