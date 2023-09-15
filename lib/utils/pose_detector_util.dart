@@ -317,6 +317,252 @@ bool isFinishedSquatPosition(Pose pose) {
   return isBentHipAngle && isBentKneeAngle;
 }
 
+bool isStartingDeadliftPosition(Pose pose) {
+  // Assuming landmarks are stored in PoseLandmarkType enum
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftHeel = pose.landmarks[PoseLandmarkType.leftHeel];
+  PoseLandmark? rightHeel = pose.landmarks[PoseLandmarkType.rightHeel];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftHeel == null ||
+      rightHeel == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  // Check the vertical order of joints from top to bottom
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  bool isBentHipAngle = leftHipAngle < 130 && rightHipAngle < 130;
+
+  double leftKneeAngle = getAngle(leftHip, leftKnee, leftHeel);
+  double rightKneeAngle = getAngle(rightHip, rightKnee, rightHeel);
+  bool isBentKneeAngle = leftKneeAngle < 130 && rightKneeAngle < 130;
+
+  bool handsBelowKnees = leftKnee.y < leftWrist.y && rightKnee.y < rightWrist.y;
+
+  // Check if the angle is within the upright angle threshold
+  return isBentKneeAngle && isBentHipAngle && handsBelowKnees;
+}
+
+bool isFinishedDeadliftPosition(Pose pose) {
+  // Assuming landmarks are stored in PoseLandmarkType enum
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftHeel = pose.landmarks[PoseLandmarkType.leftHeel];
+  PoseLandmark? rightHeel = pose.landmarks[PoseLandmarkType.rightHeel];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftHeel == null ||
+      rightHeel == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  // Check the vertical order of joints from top to bottom
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  bool isStraightHipAngle = leftHipAngle > 150 && rightHipAngle > 150;
+
+  double leftKneeAngle = getAngle(leftHip, leftKnee, leftHeel);
+  double rightKneeAngle = getAngle(rightHip, rightKnee, rightHeel);
+  bool isStraightKneeAngle = leftKneeAngle > 150 && rightKneeAngle > 150;
+
+  bool handsAboveKnees = leftKnee.y > leftWrist.y && rightKnee.y > rightWrist.y;
+
+  // Check if the angle is within the upright angle threshold
+  return isStraightKneeAngle && isStraightHipAngle && handsAboveKnees;
+}
+
+bool isStartingBentRowPosition(Pose pose) {
+  // Assuming landmarks are stored in PoseLandmarkType enum
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftElbow == null ||
+      rightElbow == null) {
+    return false;
+  }
+
+  // Check the vertical order of joints from top to bottom
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  bool isBentHipAngle = leftHipAngle < 160 && rightHipAngle < 160;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  bool isStraightElbow = leftElbowAngle > 130 && rightElbowAngle > 130;
+
+  // Check if the angle is within the upright angle threshold
+  return isBentHipAngle && isStraightElbow;
+}
+
+bool isFinishedBentRowPosition(Pose pose) {
+  // Assuming landmarks are stored in PoseLandmarkType enum
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftElbow == null ||
+      rightElbow == null) {
+    return false;
+  }
+
+  // Check the vertical order of joints from top to bottom
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  bool isBentHipAngle = leftHipAngle < 160 && rightHipAngle < 160;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  bool isBentElbow = leftElbowAngle < 100 && rightElbowAngle < 100;
+
+  // Check if the angle is within the upright angle threshold
+  return isBentHipAngle && isBentElbow;
+}
+
+bool isStartingKettlebellPosition(Pose pose) {
+  // Assuming landmarks are stored in PoseLandmarkType enum
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftElbow == null ||
+      rightElbow == null) {
+    return false;
+  }
+
+  // Check the vertical order of joints from top to bottom
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  bool isBentHipAngle = leftHipAngle < 120 && rightHipAngle < 120;
+
+  double leftShoulderAngle = getAngle(leftElbow, leftShoulder, leftHip);
+  double rightShoulderAngle = getAngle(rightElbow, rightShoulder, rightHip);
+  bool armsAreDown = leftShoulderAngle < 40 && rightShoulderAngle < 40;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  bool isStraightElbow = leftElbowAngle > 150 && rightElbowAngle > 150;
+
+  // Check if the angle is within the upright angle threshold
+  return isBentHipAngle && armsAreDown && isStraightElbow;
+}
+
+bool isFinishedKettlebellPosition(Pose pose) {
+  // Assuming landmarks are stored in PoseLandmarkType enum
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftElbow == null ||
+      rightElbow == null) {
+    return false;
+  }
+
+  // Check the vertical order of joints from top to bottom
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  bool isStraightHipAngle = leftHipAngle > 150 && rightHipAngle > 150;
+
+  double leftShoulderAngle = getAngle(leftElbow, leftShoulder, leftHip);
+  double rightShoulderAngle = getAngle(rightElbow, rightShoulder, rightHip);
+  bool armsAreUp = leftShoulderAngle > 70 && rightShoulderAngle > 70;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  bool isStraightElbow = leftElbowAngle > 150 && rightElbowAngle > 150;
+
+  // Check if the angle is within the upright angle threshold
+  return isStraightHipAngle && armsAreUp && isStraightElbow;
+}
+
 bool isStartingLeftArmWristCurl(Pose pose) {
   PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
   PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
@@ -371,6 +617,303 @@ bool isFinishingRightArmWristCurl(Pose pose) {
   bool isFolded = elbowAngle < 55;
 
   return isFolded;
+}
+
+bool isStartingFlatBarbellPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftHeel = pose.landmarks[PoseLandmarkType.leftHeel];
+  PoseLandmark? rightHeel = pose.landmarks[PoseLandmarkType.rightHeel];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftHeel == null ||
+      rightHeel == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  double minHipAngle = 170;
+  bool hipsAreStraight =
+      leftHipAngle > minHipAngle && rightHipAngle > minHipAngle;
+
+  double leftKneeAngle = getAngle(leftHip, leftKnee, leftHeel);
+  double rightKneeAngle = getAngle(rightHip, rightKnee, rightHeel);
+  double minKneeAngle = 70;
+  double maxKneeAngle = 120;
+  bool kneesAreBent = leftKneeAngle > minKneeAngle &&
+      rightKneeAngle > minKneeAngle &&
+      leftKneeAngle < maxKneeAngle &&
+      rightKneeAngle < maxKneeAngle;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double elbowBentLimit = 100;
+  bool elbowsAreBent =
+      leftElbowAngle < elbowBentLimit && rightElbowAngle < elbowBentLimit;
+
+  return hipsAreStraight && kneesAreBent && elbowsAreBent;
+}
+
+bool isFinishingFlatBarbellPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftHeel = pose.landmarks[PoseLandmarkType.leftHeel];
+  PoseLandmark? rightHeel = pose.landmarks[PoseLandmarkType.rightHeel];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftHeel == null ||
+      rightHeel == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  double minHipAngle = 170;
+  bool hipsAreStraight =
+      leftHipAngle > minHipAngle && rightHipAngle > minHipAngle;
+
+  double leftKneeAngle = getAngle(leftHip, leftKnee, leftHeel);
+  double rightKneeAngle = getAngle(rightHip, rightKnee, rightHeel);
+  double minKneeAngle = 70;
+  double maxKneeAngle = 120;
+  bool kneesAreBent = leftKneeAngle > minKneeAngle &&
+      rightKneeAngle > minKneeAngle &&
+      leftKneeAngle < maxKneeAngle &&
+      rightKneeAngle < maxKneeAngle;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double elbowStraightThreshold = 160;
+  bool elbowsAreStraight = leftElbowAngle > elbowStraightThreshold &&
+      rightElbowAngle > elbowStraightThreshold;
+
+  return hipsAreStraight && kneesAreBent && elbowsAreStraight;
+}
+
+bool isStartingInclinedDumbellPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftHeel = pose.landmarks[PoseLandmarkType.leftHeel];
+  PoseLandmark? rightHeel = pose.landmarks[PoseLandmarkType.rightHeel];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftHeel == null ||
+      rightHeel == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  double minHipAngle = 120;
+  bool isInclinedHips =
+      leftHipAngle > minHipAngle && rightHipAngle > minHipAngle;
+
+  double leftKneeAngle = getAngle(leftHip, leftKnee, leftHeel);
+  double rightKneeAngle = getAngle(rightHip, rightKnee, rightHeel);
+  double minKneeAngle = 70;
+  double maxKneeAngle = 120;
+  bool kneesAreBent = leftKneeAngle > minKneeAngle &&
+      rightKneeAngle > minKneeAngle &&
+      leftKneeAngle < maxKneeAngle &&
+      rightKneeAngle < maxKneeAngle;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double elbowBentLimit = 100;
+  bool elbowsAreBent =
+      leftElbowAngle < elbowBentLimit && rightElbowAngle < elbowBentLimit;
+
+  return isInclinedHips && kneesAreBent && elbowsAreBent;
+}
+
+bool isFinishingInclinedDumbellPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftHeel = pose.landmarks[PoseLandmarkType.leftHeel];
+  PoseLandmark? rightHeel = pose.landmarks[PoseLandmarkType.rightHeel];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftHeel == null ||
+      rightHeel == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  double minHipAngle = 110;
+  double maxHipAngle = 160;
+  bool isInclinedHips = leftHipAngle > minHipAngle &&
+      rightHipAngle > minHipAngle &&
+      leftHipAngle < maxHipAngle &&
+      rightHipAngle < maxHipAngle;
+
+  double leftKneeAngle = getAngle(leftHip, leftKnee, leftHeel);
+  double rightKneeAngle = getAngle(rightHip, rightKnee, rightHeel);
+  double minKneeAngle = 70;
+  double maxKneeAngle = 120;
+  bool kneesAreBent = leftKneeAngle > minKneeAngle &&
+      rightKneeAngle > minKneeAngle &&
+      leftKneeAngle < maxKneeAngle &&
+      rightKneeAngle < maxKneeAngle;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double elbowStraightThreshold = 160;
+  bool elbowsAreStraight = leftElbowAngle > elbowStraightThreshold &&
+      rightElbowAngle > elbowStraightThreshold;
+
+  return isInclinedHips && kneesAreBent && elbowsAreStraight;
+}
+
+bool isStartingPushUpPosition(Pose pose) {
+  // Define relevant pose landmarks
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+
+  // Check if any required landmarks are missing
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  // Calculate angles and define criteria for starting a push-up
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  double straightHipThreshold = 160;
+  bool hipsAreStraight = leftHipAngle > straightHipThreshold &&
+      rightHipAngle > straightHipThreshold;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double elbowBentLimit = 60;
+  bool elbowsAreBent =
+      leftElbowAngle < elbowBentLimit && rightElbowAngle < elbowBentLimit;
+
+  return hipsAreStraight && elbowsAreBent;
+}
+
+bool isFinishingPushUpPosition(Pose pose) {
+  // Define relevant pose landmarks
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  PoseLandmark? leftKnee = pose.landmarks[PoseLandmarkType.leftKnee];
+  PoseLandmark? rightKnee = pose.landmarks[PoseLandmarkType.rightKnee];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+
+  // Check if any required landmarks are missing
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftHip == null ||
+      rightHip == null ||
+      leftKnee == null ||
+      rightKnee == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  // Calculate angles and define criteria for starting a push-up
+  double leftHipAngle = getAngle(leftShoulder, leftHip, leftKnee);
+  double rightHipAngle = getAngle(rightShoulder, rightHip, rightKnee);
+  double straightHipThreshold = 160;
+  bool hipsAreStraight = leftHipAngle > straightHipThreshold &&
+      rightHipAngle > straightHipThreshold;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double elbowBentLimit = 160;
+  bool elbowsAreStraight =
+      leftElbowAngle > elbowBentLimit && rightElbowAngle > elbowBentLimit;
+
+  return hipsAreStraight && elbowsAreStraight;
 }
 
 bool isStartingLungePosition(Pose pose) {

@@ -269,15 +269,48 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
               ? 'Lift the barbell towards your chest'
               : 'Slowly lower the barbell as you stretch out your arms';
           break;
+        //  BACK WORKOUTS
+        case 'Deadlifts':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Slowly stand up as you lift the barbell upwards'
+              : 'Bend your knees and hips slowly as you lower the barbell back to the floor';
+          break;
+        case 'Bent-Over Row':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Bend forward and pull your arms back and bend your elbows as you lift the barbell'
+              : 'Outstretch your arms as lower the barbell back to the floor';
+          break;
+        //  LEG WORKOUTS
         case 'Lunges':
           _currentWorkoutInstruction = mayAddRep
               ? 'Step forward as you put one knee downward. Form a right angle with your knee'
               : 'Slowly return to a standing position';
           break;
+        case 'Kettlebell Swings':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Swing the kettlbell upwards as you stand up straight'
+              : 'Bring the kettlebell back down as you bend forward';
+          break;
+        //  CHEST WORKOUTS
+        case 'Flat Barbell Bench Press':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Push the barbell upwards while lying flat on your back'
+              : 'Slowly bring the barbell back down to chest level';
+          break;
+        case 'Inclined Dumbell Bench Press':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Push the dumbells upwards while lying inclined on your back'
+              : 'Slowly bring the barbell back down to chest level';
+          break;
+        case 'Chest Pushups':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Begin in a plank position with your hands placed slightly wider than shoulder-width apart and push yourself upwards.'
+              : 'Lower your chest towards the ground by bending your elbows, and maintaining your straight plank position';
+          break;
         default:
           _currentWorkoutInstruction = mayAddRep
-              ? 'Put your left hand above your nose'
-              : 'Put your left hand below your left hip';
+              ? 'Put your left hand above your nose (This workout has not been implemented yet)'
+              : 'Put your left hand below your left hip (This workout has not been implemented yet)';
           break;
       }
     });
@@ -384,12 +417,84 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           }
         }
         break;
+      case 'Bent-Over Row':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishedBentRowPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingBentRowPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Deadlifts':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishedDeadliftPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingDeadliftPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
       case 'Lunges':
         for (var pose in poses) {
           if (mayAddRep && isFinishingLungePosition(pose)) {
             mayAddRep = false;
             _addRepToCurrentSet();
           } else if (!mayAddRep && isStartingLungePosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Kettlebell Swings':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishedKettlebellPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingKettlebellPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Flat Barbell Bench Press':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingFlatBarbellPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingFlatBarbellPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Inclined Dumbell Bench Press':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingInclinedDumbellPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingInclinedDumbellPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Chest Pushups':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingPushUpPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingPushUpPosition(pose)) {
             setState(() {
               mayAddRep = true;
             });
@@ -704,6 +809,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                     child: Center(
                         child: Text(
                       _currentWorkoutInstruction,
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,

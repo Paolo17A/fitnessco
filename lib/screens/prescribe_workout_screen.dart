@@ -246,7 +246,8 @@ class _PrescribeWorkoutScreenState extends State<PrescribeWorkoutScreen> {
             textAlign: TextAlign.center,
             controller: controller,
             keyboardType: TextInputType.number,
-            style: const TextStyle(fontWeight: FontWeight.bold),
+            style: const TextStyle(
+                fontWeight: FontWeight.bold, color: Colors.white),
           ),
         ),
       ),

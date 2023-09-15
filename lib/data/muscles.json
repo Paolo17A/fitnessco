@@ -6,16 +6,12 @@
   ],
   "Back": [
     "Deadlifts",
-    "Bent-Over Row",
-    "Lateral Pull-Down"
+    "Bent-Over Row"
   ],
   "Biceps": [
     "Left Arm Dumbbell Curl",
     "Right Arm Dumbbell Curl",
     "Barbell Curl"
-  ],
-  "Calves": [
-    "Lunges"
   ],
   "Chest": [
     "Flat Barbell Bench Press",
@@ -25,7 +21,8 @@
   "Legs": [
     "Squats",
     "Deadlift",
-    "Kettlebell Swings"
+    "Kettlebell Swings",
+    "Lunges"
   ],
   "Shoulders": [
     "Overhead Press",
