@@ -393,7 +393,7 @@ class _CameraViewState extends State<CameraView> {
     final plane = image.planes.first;
 
     // compose InputImage using bytes
-    /*InputImage.fromBytes(
+    return InputImage.fromBytes(
       bytes: plane.bytes,
       metadata: InputImageMetadata(
         size: Size(image.width.toDouble(), image.height.toDouble()),
@@ -401,9 +401,9 @@ class _CameraViewState extends State<CameraView> {
         format: format, // used only in iOS
         bytesPerRow: plane.bytesPerRow, // used only in iOS
       ),
-    );*/
+    );
 
-    return InputImage.fromBytes(
+    /*return InputImage.fromBytes(
         bytes: plane.bytes,
         inputImageData: InputImageData(
             size: Size(image.width.toDouble(), image.height.toDouble()),
@@ -411,6 +411,6 @@ class _CameraViewState extends State<CameraView> {
             inputImageFormat: format,
             planeData: [
               InputImagePlaneMetadata(bytesPerRow: plane.bytesPerRow)
-            ]));
+            ]));*/
   }
 }

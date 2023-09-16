@@ -211,8 +211,17 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     if (image.planes.length != 1) return null;
     final plane = image.planes.first;
 
-    // compose InputImage using bytes
     return InputImage.fromBytes(
+      bytes: plane.bytes,
+      metadata: InputImageMetadata(
+        size: Size(image.width.toDouble(), image.height.toDouble()),
+        rotation: rotation, // used only in Android
+        format: format, // used only in iOS
+        bytesPerRow: plane.bytesPerRow, // used only in iOS
+      ),
+    );
+    // compose InputImage using bytes
+    /*return InputImage.fromBytes(
         bytes: plane.bytes,
         inputImageData: InputImageData(
             size: Size(image.width.toDouble(), image.height.toDouble()),
@@ -220,7 +229,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
             inputImageFormat: format,
             planeData: [
               InputImagePlaneMetadata(bytesPerRow: plane.bytesPerRow)
-            ]));
+            ]));*/
   }
   //===============================================================================================
 
@@ -228,17 +237,16 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   //===============================================================================================
   Future<void> _processImage(InputImage inputImage) async {
     if (!_canProcess) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'An error occured while initializing pose estimation. Please try again.')));
-      Navigator.of(context).pop();
+      setState(() {
+        _currentWorkoutInstruction = 'Cannot process image. Please try again.';
+      });
+      //Navigator.of(context).pop();
       return;
     }
     if (_isBusy) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text(
-              'An error occured while initializing pose estimation. Please try again.')));
-      Navigator.of(context).pop();
+      /*_currentWorkoutInstruction =
+          'Camera is currently busy. Please try again.';*/
+      //Navigator.of(context).pop();
       return;
     }
     _isBusy = true;
@@ -326,16 +334,15 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           break;
       }
     });
-    final poses = await _poseDetector.processImage(inputImage);
+    List<Pose> poses = await _poseDetector.processImage(inputImage);
 
-    if (inputImage.inputImageData == null) {
+    if (inputImage.metadata == null) {
       _customPaint = null;
-      return;
     }
     final painter = PosePainter(
       poses,
-      inputImage.inputImageData!.size,
-      inputImage.inputImageData!.imageRotation,
+      inputImage.metadata!.size,
+      inputImage.metadata!.rotation,
       _cameraLensDirection,
     );
     _customPaint = CustomPaint(painter: painter);

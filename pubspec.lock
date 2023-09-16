@@ -332,18 +332,18 @@ packages:
     dependency: "direct main"
     description:
       name: google_mlkit_commons
-      sha256: af63771903947d5523d9e991a939a4b8bf994f11661c9b9c8a71d7d3997115f8
+      sha256: "42173a8ba89f386486cc5b8249e84da4a4b861daa70498373627d985eb418689"
       url: "https://pub.dev"
     source: hosted
-    version: "0.2.0"
+    version: "0.5.0"
   google_mlkit_pose_detection:
     dependency: "direct main"
     description:
       name: google_mlkit_pose_detection
-      sha256: "210caa11fda658387fdb6398d691a7cc8eaa5f0f9616a3deca321ef58db876f3"
+      sha256: "08759fc095751cf84f6758f276212881388e04210c64087341e260f9f233316e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.9.0"
   http:
     dependency: transitive
     description:
