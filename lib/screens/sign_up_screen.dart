@@ -69,7 +69,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'bmiHistory': [],
         'workoutHistory': [],
         'gymHistory': [],
-        'appointment': {}
+        'appointment': {},
+        'paymentInterval': 'DAILY'
       });
 
       // Send email confirmation link to user

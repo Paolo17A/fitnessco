@@ -93,7 +93,14 @@ class _SignInScreenState extends State<SignInScreen> {
         await FirebaseFirestore.instance.collection('users').doc(uid).get();
     final userData = docSnapshot.data();
 
-    if (userData!['membershipStatus'] == 'UNPAID') {
+    if (!userData!.containsKey('paymentInterval')) {
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .update({'paymentInterval': 'DAILY'});
+    }
+
+    if (userData['membershipStatus'] == 'UNPAID') {
       _emailTextController.clear();
       _passwordTextController.clear();
       FirebaseAuth.instance.signOut();

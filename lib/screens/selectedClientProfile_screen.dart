@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/widgets/MembershipStatusDropdown_widget.dart';
 import 'package:fitnessco/widgets/gym_history_entry_widget.dart';
+import 'package:fitnessco/widgets/payment_interval_dropdown_widget.dart';
 import 'package:flutter/material.dart';
 
 class SelectedClientProfile extends StatefulWidget {
@@ -16,6 +17,7 @@ class SelectedClientProfile extends StatefulWidget {
 
 class _SelectedClientProfileState extends State<SelectedClientProfile> {
   String _selectedMembershipStatus = 'UNPAID';
+  String _selectedPaymentInterval = 'DAILY';
   bool _currentlyUsingGym = false;
   List<dynamic> gymHistory = [];
   String _profileImageURL = '';
@@ -26,7 +28,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
     _fetchUserData();
   }
 
-  Future<void> _fetchUserData() async {
+  void _fetchUserData() async {
     final docSnapshot = await FirebaseFirestore.instance
         .collection('users')
         .doc(widget.uid)
@@ -38,6 +40,16 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
           _selectedMembershipStatus = 'UNPAID';
         } else {
           _selectedMembershipStatus = userData['membershipStatus'] as String;
+        }
+
+        if (!userData.containsKey('paymentInterval')) {
+          FirebaseFirestore.instance
+              .collection('users')
+              .doc(widget.uid)
+              .update({'paymentInterval': 'DAILY'});
+          _selectedPaymentInterval = 'DAILY';
+        } else {
+          _selectedPaymentInterval = userData['paymentInterval'] as String;
         }
 
         gymHistory = userData['gymHistory'];
@@ -58,7 +70,10 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       await FirebaseFirestore.instance
           .collection('users')
           .doc(widget.uid)
-          .update({'membershipStatus': _selectedMembershipStatus});
+          .update({
+        'membershipStatus': _selectedMembershipStatus,
+        'paymentInterval': _selectedPaymentInterval
+      });
 
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Client Profile Saved Successfully"),
@@ -154,140 +169,131 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
         FirebaseFirestore.instance.collection('users');
 
     return Scaffold(
-      appBar: AppBar(
-        title: FutureBuilder<DocumentSnapshot>(
-          future: trainers.doc(widget.uid).get(),
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (snapshot.connectionState == ConnectionState.done) {
-              if (snapshot.hasData) {
-                var trainerData = snapshot.data!.data() as Map<String, dynamic>;
-                return Text(
-                    '${trainerData['firstName']} ${trainerData['lastName']}');
-              } else if (snapshot.hasError) {
-                return Text('Error: ${snapshot.error}');
+        appBar: AppBar(
+          title: FutureBuilder<DocumentSnapshot>(
+            future: trainers.doc(widget.uid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  var trainerData =
+                      snapshot.data!.data() as Map<String, dynamic>;
+                  return Text(
+                      '${trainerData['firstName']} ${trainerData['lastName']}');
+                } else if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
               }
-            }
-            return const SizedBox.shrink();
-          },
+              return const SizedBox.shrink();
+            },
+          ),
         ),
-      ),
-      body: FutureBuilder<DocumentSnapshot>(
-        future: trainers.doc(widget.uid).get(),
-        builder:
-            (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-          if (snapshot.connectionState == ConnectionState.done) {
-            if (snapshot.hasData) {
-              var trainerData = snapshot.data!.data() as Map<String, dynamic>;
-              return Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Container(
-                    color: Colors.purpleAccent.withOpacity(0.1),
-                    child: Padding(
-                      padding: EdgeInsets.all(
-                          MediaQuery.of(context).size.width * 0.04),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
-                        children: [
-                          _buildProfileImage(),
-                          Column(
-                            children: [
-                              const SizedBox(height: 15),
-                              Text(
-                                '${trainerData['firstName']} ${trainerData['lastName']}',
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              Text(
-                                "Membership Status: $_selectedMembershipStatus",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                              const SizedBox(height: 20),
-                            ],
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  MembershipStatusDropdown(
-                    selectedMembershipStatus: _selectedMembershipStatus,
-                    onChanged: (String? newValue) {
-                      _selectedMembershipStatus = newValue!;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _saveMembershipStatus,
-                    child: const Text(
-                      'SAVE',
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10),
-                    child: Container(
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                            color: Colors.deepPurple.withOpacity(0.5),
-                            borderRadius: BorderRadius.circular(10)),
-                        child: Column(
-                          children: [
-                            const Padding(
-                              padding: EdgeInsets.all(8.0),
-                              child: Text('Gym Usage History',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold)),
-                            ),
-                            ElevatedButton(
-                                onPressed: () {
-                                  _currentlyUsingGym
-                                      ? _timeOutClient()
-                                      : _timeInClient();
-                                },
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Colors.deepPurple.withOpacity(0.6)),
-                                child: Text(
-                                  _currentlyUsingGym ? 'TIME OUT' : 'TIME IN',
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold),
-                                )),
-                            ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: gymHistory.length,
-                                itemBuilder: (context, index) {
-                                  return gymHistoryEntryWidget(
-                                      gymHistory[index]['timeIn'],
-                                      gymHistory[index]['timeOut']);
-                                })
-                          ],
-                        )),
-                  )
-                ],
-              );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            }
-          }
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        },
-      ),
-    );
+        body: FutureBuilder<DocumentSnapshot>(
+            future: trainers.doc(widget.uid).get(),
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  var trainerData =
+                      snapshot.data!.data() as Map<String, dynamic>;
+                  return Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        Container(
+                            color: Colors.purpleAccent.withOpacity(0.1),
+                            child: Padding(
+                                padding: EdgeInsets.all(
+                                    MediaQuery.of(context).size.width * 0.04),
+                                child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildProfileImage(),
+                                      Column(children: [
+                                        const SizedBox(height: 15),
+                                        Text(
+                                            '${trainerData['firstName']} ${trainerData['lastName']}',
+                                            style: const TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold)),
+                                        const SizedBox(height: 15),
+                                        Text(
+                                            "Membership Status: $_selectedMembershipStatus",
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey)),
+                                        const SizedBox(height: 20)
+                                      ])
+                                    ]))),
+                        const SizedBox(height: 20),
+                        MembershipStatusDropdown(
+                            selectedMembershipStatus: _selectedMembershipStatus,
+                            onChanged: (String? newValue) {
+                              _selectedMembershipStatus = newValue!;
+                            }),
+                        const SizedBox(height: 20),
+                        PaymentIntervalDropdownWidget(
+                            selectedPaymentInterval: _selectedPaymentInterval,
+                            onChanged: (String? newValue) {
+                              _selectedPaymentInterval = newValue!;
+                            }),
+                        ElevatedButton(
+                            onPressed: _saveMembershipStatus,
+                            child: const Text(
+                              'SAVE',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            )),
+                        Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Container(
+                                width: double.infinity,
+                                decoration: BoxDecoration(
+                                    color: Colors.deepPurple.withOpacity(0.5),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Column(children: [
+                                  const Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: Text('Gym Usage History',
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold)),
+                                  ),
+                                  ElevatedButton(
+                                      onPressed: () {
+                                        _currentlyUsingGym
+                                            ? _timeOutClient()
+                                            : _timeInClient();
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.deepPurple
+                                              .withOpacity(0.6)),
+                                      child: Text(
+                                        _currentlyUsingGym
+                                            ? 'TIME OUT'
+                                            : 'TIME IN',
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      )),
+                                  ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: gymHistory.length,
+                                      itemBuilder: (context, index) {
+                                        return gymHistoryEntryWidget(
+                                            gymHistory[index]['timeIn'],
+                                            gymHistory[index]['timeOut']);
+                                      })
+                                ])))
+                      ]);
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text('Error: ${snapshot.error}'),
+                  );
+                }
+              }
+              return const Center(child: CircularProgressIndicator());
+            }));
   }
 }

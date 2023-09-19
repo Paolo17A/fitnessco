@@ -25,45 +25,37 @@ class UserOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      color: Colors.purpleAccent.withOpacity(0.3),
-      child: ListTile(
-        leading: profileImageurL.isEmpty
-            ? CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.purple,
-                child: Icon(
-                  Icons.person,
-                  color: Colors.white,
-                ),
-              )
-            : CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.purple,
-                backgroundImage: NetworkImage(profileImageurL)),
-        title: Text("$firstName $lastName"),
-        trailing: ElevatedButton(
-          child: const Text("View Profile"),
-          onPressed: () {
-            if (accountType == "TRAINER") {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SelectedTrainerProfile(
-                          uid: uid,
-                          isBeingViewedByAdmin: isBeingViewedByAdmin,
-                        )),
-              );
-            } else if (accountType == "CLIENT") {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                    builder: (context) => SelectedClientProfile(uid: uid)),
-              );
-            }
-            // Navigate to user profile screen
-          },
-        ),
-      ),
-    );
+        color: Colors.purpleAccent.withOpacity(0.3),
+        child: ListTile(
+            leading: profileImageurL.isEmpty
+                ? CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.purple,
+                    child: Icon(Icons.person, color: Colors.white))
+                : CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.purple,
+                    backgroundImage: NetworkImage(profileImageurL)),
+            title: Text("$firstName $lastName"),
+            trailing: ElevatedButton(
+                child: const Text("View Profile"),
+                onPressed: () {
+                  if (accountType == "TRAINER") {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => SelectedTrainerProfile(
+                                uid: uid,
+                                isBeingViewedByAdmin: isBeingViewedByAdmin)));
+                  } else if (accountType == "CLIENT") {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) =>
+                              SelectedClientProfile(uid: uid)),
+                    );
+                  }
+                  // Navigate to user profile screen
+                })));
   }
 }
