@@ -32,7 +32,7 @@ class _MembershipStatusDropdownState
       child: Row(
         children: [
           const Text(
-            'Payment Interval:',
+            'Payment Plan:',
             style: TextStyle(
               fontWeight: FontWeight.bold,
             ),

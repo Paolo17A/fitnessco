@@ -7,6 +7,7 @@ import 'package:fitnessco/screens/camera_workout_screen.dart';
 import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/screens/edit_client_profile_screen.dart';
 import 'package:fitnessco/screens/workout_history_screen.dart';
+import 'package:fitnessco/utils/gym_rates_dialogue_util.dart';
 import 'package:fitnessco/utils/quit_dialogue_util.dart';
 import 'package:flutter/material.dart';
 
@@ -158,106 +159,114 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
     return WillPopScope(
         onWillPop: () => displayQuitDialogue(context),
         child: Scaffold(
-            body: RefreshIndicator(
-                onRefresh: _refreshData,
-                child: _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : Container(
-                        color: Colors.white,
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Container(
-                                  height: 150,
-                                  color: Colors.purpleAccent.withOpacity(0.1),
-                                  child: Padding(
-                                      padding: EdgeInsets.all(
-                                          screenSize.width * 0.04),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceAround,
-                                          children: [
-                                            _buildProfileImage(),
-                                            Column(children: [
-                                              const SizedBox(height: 25),
-                                              Text(
-                                                '$_firstName $_lastName',
-                                                style: const TextStyle(
-                                                  fontSize: 24,
-                                                  fontWeight: FontWeight.bold,
-                                                ),
+            body: SafeArea(
+          child: RefreshIndicator(
+              onRefresh: _refreshData,
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Container(
+                      color: Colors.white,
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Container(
+                                height: 150,
+                                color: Colors.purpleAccent.withOpacity(0.1),
+                                child: Padding(
+                                    padding:
+                                        EdgeInsets.all(screenSize.width * 0.04),
+                                    child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          _buildProfileImage(),
+                                          Column(children: [
+                                            //const SizedBox(height: 25),
+                                            Text(
+                                              '$_firstName $_lastName',
+                                              style: const TextStyle(
+                                                fontSize: 24,
+                                                fontWeight: FontWeight.bold,
                                               ),
-                                              const SizedBox(height: 15),
-                                              Text(
-                                                "Payment Interval: $_paymentInterval",
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.grey,
-                                                ),
+                                            ),
+                                            const SizedBox(height: 15),
+                                            Text(
+                                              "Payment Plan: $_paymentInterval",
+                                              style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
                                               ),
-                                              ElevatedButton(
-                                                  onPressed: () {},
-                                                  child: Text('VIEW GYM RATES',
-                                                      style: TextStyle(
-                                                          fontWeight: FontWeight
-                                                              .w900))),
-                                              const SizedBox(height: 20),
-                                            ])
-                                          ]))),
-                              Center(
-                                  child: GridView.count(
-                                      padding: EdgeInsets.all(
-                                          screenSize.width * 0.05),
-                                      crossAxisCount: 2,
-                                      crossAxisSpacing: screenSize.width * 0.05,
-                                      mainAxisSpacing: screenSize.width * 0.05,
-                                      childAspectRatio: itemWidth / itemHeight,
-                                      shrinkWrap: true,
-                                      children: [
-                                    if (_isConfirmed)
-                                      squareIconButton_Widget(context,
-                                          'Chat My Trainer', Icons.person, () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) => ChatScreen(
-                                                    otherPersonUID: _trainerUID,
-                                                    isClient: true,
-                                                    onCallback:
-                                                        _onTrainerRemoved)));
-                                      })
-                                    else
-                                      squareIconButton_Widget(
-                                          context,
-                                          'View All Trainers',
-                                          Icons.people,
-                                          () =>
-                                              _goToAllTrainersScreen(context)),
-                                    squareIconButton_Widget(
-                                        context,
-                                        'View My Workout Plan',
-                                        Icons.list,
-                                        () =>
-                                            _goToClientWorkoutScreen(context)),
-                                    squareIconButton_Widget(
-                                        context,
-                                        'My Training Session',
-                                        Icons.fitness_center,
-                                        () =>
-                                            _goToCameraWorkoutScreen(context)),
+                                            ),
+                                            ElevatedButton(
+                                                onPressed: () async {
+                                                  final gymRates =
+                                                      await FirebaseFirestore
+                                                          .instance
+                                                          .collection(
+                                                              'gym_settings')
+                                                          .doc('settings')
+                                                          .get();
+                                                  displayGymRates(context,
+                                                      gymRates.data()!);
+                                                },
+                                                child: Text('VIEW GYM RATES',
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.w900))),
+                                          ])
+                                        ]))),
+                            Center(
+                                child: GridView.count(
+                                    padding:
+                                        EdgeInsets.all(screenSize.width * 0.05),
+                                    crossAxisCount: 2,
+                                    crossAxisSpacing: screenSize.width * 0.05,
+                                    mainAxisSpacing: screenSize.width * 0.05,
+                                    childAspectRatio: itemWidth / itemHeight,
+                                    shrinkWrap: true,
+                                    children: [
+                                  if (_isConfirmed)
                                     squareIconButton_Widget(context,
-                                        'Personal History', Icons.history, () {
-                                      _settingModalBottomSheet(context);
+                                        'Chat My Trainer', Icons.person, () {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => ChatScreen(
+                                                  otherPersonUID: _trainerUID,
+                                                  isClient: true,
+                                                  onCallback:
+                                                      _onTrainerRemoved)));
                                     })
-                                  ])),
-                              squareIconButton_Widget(
-                                  context,
-                                  'Profile Settings',
-                                  Icons.edit,
-                                  () => _goToEditClientProfileScreen(context)),
-                              const SizedBox(height: 100),
-                              LogOutWidget(screenSize: screenSize)
-                            ])))));
+                                  else
+                                    squareIconButton_Widget(
+                                        context,
+                                        'View All Trainers',
+                                        Icons.people,
+                                        () => _goToAllTrainersScreen(context)),
+                                  squareIconButton_Widget(
+                                      context,
+                                      'View My Workout Plan',
+                                      Icons.list,
+                                      () => _goToClientWorkoutScreen(context)),
+                                  squareIconButton_Widget(
+                                      context,
+                                      'My Training Session',
+                                      Icons.fitness_center,
+                                      () => _goToCameraWorkoutScreen(context)),
+                                  squareIconButton_Widget(context,
+                                      'Personal History', Icons.history, () {
+                                    _settingModalBottomSheet(context);
+                                  })
+                                ])),
+                            squareIconButton_Widget(
+                                context,
+                                'Profile Settings',
+                                Icons.edit,
+                                () => _goToEditClientProfileScreen(context)),
+                            const SizedBox(height: 100),
+                            LogOutWidget(screenSize: screenSize)
+                          ]))),
+        )));
   }
 }
