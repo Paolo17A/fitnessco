@@ -1003,6 +1003,328 @@ bool isFinishingLungePosition(Pose pose) {
           (leftHipStraightened && rightHipBent));
 }
 
+bool isStartingOverheadPressPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 80;
+  bool elbowsAreBent = leftElbowAngle < acceptablebendThreshold &&
+      rightElbowAngle < acceptablebendThreshold;
+
+  bool elbowsBelowShoulders =
+      leftElbow.y > leftShoulder.y && rightElbow.y > rightShoulder.y;
+
+  return elbowsAreBent && elbowsBelowShoulders;
+}
+
+bool isFinishingOverheadPressPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null) {
+    return false;
+  }
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 155;
+  bool elbowsAreBent = leftElbowAngle > acceptablebendThreshold &&
+      rightElbowAngle > acceptablebendThreshold;
+
+  bool elbowsAboveShoulders =
+      leftElbow.y < leftShoulder.y && rightElbow.y < rightShoulder.y;
+
+  return elbowsAreBent && elbowsAboveShoulders;
+}
+
+bool isStartingDumbellFrontRaisePosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftHip == null ||
+      rightHip == null) {
+    return false;
+  }
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 155;
+  bool elbowsAreStraight = leftElbowAngle > acceptablebendThreshold &&
+      rightElbowAngle > acceptablebendThreshold;
+
+  double leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
+  double rightshoulderAngle = getAngle(rightHip, rightShoulder, rightElbow);
+  double shoulderAngleThreshold = 40;
+  bool elbowsAreDown = leftShoulderAngle < shoulderAngleThreshold &&
+      rightshoulderAngle < shoulderAngleThreshold;
+
+  return elbowsAreStraight && elbowsAreDown;
+}
+
+bool isFinishingDumbellFrontRaisePosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftHip == null ||
+      rightHip == null) {
+    return false;
+  }
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 155;
+  bool elbowsAreStraight = leftElbowAngle > acceptablebendThreshold &&
+      rightElbowAngle > acceptablebendThreshold;
+
+  double leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
+  double rightshoulderAngle = getAngle(rightHip, rightShoulder, rightElbow);
+  double shoulderAngleThreshold = 75;
+  bool elbowsAreUp = leftShoulderAngle > shoulderAngleThreshold &&
+      rightshoulderAngle > shoulderAngleThreshold;
+
+  return elbowsAreStraight && elbowsAreUp;
+}
+
+bool isStartingUprightRowPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftHip == null ||
+      rightHip == null) {
+    return false;
+  }
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 160;
+  bool elbowsAreStraight = leftElbowAngle > acceptablebendThreshold &&
+      rightElbowAngle > acceptablebendThreshold;
+
+  double leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
+  double rightShoulderAngle = getAngle(rightHip, rightShoulder, rightElbow);
+  double armsDownThreshold = 40;
+  bool armsAreDown = leftShoulderAngle < armsDownThreshold &&
+      rightShoulderAngle < armsDownThreshold;
+
+  return elbowsAreStraight && armsAreDown;
+}
+
+bool isFinishingUprightRowPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftHip == null ||
+      rightHip == null) {
+    return false;
+  }
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 50;
+  bool elbowsAreBent = leftElbowAngle < acceptablebendThreshold &&
+      rightElbowAngle < acceptablebendThreshold;
+
+  double leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
+  double rightShoulderAngle = getAngle(rightHip, rightShoulder, rightElbow);
+  double armsDownThreshold = 75;
+  bool armsAreRight = leftShoulderAngle > armsDownThreshold &&
+      rightShoulderAngle > armsDownThreshold;
+
+  return elbowsAreBent && armsAreRight;
+}
+
+bool isStartingDumbellTricepsExtensionPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftHip == null ||
+      rightHip == null) {
+    return false;
+  }
+
+  bool elbowsAboveShoulders =
+      leftElbow.y < leftShoulder.y && rightElbow.y < leftShoulder.y;
+
+  double leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
+  double rightShoulderAngle = getAngle(rightHip, rightShoulder, rightElbow);
+  double armsDownThreshold = 150;
+  bool armsAreUp = leftShoulderAngle > armsDownThreshold &&
+      rightShoulderAngle > armsDownThreshold;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 160;
+  bool elbowsAreStraight = leftElbowAngle > acceptablebendThreshold &&
+      rightElbowAngle > acceptablebendThreshold;
+
+  return elbowsAboveShoulders && armsAreUp && elbowsAreStraight;
+}
+
+bool isFinishingDumbellTricepsExtensionPosition(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  PoseLandmark? leftHip = pose.landmarks[PoseLandmarkType.leftHip];
+  PoseLandmark? rightHip = pose.landmarks[PoseLandmarkType.rightHip];
+  if (leftShoulder == null ||
+      rightShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      leftWrist == null ||
+      rightWrist == null ||
+      leftHip == null ||
+      rightHip == null) {
+    return false;
+  }
+
+  bool elbowsAboveShoulders =
+      leftElbow.y < leftShoulder.y && rightElbow.y < leftShoulder.y;
+
+  double leftShoulderAngle = getAngle(leftHip, leftShoulder, leftElbow);
+  double rightShoulderAngle = getAngle(rightHip, rightShoulder, rightElbow);
+  double armsDownThreshold = 140;
+  bool armsAreUp = leftShoulderAngle > armsDownThreshold &&
+      rightShoulderAngle > armsDownThreshold;
+
+  double leftElbowAngle = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double acceptablebendThreshold = 100;
+  bool elbowsAreBent = leftElbowAngle < acceptablebendThreshold &&
+      rightElbowAngle < acceptablebendThreshold;
+
+  return elbowsAboveShoulders && armsAreUp && elbowsAreBent;
+}
+
+bool isStartingTricepRopePushdown(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      rightShoulder == null ||
+      rightWrist == null ||
+      leftWrist == null) {
+    return false;
+  }
+
+  double leftElbowThreshold = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double bendThreshold = 100;
+  bool elbowsAreBent =
+      rightElbowAngle < bendThreshold && leftElbowThreshold < bendThreshold;
+
+  return elbowsAreBent;
+}
+
+bool isFinishingTricepRopePushdown(Pose pose) {
+  PoseLandmark? leftShoulder = pose.landmarks[PoseLandmarkType.leftShoulder];
+  PoseLandmark? rightShoulder = pose.landmarks[PoseLandmarkType.rightShoulder];
+  PoseLandmark? leftElbow = pose.landmarks[PoseLandmarkType.leftElbow];
+  PoseLandmark? rightElbow = pose.landmarks[PoseLandmarkType.rightElbow];
+  PoseLandmark? leftWrist = pose.landmarks[PoseLandmarkType.leftWrist];
+  PoseLandmark? rightWrist = pose.landmarks[PoseLandmarkType.rightWrist];
+  if (leftShoulder == null ||
+      leftElbow == null ||
+      rightElbow == null ||
+      rightShoulder == null ||
+      rightWrist == null ||
+      leftWrist == null) {
+    return false;
+  }
+
+  double leftElbowThreshold = getAngle(leftShoulder, leftElbow, leftWrist);
+  double rightElbowAngle = getAngle(rightShoulder, rightElbow, rightWrist);
+  double bendThreshold = 160;
+  bool elbowsAreStraight =
+      rightElbowAngle > bendThreshold && leftElbowThreshold > bendThreshold;
+
+  return elbowsAreStraight;
+}
+
 //==========================================================================================================================
 
 double calculateDistance(PoseLandmark landmark1, PoseLandmark landmark2) {

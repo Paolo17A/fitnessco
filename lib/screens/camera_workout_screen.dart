@@ -327,6 +327,37 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
               ? 'Begin in a plank position with your hands placed slightly wider than shoulder-width apart and push yourself upwards.'
               : 'Lower your chest towards the ground by bending your elbows, and maintaining your straight plank position';
           break;
+        //  SHOULDER WORK OUTS
+        case 'Overhead Press':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Raise the weights above your head'
+              : 'Lower the weights back to shoulder level';
+          break;
+        case 'Dumbell Front Raise':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Raise the dumbells forward up to shoulder level.'
+              : 'Lower the dumbells back to hip level';
+          break;
+        case 'Upright Rows':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Raise the barbell upward up to shoulder level.'
+              : 'Lower the barbell back down to hip level';
+          break;
+        case 'Dumbbell Triceps Extension':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Bend your elbows to lower the dumbell behind your head.'
+              : 'Straighten your elbows to raise the dumbell back abouve your head';
+          break;
+        case 'Tricep Pushups':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Begin in a plank position with your hands placed wider than shoulder-width apart and push yourself upwards.'
+              : 'Lower your chest towards the ground by bending your elbows, and maintaining your straight plank position';
+          break;
+        case 'Tricep Rope Pushdown':
+          _currentWorkoutInstruction = mayAddRep
+              ? 'Pull the rope by extending your arm downwards.'
+              : 'Bend your arms back up a you let the rope bring down thw weights.';
+          break;
         default:
           _currentWorkoutInstruction = mayAddRep
               ? 'Put your left hand above your nose (This workout has not been implemented yet)'
@@ -520,6 +551,79 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           }
         }
         break;
+      case 'Overhead Press':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingOverheadPressPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingOverheadPressPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Dumbell Front Raise':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingDumbellFrontRaisePosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingDumbellFrontRaisePosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Upright Rows':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingUprightRowPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingUprightRowPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Dumbbell Triceps Extension':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingDumbellTricepsExtensionPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep &&
+              isStartingDumbellTricepsExtensionPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Tricep Pushups':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingPushUpPosition(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingPushUpPosition(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
+      case 'Tricep Rope Pushdown':
+        for (var pose in poses) {
+          if (mayAddRep && isFinishingTricepRopePushdown(pose)) {
+            mayAddRep = false;
+            _addRepToCurrentSet();
+          } else if (!mayAddRep && isStartingTricepRopePushdown(pose)) {
+            setState(() {
+              mayAddRep = true;
+            });
+          }
+        }
+        break;
       default:
         for (var pose in poses) {
           if (mayAddRep && isLeftHandAboveHead(pose)) {
@@ -625,41 +729,40 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
-                title: const Text('Confirm Skip Workout'),
-                content: const Text(
-                    'Are you sure you want to skip this workout? This is the only workout prescribed for this muscle'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      setState(() {
-                        currentMuscleGroupIndex++;
-                        currentWorkoutIndex = 0;
-                        _currentRep = 0;
-                        _currentSet = 0;
-                        //  This is either the last or the only muscle to be trained
-                        if (currentMuscleGroupIndex == muscleGroups.length) {
-                          _addWorkoutToFirebase();
-                        }
-                        //  Move on to the next muscle
-                        else {
-                          workouts = (prescribedWorkouts[
-                                      muscleGroups[currentMuscleGroupIndex]]
-                                  as Map<String, dynamic>)
-                              .keys
-                              .toList();
-                          _resetWorkoutVariables();
-                        }
-                      });
-                    },
-                    child: const Text('Skip'),
-                  ),
-                ],
-              ));
+                  title: const Text('Confirm Skip Workout'),
+                  content: const Text(
+                      'Are you sure you want to skip this workout? This is the only workout prescribed for this muscle'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          currentMuscleGroupIndex++;
+                          currentWorkoutIndex = 0;
+                          _currentRep = 0;
+                          _currentSet = 0;
+                          //  This is either the last or the only muscle to be trained
+                          if (currentMuscleGroupIndex == muscleGroups.length) {
+                            _addWorkoutToFirebase();
+                          }
+                          //  Move on to the next muscle
+                          else {
+                            workouts = (prescribedWorkouts[
+                                        muscleGroups[currentMuscleGroupIndex]]
+                                    as Map<String, dynamic>)
+                                .keys
+                                .toList();
+                            _resetWorkoutVariables();
+                          }
+                        });
+                      },
+                      child: const Text('Skip'),
+                    )
+                  ]));
       return;
     }
     //  There are multiple prescribed workouts for this muscle group
@@ -700,38 +803,37 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
       showDialog(
           context: context,
           builder: (context) => AlertDialog(
-                title: const Text('Confirm Skip Workout'),
-                content: const Text(
-                    'Are you sure you want to skip this muscle? You have not trained this muscle yet'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Cancel'),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      setState(() {
-                        currentMuscleGroupIndex++;
-                        currentWorkoutIndex = 0;
-                        _currentRep = 0;
-                        _currentSet = 0;
-                        if (currentMuscleGroupIndex == muscleGroups.length) {
-                          _addWorkoutToFirebase();
-                        } else {
-                          workouts = (prescribedWorkouts[
-                                      muscleGroups[currentMuscleGroupIndex]]
-                                  as Map<String, dynamic>)
-                              .keys
-                              .toList();
-                          _resetWorkoutVariables();
-                        }
-                      });
-                    },
-                    child: const Text('Skip'),
-                  ),
-                ],
-              ));
+                  title: const Text('Confirm Skip Workout'),
+                  content: const Text(
+                      'Are you sure you want to skip this muscle? You have not trained this muscle yet'),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                          setState(() {
+                            currentMuscleGroupIndex++;
+                            currentWorkoutIndex = 0;
+                            _currentRep = 0;
+                            _currentSet = 0;
+                            if (currentMuscleGroupIndex ==
+                                muscleGroups.length) {
+                              _addWorkoutToFirebase();
+                            } else {
+                              workouts = (prescribedWorkouts[
+                                          muscleGroups[currentMuscleGroupIndex]]
+                                      as Map<String, dynamic>)
+                                  .keys
+                                  .toList();
+                              _resetWorkoutVariables();
+                            }
+                          });
+                        },
+                        child: const Text('Skip'))
+                  ]));
     } else {
       setState(() {
         currentMuscleGroupIndex++;
@@ -804,97 +906,88 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Pose Estimation",
+        appBar: AppBar(
+          title: const Text(
+            "Pose Estimation",
+          ),
+          actions: [
+            IconButton(
+                onPressed: _switchLiveCamera,
+                icon: const Icon(Icons.cameraswitch))
+          ],
         ),
-        actions: [
-          IconButton(
-              onPressed: _switchLiveCamera,
-              icon: const Icon(Icons.cameraswitch))
-        ],
-      ),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Stack(
-              children: [
+        body: isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Stack(children: [
                 Align(alignment: Alignment.topCenter, child: _liveFeedBody()),
                 Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    width: double.infinity,
-                    height: 100,
-                    color: Colors.black.withOpacity(0.75),
-                    child: Center(
-                        child: Text(
-                      _currentWorkoutInstruction,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold),
-                    )),
-                  ),
-                ),
-                Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Padding(
-                    padding: const EdgeInsets.all(6),
+                    alignment: Alignment.topCenter,
                     child: Container(
-                      width: double.infinity,
-                      height: MediaQuery.of(context).size.height * 0.3,
-                      decoration: BoxDecoration(
-                          color: Colors.purple.withOpacity(0.75),
-                          borderRadius: BorderRadius.circular(10)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          const SizedBox(height: 10),
-                          Text(
-                              'Current Muscle Group: ${muscleGroups[currentMuscleGroupIndex]}',
-                              style: _textStyle()),
-                          const SizedBox(height: 10),
-                          Text(
-                              'Current Workout: ${workouts[currentWorkoutIndex]}',
-                              style: _textStyle()),
-                          const SizedBox(height: 10),
-                          Text('Current Set: $_currentSet / $_setQuota',
-                              style: _textStyle()),
-                          const SizedBox(height: 10),
-                          Text('Reps Done: $_currentRep / $_repsQuota',
-                              style: _textStyle()),
-                          const SizedBox(height: 10),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton(
-                                    onPressed: _skipWorkout,
-                                    child: const Text('Skip Workout')),
-                                FloatingActionButton(
-                                  onPressed: () {
-                                    mayAddRep = true;
-                                    _addRepToCurrentSet();
-                                  },
-                                  child: const Icon(Icons.add),
-                                ),
-                                ElevatedButton(
-                                    onPressed: muscleGroups.length == 1
-                                        ? null
-                                        : _skipMuscle,
-                                    child: const Text('Skip Muscle'))
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              ],
-            ),
-    );
+                        width: double.infinity,
+                        height: 100,
+                        color: Colors.black.withOpacity(0.75),
+                        child: Center(
+                            child: Text(_currentWorkoutInstruction,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.bold))))),
+                Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Padding(
+                        padding: const EdgeInsets.all(6),
+                        child: Container(
+                            width: double.infinity,
+                            height: MediaQuery.of(context).size.height * 0.3,
+                            decoration: BoxDecoration(
+                                color: Colors.purple.withOpacity(0.75),
+                                borderRadius: BorderRadius.circular(10)),
+                            child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const SizedBox(height: 10),
+                                  Text(
+                                      'Current Muscle Group: ${muscleGroups[currentMuscleGroupIndex]}',
+                                      style: _textStyle()),
+                                  const SizedBox(height: 10),
+                                  Text(
+                                      'Current Workout: ${workouts[currentWorkoutIndex]}',
+                                      style: _textStyle()),
+                                  const SizedBox(height: 10),
+                                  Text('Current Set: $_currentSet / $_setQuota',
+                                      style: _textStyle()),
+                                  const SizedBox(height: 10),
+                                  Text('Reps Done: $_currentRep / $_repsQuota',
+                                      style: _textStyle()),
+                                  const SizedBox(height: 10),
+                                  Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceEvenly,
+                                          children: [
+                                            ElevatedButton(
+                                                onPressed: _skipWorkout,
+                                                child:
+                                                    const Text('Skip Workout')),
+                                            FloatingActionButton(
+                                              onPressed: () {
+                                                mayAddRep = true;
+                                                _addRepToCurrentSet();
+                                              },
+                                              child: const Icon(Icons.add),
+                                            ),
+                                            ElevatedButton(
+                                                onPressed:
+                                                    muscleGroups.length == 1
+                                                        ? null
+                                                        : _skipMuscle,
+                                                child:
+                                                    const Text('Skip Muscle'))
+                                          ]))
+                                ]))))
+              ]));
   }
 
   TextStyle _textStyle() {
@@ -907,20 +1000,18 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     if (_controller == null) return Container();
     if (_controller?.value.isInitialized == false) return Container();
     return Container(
-      color: Colors.white,
-      height: MediaQuery.of(context).size.height * 0.7,
-      width: double.infinity,
-      child: _changingCameraLens
-          ? const Center(
-              child: Text('Changing camera lens'),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: CameraPreview(
-                _controller!,
-                child: _customPaint,
-              ),
-            ),
-    );
+        color: Colors.white,
+        height: MediaQuery.of(context).size.height * 0.7,
+        width: double.infinity,
+        child: _changingCameraLens
+            ? const Center(
+                child: Text('Changing camera lens'),
+              )
+            : Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: CameraPreview(
+                  _controller!,
+                  child: _customPaint,
+                )));
   }
 }

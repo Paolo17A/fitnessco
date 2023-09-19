@@ -44,51 +44,46 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                 padding: const EdgeInsets.all(10),
                 child: Center(
                     child: _workoutHistory.isEmpty
-                        ? const Text('YOu have no Workout History')
-                        : Column(
-                            children: [
-                              ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: _workoutHistory.length,
-                                  itemBuilder: (context, index) {
-                                    List<String> muscleGroups =
-                                        (_workoutHistory[index]['workout']
-                                                as Map<String, dynamic>)
-                                            .keys
-                                            .toList();
-                                    return Container(
+                        ? const Text('You have no Workout History')
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: _workoutHistory.length,
+                            itemBuilder: (context, index) {
+                              List<String> muscleGroups =
+                                  (_workoutHistory[index]['workout']
+                                          as Map<String, dynamic>)
+                                      .keys
+                                      .toList();
+                              return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Container(
                                       decoration: BoxDecoration(
                                           color: Colors.deepPurple
                                               .withOpacity(0.6),
                                           borderRadius:
                                               BorderRadius.circular(20)),
-                                      child: Column(
-                                        children: [
-                                          Padding(
+                                      child: Column(children: [
+                                        Padding(
                                             padding: const EdgeInsets.all(9),
                                             child: Text(
-                                              '${(_workoutHistory[index]['dateTime']['month']).toString()} - ${(_workoutHistory[index]['dateTime']['day']).toString()} - ${(_workoutHistory[index]['dateTime']['year']).toString()}',
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 25,
-                                                  color: Colors.white),
-                                            ),
-                                          ),
-                                          Column(
+                                                '${(_workoutHistory[index]['dateTime']['month']).toString()} - ${(_workoutHistory[index]['dateTime']['day']).toString()} - ${(_workoutHistory[index]['dateTime']['year']).toString()}',
+                                                style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 25,
+                                                    color: Colors.white))),
+                                        Column(
                                             children:
                                                 muscleGroups.map((muscleGroup) {
-                                              List<String> workouts =
-                                                  (_workoutHistory[index]
-                                                                  ['workout']
-                                                              [muscleGroup]
-                                                          as Map<String,
-                                                              dynamic>)
-                                                      .keys
-                                                      .toList();
-                                              return Padding(
-                                                padding:
-                                                    const EdgeInsets.all(8),
-                                                child: Container(
+                                          List<String> workouts =
+                                              (_workoutHistory[index]['workout']
+                                                          [muscleGroup]
+                                                      as Map<String, dynamic>)
+                                                  .keys
+                                                  .toList();
+                                          return Padding(
+                                              padding: const EdgeInsets.all(8),
+                                              child: Container(
                                                   width: double.infinity,
                                                   decoration: BoxDecoration(
                                                     color: Colors.deepPurple
@@ -98,109 +93,80 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
                                                             10),
                                                   ),
                                                   child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.all(
-                                                            8.0),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .center,
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Column(
+                                                          crossAxisAlignment:
+                                                              CrossAxisAlignment
+                                                                  .start,
                                                           children: [
-                                                            Text(
-                                                              muscleGroup
-                                                                  .toUpperCase(),
-                                                              style:
-                                                                  const TextStyle(
-                                                                color: Colors
-                                                                    .white,
-                                                                fontWeight:
-                                                                    FontWeight
-                                                                        .bold,
-                                                                fontSize: 20,
-                                                              ),
-                                                            ),
-                                                          ],
-                                                        ),
-                                                        Column(
-                                                            children: workouts
-                                                                .map((workout) {
-                                                          List<dynamic>
-                                                              repsDone =
-                                                              _workoutHistory[index]
+                                                            Row(
+                                                                mainAxisAlignment:
+                                                                    MainAxisAlignment
+                                                                        .center,
+                                                                children: [
+                                                                  Text(
+                                                                      muscleGroup
+                                                                          .toUpperCase(),
+                                                                      style:
+                                                                          const TextStyle(
+                                                                        color: Colors
+                                                                            .white,
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                        fontSize:
+                                                                            20,
+                                                                      ))
+                                                                ]),
+                                                            Column(
+                                                                children:
+                                                                    workouts.map(
+                                                                        (workout) {
+                                                              List<dynamic>
+                                                                  repsDone =
+                                                                  _workoutHistory[index]['workout']
+                                                                              [
+                                                                              muscleGroup]
+                                                                          [
+                                                                          workout]
+                                                                      [
+                                                                      'repsDone'];
+                                                              int repsQuota = _workoutHistory[
+                                                                              index]
                                                                           [
                                                                           'workout']
                                                                       [
                                                                       muscleGroup]
                                                                   [
-                                                                  workout]['repsDone'];
-                                                          int repsQuota = _workoutHistory[
-                                                                          index]
-                                                                      [
-                                                                      'workout']
-                                                                  [muscleGroup][
-                                                              workout]['repsQuota'];
-                                                          return SizedBox(
-                                                            width:
-                                                                double.infinity,
-                                                            child: Padding(
-                                                              padding:
-                                                                  const EdgeInsets
-                                                                      .all(8.0),
-                                                              child: Column(
-                                                                crossAxisAlignment:
-                                                                    CrossAxisAlignment
-                                                                        .start,
-                                                                children: [
-                                                                  Text(
-                                                                    workout,
-                                                                    style: const TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .bold,
-                                                                        fontSize:
-                                                                            15),
-                                                                  ),
-                                                                  Padding(
-                                                                    padding: const EdgeInsets
-                                                                            .symmetric(
-                                                                        horizontal:
-                                                                            20),
-                                                                    child:
-                                                                        Column(
-                                                                      children:
-                                                                          repsDone
-                                                                              .map((reps) {
-                                                                        return Text(
-                                                                            'Set: $reps / $repsQuota',
-                                                                            style:
-                                                                                const TextStyle(color: Colors.white));
-                                                                      }).toList(),
-                                                                    ),
-                                                                  )
-                                                                ],
-                                                              ),
-                                                            ),
-                                                          );
-                                                        }).toList())
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
-                                              );
-                                            }).toList(),
-                                          )
-                                        ],
-                                      ),
-                                    );
-                                  }),
-                            ],
-                          ))));
+                                                                  workout]['repsQuota'];
+                                                              return SizedBox(
+                                                                  width: double
+                                                                      .infinity,
+                                                                  child: Padding(
+                                                                      padding: const EdgeInsets.all(8.0),
+                                                                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                                                        Text(
+                                                                          workout,
+                                                                          style: const TextStyle(
+                                                                              color: Colors.white,
+                                                                              fontWeight: FontWeight.bold,
+                                                                              fontSize: 15),
+                                                                        ),
+                                                                        Padding(
+                                                                          padding:
+                                                                              const EdgeInsets.symmetric(horizontal: 20),
+                                                                          child: Column(
+                                                                              children: repsDone.map((reps) {
+                                                                            return Text('Set: $reps / $repsQuota',
+                                                                                style: const TextStyle(color: Colors.white));
+                                                                          }).toList()),
+                                                                        )
+                                                                      ])));
+                                                            }).toList())
+                                                          ]))));
+                                        }).toList())
+                                      ])));
+                            }))));
   }
 }

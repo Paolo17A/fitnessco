@@ -12,6 +12,11 @@ class ManageGymScreen extends StatefulWidget {
 class ManageGymScreenState extends State<ManageGymScreen> {
   final TextEditingController _membershipRateController =
       TextEditingController();
+  //  MEMBERSHIP RATES
+  final TextEditingController _dailyRateController = TextEditingController();
+  final TextEditingController _weeklyRateController = TextEditingController();
+  final TextEditingController _monthlyRateController = TextEditingController();
+
   final TextEditingController _commissionRateController =
       TextEditingController();
 
@@ -30,13 +35,11 @@ class ManageGymScreenState extends State<ManageGymScreen> {
           .doc('settings')
           .get();
 
-      if (documentSnapshot.exists) {
-        final data = documentSnapshot.data() as Map<String, dynamic>;
-        _membershipRateController.text =
-            data['membership_rate'].toStringAsFixed(2);
-        _commissionRateController.text =
-            data['commission_rate'].toStringAsFixed(2);
-      }
+      final data = documentSnapshot.data()! as Map<String, dynamic>;
+      _membershipRateController.text =
+          data['membership_rate'].toStringAsFixed(2);
+      _commissionRateController.text =
+          data['commission_rate'].toStringAsFixed(2);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
         content: Text("Error saving membership status: $e"),
@@ -79,6 +82,9 @@ class ManageGymScreenState extends State<ManageGymScreen> {
   @override
   void dispose() {
     _membershipRateController.dispose();
+    _dailyRateController.dispose();
+    _weeklyRateController.dispose();
+    _monthlyRateController.dispose();
     _commissionRateController.dispose();
     super.dispose();
   }
@@ -86,41 +92,31 @@ class ManageGymScreenState extends State<ManageGymScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Manage Gym'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  TextField(
-                    controller: _membershipRateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Monthly Membership Rate',
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                  const SizedBox(height: 16.0),
-                  TextField(
-                    controller: _commissionRateController,
-                    decoration: const InputDecoration(
-                      labelText: 'Trainer Commission Rate',
-                    ),
-                    keyboardType:
-                        const TextInputType.numberWithOptions(decimal: true),
-                  ),
-                  const SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: _saveGymSettings,
-                    child: const Text('Save Gym Settings'),
-                  ),
-                ],
-              ),
-            ),
-    );
+        appBar: AppBar(title: const Text('Manage Gym')),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      TextField(
+                          controller: _membershipRateController,
+                          decoration: const InputDecoration(
+                              labelText: 'Monthly Membership Rate'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true)),
+                      const SizedBox(height: 16.0),
+                      TextField(
+                          controller: _commissionRateController,
+                          decoration: const InputDecoration(
+                              labelText: 'Trainer Commission Rate'),
+                          keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true)),
+                      const SizedBox(height: 16.0),
+                      ElevatedButton(
+                          onPressed: _saveGymSettings,
+                          child: const Text('Save Gym Settings'))
+                    ])));
   }
 }

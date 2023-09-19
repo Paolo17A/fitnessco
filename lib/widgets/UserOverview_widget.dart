@@ -10,6 +10,7 @@ class UserOverview extends StatelessWidget {
   final String firstName;
   final String lastName;
   final bool isBeingViewedByAdmin;
+  final String profileImageurL;
 
   const UserOverview(
       {Key? key,
@@ -17,7 +18,8 @@ class UserOverview extends StatelessWidget {
       required this.accountType,
       required this.firstName,
       required this.lastName,
-      required this.isBeingViewedByAdmin})
+      required this.isBeingViewedByAdmin,
+      this.profileImageurL = ''})
       : super(key: key);
 
   @override
@@ -25,10 +27,19 @@ class UserOverview extends StatelessWidget {
     return Card(
       color: Colors.purpleAccent.withOpacity(0.3),
       child: ListTile(
-        leading: const CircleAvatar(
-          radius: 20,
-          backgroundColor: Colors.amber,
-        ),
+        leading: profileImageurL.isEmpty
+            ? CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.purple,
+                child: Icon(
+                  Icons.person,
+                  color: Colors.white,
+                ),
+              )
+            : CircleAvatar(
+                radius: 20,
+                backgroundColor: Colors.purple,
+                backgroundImage: NetworkImage(profileImageurL)),
         title: Text("$firstName $lastName"),
         trailing: ElevatedButton(
           child: const Text("View Profile"),

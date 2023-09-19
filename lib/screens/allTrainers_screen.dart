@@ -56,13 +56,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
                   onPressed: () {
                     _goToAddTrainersScreen(context);
                   },
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    // do something when search button is pressed
-                  },
-                ),
+                )
               ]
             : null,
       ),

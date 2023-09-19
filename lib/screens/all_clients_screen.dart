@@ -56,6 +56,7 @@ class AllClientsScreenState extends State<AllClientsScreen> {
                     firstName: users[index]['firstName'],
                     lastName: users[index]['lastName'],
                     isBeingViewedByAdmin: true,
+                    profileImageurL: users[index]['profileImageURL'],
                   );
                 },
               );
