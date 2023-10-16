@@ -1,11 +1,10 @@
-// ignore_for_file: file_names, avoid_print
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:flutter/material.dart';
-import '../utils/color_utils.dart';
-import '../widgets/OvalButton_widget.dart';
-import '../widgets/FitnesscoTextField_widget.dart';
+import '../widgets/custom_button_widgets.dart';
+import '../widgets/fitnessco_textfield_widget.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -15,12 +14,11 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final TextEditingController _firstNameController = TextEditingController();
-  final TextEditingController _lastNameController = TextEditingController();
-  final TextEditingController _emailTextController = TextEditingController();
-  final TextEditingController _passwordTextController = TextEditingController();
-  final TextEditingController _confirmPasswordTextController =
-      TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+  final _emailTextController = TextEditingController();
+  final _passwordTextController = TextEditingController();
+  final _confirmPasswordTextController = TextEditingController();
   bool _isLoading = false;
 
   Future<void> _signUp(BuildContext context) async {
@@ -29,17 +27,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
         _emailTextController.text.isEmpty ||
         _passwordTextController.text.isEmpty ||
         _confirmPasswordTextController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please fill up all provided fields"),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context, label: "Please fill up all provided fields");
       return;
     }
     if (_passwordTextController.text != _confirmPasswordTextController.text) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Passwords do not match"),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context, label: "Passwords do not match");
       return;
     }
     try {
@@ -51,15 +43,15 @@ class _SignUpScreenState extends State<SignUpScreen> {
         email: _emailTextController.text,
         password: _passwordTextController.text,
       );
-      final firstName = _firstNameController.text;
-      final lastName = _lastNameController.text;
 
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
-        'firstName': firstName,
-        'lastName': lastName,
+        'firstName': _firstNameController.text,
+        'lastName': _lastNameController.text,
+        'accountInitialized': false,
+        'profileDetails': {},
         'accountType': 'CLIENT',
         'currentTrainer': '',
         'isConfirmed': false,
@@ -76,7 +68,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       // Send email confirmation link to user
       await userCredential.user!.sendEmailVerification();
 
-      _openHomeScreen(userCredential.user!.uid);
+      showSuccessMessage(context,
+          label:
+              'A VERIFICATION LINK HAS BEEN SENT TO YOUR EMAIL. PLEASE CHECK TO VERIFY YOUR ACCOUNT',
+          onPress: () => _goToLoginScreen());
       setState(() {
         _isLoading = false;
       });
@@ -84,85 +79,113 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text(error.toString()),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context, label: error.toString());
     }
   }
 
-  void _openHomeScreen(String uid) {
-    Navigator.pop(context);
-    /*Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => ClientHomeScreen(uid: uid)),
-    );*/
+  void _goToLoginScreen() {
+    setState(() {
+      _isLoading = false;
+    });
+    _emailTextController.clear();
+    _passwordTextController.clear();
+    _confirmPasswordTextController.clear();
+    _firstNameController.clear();
+    _lastNameController.clear();
+    Navigator.of(context).pushNamed('/signIn');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "Sign Up",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
       body: GestureDetector(
-        onTap: () {
-          FocusScope.of(context).unfocus();
-        },
-        child: Stack(children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-                hexStringToColor("CB2B93"),
-                hexStringToColor("9546C4"),
-                hexStringToColor("5E61F4")
-              ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
-                child: Column(
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: SafeArea(
+              child: stackedLoadingContainer(context, _isLoading, [
+            userAuthBackgroundContainer(context,
+                child: Stack(
                   children: [
-                    fitnesscoTextField("Enter First Name", Icons.person_outline,
-                        false, _firstNameController),
-                    const SizedBox(height: 30),
-                    fitnesscoTextField("Enter Last Name", Icons.person_outline,
-                        false, _lastNameController),
-                    const SizedBox(height: 30),
-                    fitnesscoTextField("Enter Email Address", Icons.email,
-                        false, _emailTextController),
-                    const SizedBox(height: 30),
-                    fitnesscoTextField("Enter Password", Icons.lock_outline,
-                        true, _passwordTextController),
-                    const SizedBox(height: 40),
-                    fitnesscoTextField("Confirm Password", Icons.lock_outline,
-                        true, _confirmPasswordTextController),
-                    const SizedBox(height: 40),
-                    ovalButton(context, "REGISTER", () => _signUp(context)),
+                    Center(
+                      child: roundedContainer(
+                          color: Colors.white.withOpacity(0.8),
+                          height: MediaQuery.of(context).size.height * 0.8,
+                          width: MediaQuery.of(context).size.width * 0.8,
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                _firstName(),
+                                _lastName(),
+                                _emailAddress(),
+                                _password(),
+                                _confirmPassword(),
+                                const SizedBox(height: 40),
+                                _registerButton()
+                              ],
+                            ),
+                          )),
+                    ),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: CircleAvatar(
+                          radius: 80,
+                          backgroundColor: Colors.white,
+                          backgroundImage: AssetImage(
+                              'assets/images/fitnessco_logo_notext.png'),
+                        ),
+                      ),
+                    )
                   ],
-                ),
-              ),
-            ),
-          ),
-          if (_isLoading)
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ]),
-      ),
+                )),
+          ]))),
     );
+  }
+
+  Widget _firstName() {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 15),
+        child: fitnesscoTextField(
+            "Enter First Name", TextInputType.name, _firstNameController,
+            icon: Icons.person_outline));
+  }
+
+  Widget _lastName() {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 15),
+        child: fitnesscoTextField(
+            "Enter Last Name", TextInputType.name, _lastNameController,
+            icon: Icons.person_outline));
+  }
+
+  Widget _emailAddress() {
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 15),
+        child: fitnesscoTextField("Enter Email Address",
+            TextInputType.emailAddress, _emailTextController,
+            icon: Icons.email));
+  }
+
+  Widget _password() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        child: fitnesscoTextField(
+            "Password", TextInputType.visiblePassword, _passwordTextController,
+            icon: Icons.lock_outline));
+  }
+
+  Widget _confirmPassword() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        child: fitnesscoTextField("Confirm Password",
+            TextInputType.visiblePassword, _confirmPasswordTextController,
+            icon: Icons.lock_outline));
+  }
+
+  Widget _registerButton() {
+    return gradientOvalButton(
+        label: 'REGISTER', width: 250, onTap: () => _signUp(context));
   }
 }

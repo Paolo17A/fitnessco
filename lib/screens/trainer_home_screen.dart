@@ -1,6 +1,7 @@
 // ignore_for_file: file_names
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
 import 'package:fitnessco/screens/trainer_schedule_screen.dart';
@@ -10,8 +11,7 @@ import '../widgets/LogOut_Widget.dart';
 import '../widgets/SquareIconButton_widget.dart';
 
 class TrainerHomeScreen extends StatefulWidget {
-  final String uid;
-  const TrainerHomeScreen({super.key, required this.uid});
+  const TrainerHomeScreen({super.key});
 
   @override
   State<TrainerHomeScreen> createState() => _TrainerHomeScreenState();
@@ -35,7 +35,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   Future<void> _fetchUserData() async {
     final docSnapshot = await FirebaseFirestore.instance
         .collection('users')
-        .doc(widget.uid)
+        .doc(FirebaseAuth.instance.currentUser!.uid)
         .get();
     final userData = docSnapshot.data();
     if (userData != null) {
@@ -61,7 +61,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditTrainerProfile(
-          uid: widget.uid,
+          uid: FirebaseAuth.instance.currentUser!.uid,
           onProfileUpdated: _onProfileUpdated,
         ),
       ),

@@ -1,7 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
-
+import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
+import 'package:fitnessco/widgets/custom_button_widgets.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
+import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+import '../widgets/custom_miscellaneous_widgets.dart';
 
 class ManageGymScreen extends StatefulWidget {
   const ManageGymScreen({super.key});
@@ -147,9 +153,7 @@ class ManageGymScreenState extends State<ManageGymScreen> {
         const SnackBar(content: Text('Gym settings saved')),
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving gym settings: $e')),
-      );
+      showErrorMessage(context, label: 'Error saving gym settings: $e');
     }
   }
 
@@ -169,80 +173,98 @@ class ManageGymScreenState extends State<ManageGymScreen> {
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
-          appBar: AppBar(title: const Text('Manage Gym')),
-          body: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SingleChildScrollView(
-                    child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: TextField(
-                                controller: _dailyRateController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Daily Membership Rate'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: TextField(
-                                controller: _weeklyRateController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Weekly Membership Rate'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: TextField(
-                                controller: _monthlyRateController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Monthly Membership Rate'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true)),
-                          ),
-                          const SizedBox(height: 10),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: TextField(
-                                controller: _downWeeklyRateController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Down Weekly Membership Rate'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true)),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            child: TextField(
-                                controller: _downMonthlyRateController,
-                                decoration: const InputDecoration(
-                                    labelText: 'Down Monthly Membership Rate'),
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                        decimal: true)),
-                          ),
-                          Divider(thickness: 3),
-                          TextField(
-                              controller: _commissionRateController,
-                              decoration: const InputDecoration(
-                                  labelText: 'Trainer Commission Rate'),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                      decimal: true)),
-                          const SizedBox(height: 16.0),
-                          ElevatedButton(
-                              onPressed: _saveGymSettings,
-                              child: const Text('Save Gym Settings'))
-                        ]),
-                  ))),
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+              title: Center(
+                child: futuraText('Manage Gym Membership',
+                    textStyle: whiteBoldStyle()),
+              ),
+              elevation: 0),
+          body: switchedLoadingContainer(
+              _isLoading,
+              userAuthBackgroundContainer(
+                context,
+                child: SafeArea(
+                  child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 10),
+                                child: Row(
+                                  children: [
+                                    futuraText('Gym Membership Rates',
+                                        textStyle: blackBoldStyle(size: 25)),
+                                  ],
+                                ),
+                              ),
+                              roundedContainer(
+                                  color: CustomColors.mercury.withOpacity(0.5),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(20),
+                                    child: Column(
+                                      children: [
+                                        gymFeeRow(context,
+                                            label: 'DAILY MEMBERSHIP RATE',
+                                            textField: fitnesscoTextField(
+                                                'Daily Membership Rate',
+                                                TextInputType.numberWithOptions(
+                                                    decimal: true),
+                                                _dailyRateController)),
+                                        const SizedBox(height: 30),
+                                        gymFeeRow(context,
+                                            label: 'WEEKLY MEMBERSHIP RATE',
+                                            textField: fitnesscoTextField(
+                                                'Weekly Membership Rate',
+                                                TextInputType.numberWithOptions(
+                                                    decimal: true),
+                                                _weeklyRateController)),
+                                        const SizedBox(height: 30),
+                                        gymFeeRow(context,
+                                            label: 'MONTHLY MEMBERSHIP RATE',
+                                            textField: fitnesscoTextField(
+                                                'Monthly Membership Rate',
+                                                TextInputType.numberWithOptions(
+                                                    decimal: true),
+                                                _monthlyRateController)),
+                                        const SizedBox(height: 30),
+                                        gymFeeRow(context,
+                                            label:
+                                                'DOWN PAYMENT WEEKLY MEMBERSHIP RATE',
+                                            textField: fitnesscoTextField(
+                                                'Down Payment Weekly Membership Rate',
+                                                TextInputType.numberWithOptions(
+                                                    decimal: true),
+                                                _downWeeklyRateController)),
+                                        const SizedBox(height: 30),
+                                        gymFeeRow(context,
+                                            label:
+                                                'DOWN PAYMENT MONTHLY MEMBERSHIP RATE',
+                                            textField: fitnesscoTextField(
+                                                'Down Payment Monthly Membership Rate',
+                                                TextInputType.numberWithOptions(
+                                                    decimal: true),
+                                                _downMonthlyRateController)),
+                                        const SizedBox(height: 16.0),
+                                      ],
+                                    ),
+                                  )),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 20),
+                                child: gradientOvalButton(
+                                    label: 'Save Gym Settings',
+                                    width: 250,
+                                    radius: 40,
+                                    onTap: _saveGymSettings),
+                              )
+                            ]),
+                      )),
+                ),
+              ))),
     );
   }
 }

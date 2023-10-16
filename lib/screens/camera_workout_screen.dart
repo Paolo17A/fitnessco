@@ -4,7 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/clientHome_screen.dart';
+import 'package:fitnessco/screens/client_home_screen.dart';
 import 'package:flutter/services.dart';
 
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';

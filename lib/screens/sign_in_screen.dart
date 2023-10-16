@@ -1,16 +1,13 @@
-// ignore_for_file: avoid_print, use_build_context_synchronously
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/adminHome_screen.dart';
-import 'package:fitnessco/screens/clientHome_screen.dart';
-import 'package:fitnessco/screens/forgot_password_screen.dart';
-import 'package:fitnessco/screens/sign_up_screen.dart';
-import 'package:fitnessco/screens/trainer_home_screen.dart';
-import 'package:fitnessco/utils/color_utils.dart';
-import 'package:fitnessco/widgets/OvalButton_widget.dart';
-import 'package:fitnessco/widgets/FitnesscoTextField_widget.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/widgets/custom_button_widgets.dart';
+import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
+import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/custom_container_widget.dart';
 
 class SignInScreen extends StatefulWidget {
   const SignInScreen({super.key});
@@ -22,17 +19,13 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
-  String firstName = "";
-  String lastName = "";
+
   bool _isLoading = false;
 
   Future<void> signIn(BuildContext context) async {
     if (_emailTextController.text.isEmpty ||
         _passwordTextController.text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please fill up all provided fields"),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context, label: 'Please fill up all provided fields');
       return;
     }
 
@@ -45,32 +38,23 @@ class _SignInScreenState extends State<SignInScreen> {
               email: _emailTextController.text,
               password: _passwordTextController.text);
 
-      DocumentSnapshot userSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .get();
-      Map<String, dynamic> dataMap = Map<String, dynamic>.from(
-          userSnapshot.data() as Map<String, dynamic>);
+      final dataMap = await getCurrentUserData();
 
-      firstName = dataMap['firstName'];
-      lastName = dataMap['lastName'];
       if (dataMap['accountType'] == "CLIENT") {
         if (userCredential.user!.emailVerified == false) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-              content: Text('Please verify your email before signing in')));
+          showErrorMessage(context,
+              label: 'Please verify your email before signing in');
           setState(() {
             _isLoading = false;
           });
           await userCredential.user!.sendEmailVerification();
-          _emailTextController.clear();
-          _passwordTextController.clear();
           return;
         }
-        _goToClientHomeScreen(context, userCredential.user!.uid);
+        _goToClientHomeScreen();
       } else if (dataMap['accountType'] == "TRAINER") {
-        _goToTrainerHomeScreen(context, userCredential.user!.uid);
+        _goToTrainerHomeScreen();
       } else if (dataMap['accountType'] == "ADMIN") {
-        _goToAdminHomeScreen(context);
+        _goToAdminHomeScreen();
       }
       setState(() {
         _isLoading = false;
@@ -79,68 +63,53 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         _isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Invalid email or password: $error"),
-        backgroundColor: Colors.purple,
-      ));
-      _emailTextController.clear();
-      _passwordTextController.clear();
+      showErrorMessage(context, label: "Error logging in: $error");
+      /*_emailTextController.clear();
+      _passwordTextController.clear();*/
     }
   }
 
-  void _goToClientHomeScreen(BuildContext context, String uid) async {
-    final docSnapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final userData = docSnapshot.data();
+  void _goToClientHomeScreen() async {
+    final userData = await getCurrentUserData();
 
-    if (!userData!.containsKey('paymentInterval')) {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .update({'paymentInterval': 'DAILY'});
+    if (!userData.containsKey('paymentInterval')) {
+      await updateCurrentUserData({'paymentInterval': 'DAILY'});
     }
 
     if (userData['membershipStatus'] == 'UNPAID') {
-      _emailTextController.clear();
-      _passwordTextController.clear();
-      FirebaseAuth.instance.signOut();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Your membership is expired. Please pay at the counter."),
-        backgroundColor: Colors.purple,
-      ));
+      await FirebaseAuth.instance.signOut();
+      showErrorMessage(context,
+          label: "YOU ARE CURRENTLY UNPAID. PLEASE PAY FIRST AT THE COUNTER");
+      setState(() {
+        _isLoading = false;
+      });
     } else {
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => const ClientHomeScreen(),
-      ));
+      if (userData.containsKey('accountInitialized') &&
+          userData['accountInitialized'] == true) {
+        Navigator.of(context).pushNamed('/clientHome');
+      } else {
+        await updateCurrentUserData({'accountInitialized': false});
+        Navigator.of(context).pushNamed('/completeProfile');
+      }
     }
   }
 
-  void _goToTrainerHomeScreen(BuildContext context, String uid) async {
-    final docSnapshot =
-        await FirebaseFirestore.instance.collection('users').doc(uid).get();
-    final userData = docSnapshot.data();
+  void _goToTrainerHomeScreen() async {
+    final userData = await getCurrentUserData();
 
-    if (userData!['isDeleted'] == true) {
+    if (userData['isDeleted'] == true) {
       _emailTextController.clear();
       _passwordTextController.clear();
       FirebaseAuth.instance.signOut();
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Your account has been deleted by the admin."),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context,
+          label: "Your account has been deleted by the admin.");
     } else {
-      Navigator.of(context).push(MaterialPageRoute(
-        builder: (context) => TrainerHomeScreen(
-          uid: uid,
-        ),
-      ));
+      Navigator.of(context).pushNamed('/trainerHome');
     }
   }
 
-  void _goToAdminHomeScreen(BuildContext context) {
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => const AdminHomeScreen(),
-    ));
+  void _goToAdminHomeScreen() {
+    Navigator.of(context).pushNamed('/adminHome');
   }
 
   @override
@@ -154,103 +123,69 @@ class _SignInScreenState extends State<SignInScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: GestureDetector(
-        onTap: () => FocusScope.of(context).unfocus(),
-        child: Stack(
-          children: [
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    hexStringToColor("CB2B93"),
-                    hexStringToColor("9546C4"),
-                    hexStringToColor("5E61F4"),
+          onTap: () => FocusScope.of(context).unfocus(),
+          child: stackedLoadingContainer(context, _isLoading, [
+            SafeArea(
+              child: welcomeBackgroundContainer(
+                context,
+                child: Column(
+                  children: [
+                    fitnesscoLogo(),
+                    roundedContainer(
+                        color: Colors.white.withOpacity(0.8),
+                        height: MediaQuery.of(context).size.height * 0.5,
+                        width: MediaQuery.of(context).size.width * 0.8,
+                        child: Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Column(children: [
+                            fitnesscoTextField(
+                                "Enter Email Address",
+                                TextInputType.emailAddress,
+                                _emailTextController,
+                                icon: Icons.email_outlined),
+                            _enterPassword(),
+                            const SizedBox(height: 10),
+                            _logInButton(),
+                            _forgotPassword(context),
+                            _signUpOption(context),
+                          ]),
+                        ))
                   ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
                 ),
               ),
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    20,
-                    MediaQuery.of(context).size.height * 0.1,
-                    20,
-                    0,
-                  ),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.white,
-                        radius: 100,
-                        child: Image.asset('assets/images/fitnessco_logo.png'),
-                      ),
-                      const SizedBox(height: 100),
-                      fitnesscoTextField(
-                        "Enter Email Address",
-                        Icons.email_outlined,
-                        false,
-                        _emailTextController,
-                      ),
-                      const SizedBox(height: 30),
-                      fitnesscoTextField(
-                        "Enter Password",
-                        Icons.lock_outline,
-                        true,
-                        _passwordTextController,
-                      ),
-                      const SizedBox(height: 30),
-                      ovalButton(context, "LOG IN", () => signIn(context)),
-                      const SizedBox(height: 10),
-                      _forgotPassword(context),
-                      const SizedBox(height: 10),
-                      _signUpOption(context),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            if (_isLoading)
-              Container(
-                width: MediaQuery.of(context).size.width,
-                height: MediaQuery.of(context).size.height,
-                color: Colors.black.withOpacity(0.5),
-                child: const Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
-          ],
-        ),
-      ),
+            )
+          ])),
     );
   }
 
-  TextButton _forgotPassword(BuildContext context) {
+  Widget _enterPassword() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 30),
+      child: fitnesscoTextField("Enter Password", TextInputType.visiblePassword,
+          _passwordTextController,
+          icon: Icons.lock_outline),
+    );
+  }
+
+  Widget _logInButton() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10),
+      child: gradientOvalButton(
+          label: 'LOG-IN', width: 250, onTap: () => signIn(context)),
+    );
+  }
+
+  Widget _forgotPassword(BuildContext context) {
     return TextButton(
-        onPressed: () {
-          Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const ForgotPasswordScreen()));
-        },
-        child: const Text("Forgot your password? ",
-            style: TextStyle(
-                color: Colors.white70,
-                decoration: TextDecoration.underline,
-                fontSize: 15)));
+        onPressed: () => Navigator.of(context).pushNamed('/forgotPassword'),
+        child:
+            futuraText("Forgot your password? ", textStyle: blackBoldStyle()));
   }
 
   TextButton _signUpOption(BuildContext context) {
     return TextButton(
-        onPressed: () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const SignUpScreen()));
-        },
-        child: const Text("Don't have an account? ",
-            style: TextStyle(
-                color: Colors.white70,
-                decoration: TextDecoration.underline,
-                fontSize: 15)));
+        onPressed: () => Navigator.of(context).pushNamed('/signUp'),
+        child:
+            futuraText("Don't have an account? ", textStyle: blackBoldStyle()));
   }
 }

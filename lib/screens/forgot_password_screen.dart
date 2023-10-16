@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 
-import '../utils/color_utils.dart';
-import '../widgets/FitnesscoTextField_widget.dart';
-import '../widgets/OvalButton_widget.dart';
+import '../widgets/fitnessco_textfield_widget.dart';
+import '../widgets/custom_button_widgets.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -16,7 +18,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _isLoading = false;
   final TextEditingController _emailTextController = TextEditingController();
 
-  void _sendEmailReset(BuildContext context) async {
+  void _sendEmailReset() async {
     _isLoading = true;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
@@ -24,10 +26,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     if (_emailTextController.text.isEmpty ||
         !_emailTextController.text.contains('@') ||
         !_emailTextController.text.contains('com')) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please enter a valid email address"),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context, label: "Please enter a valid email address");
       return;
     }
     try {
@@ -38,10 +37,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           content: Text('Reset Password Email Sent Successfully!')));
       navigator.pop();
     } catch (error) {
-      _isLoading = false;
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content:
-              Text('Error Sending Reset Password Email: ${error.toString()}')));
+      setState(() {
+        _isLoading = false;
+      });
+      showErrorMessage(context,
+          label: 'Error Sending Reset Password Email: ${error.toString()}');
     }
   }
 
@@ -49,54 +49,73 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          "Reset Password",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-        ),
-      ),
       body: GestureDetector(
         onTap: () {
           FocusScope.of(context).unfocus();
         },
-        child: Stack(children: [
-          Container(
-            width: MediaQuery.of(context).size.width,
-            height: MediaQuery.of(context).size.height,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-                hexStringToColor("CB2B93"),
-                hexStringToColor("9546C4"),
-                hexStringToColor("5E61F4")
-              ], begin: Alignment.topCenter, end: Alignment.bottomCenter),
-            ),
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 120, 20, 0),
-                child: Column(
-                  children: [
-                    fitnesscoTextField("Enter your email address",
-                        Icons.person_outline, false, _emailTextController),
-                    const SizedBox(height: 30),
-                    ovalButton(context, "RESET PASSWORD",
-                        () => _sendEmailReset(context)),
-                  ],
-                ),
+        child: SafeArea(
+            child: stackedLoadingContainer(context, _isLoading, [
+          SingleChildScrollView(
+            child: userAuthBackgroundContainer(
+              context,
+              child: Stack(
+                children: [
+                  Center(
+                    child: roundedContainer(
+                      color: Colors.white.withOpacity(0.8),
+                      height: MediaQuery.of(context).size.height * 0.8,
+                      width: MediaQuery.of(context).size.width * 0.8,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.symmetric(
+                                vertical:
+                                    MediaQuery.of(context).size.height * 0.2),
+                            child: Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 20),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'RESET PASSWORD',
+                                    style: blackBoldStyle(),
+                                  ),
+                                  const SizedBox(height: 30),
+                                  fitnesscoTextField(
+                                    "ENTER EMAIL",
+                                    TextInputType.emailAddress,
+                                    _emailTextController,
+                                    icon: Icons.email,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          gradientOvalButton(
+                              label: "RESET PASSWORD",
+                              width: 250,
+                              onTap: _sendEmailReset)
+                        ],
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topCenter,
+                    child: Padding(
+                      padding: const EdgeInsets.all(20),
+                      child: CircleAvatar(
+                        radius: 80,
+                        backgroundColor: Colors.white,
+                        backgroundImage: AssetImage(
+                            'assets/images/fitnessco_logo_notext.png'),
+                      ),
+                    ),
+                  )
+                ],
               ),
             ),
-          ),
-          if (_isLoading)
-            Container(
-              width: MediaQuery.of(context).size.width,
-              height: MediaQuery.of(context).size.height,
-              color: Colors.black.withOpacity(0.5),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
-            ),
-        ]),
+          )
+        ])),
       ),
     );
   }

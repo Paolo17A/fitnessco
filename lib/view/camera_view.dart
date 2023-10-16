@@ -72,7 +72,29 @@ class _CameraViewState extends State<CameraView> {
     return Scaffold(body: _liveFeedBody());
   }
 
-  Widget _OLDliveFeedBody() {
+  Widget _liveFeedBody() {
+    if (_cameras.isEmpty) return Container();
+    if (_controller == null) return Container();
+    if (_controller?.value.isInitialized == false) return Container();
+    return Container(
+      color: Colors.white,
+      height: MediaQuery.of(context).size.height * 0.7,
+      width: double.infinity,
+      child: _changingCameraLens
+          ? const Center(
+              child: Text('Changing camera lens'),
+            )
+          : Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: CameraPreview(
+                _controller!,
+                child: widget.customPaint,
+              ),
+            ),
+    );
+  }
+
+  /*Widget _OLDliveFeedBody() {
     if (_cameras.isEmpty) return Container();
     if (_controller == null) return Container();
     if (_controller?.value.isInitialized == false) return Container();
@@ -98,28 +120,6 @@ class _CameraViewState extends State<CameraView> {
           //_exposureControl(),
         ],
       ),
-    );
-  }
-
-  Widget _liveFeedBody() {
-    if (_cameras.isEmpty) return Container();
-    if (_controller == null) return Container();
-    if (_controller?.value.isInitialized == false) return Container();
-    return Container(
-      color: Colors.white,
-      height: MediaQuery.of(context).size.height * 0.7,
-      width: double.infinity,
-      child: _changingCameraLens
-          ? const Center(
-              child: Text('Changing camera lens'),
-            )
-          : Padding(
-              padding: const EdgeInsets.all(6.0),
-              child: CameraPreview(
-                _controller!,
-                child: widget.customPaint,
-              ),
-            ),
     );
   }
 
@@ -276,7 +276,7 @@ class _CameraViewState extends State<CameraView> {
           ]),
         ),
       );
-
+*/
   Future _startLiveFeed() async {
     final camera = _cameras[_cameraIndex];
     _controller = CameraController(

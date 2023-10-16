@@ -1,15 +1,12 @@
-// ignore_for_file: library_private_types_in_public_api, file_names, use_build_context_synchronously
-
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/trainer_home_screen.dart';
 import 'package:fitnessco/utils/remove_pic_dialogue.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/color_utils.dart';
-import '../widgets/FitnesscoTextField_widget.dart';
+import '../widgets/fitnessco_textfield_widget.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class EditTrainerProfile extends StatefulWidget {
@@ -110,10 +107,8 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
     }
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text('Profile information saved successfully')));
-    Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-            builder: (context) => TrainerHomeScreen(uid: widget.uid)),
-        (Route<dynamic> route) => false);
+    Navigator.of(context).pop();
+    Navigator.of(context).pushReplacementNamed('/trainerHome');
   }
 
   Widget _buildProfileImage() {
@@ -201,19 +196,13 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                           ),
                         ),
                       ),
-                      fitnesscoTextField(
-                        'First Name',
-                        Icons.person,
-                        false,
-                        _firstNameController,
-                      ),
+                      fitnesscoTextField('First Name', TextInputType.name,
+                          _firstNameController,
+                          icon: Icons.person),
                       const SizedBox(height: 16.0),
                       fitnesscoTextField(
-                        'Last Name',
-                        Icons.person_outline,
-                        false,
-                        _lastNameController,
-                      ),
+                          'Last Name', TextInputType.name, _lastNameController,
+                          icon: Icons.person_outline),
                       const SizedBox(height: 32.0),
                       ElevatedButton(
                         onPressed: _updateProfile,

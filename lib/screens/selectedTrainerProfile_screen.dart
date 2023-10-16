@@ -2,8 +2,8 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/allTrainers_screen.dart';
-import 'package:fitnessco/screens/clientHome_screen.dart';
+import 'package:fitnessco/screens/all_trainers_screen.dart';
+import 'package:fitnessco/screens/client_home_screen.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:flutter/material.dart';
 

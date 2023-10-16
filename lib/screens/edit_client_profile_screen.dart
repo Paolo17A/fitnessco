@@ -9,8 +9,8 @@ import 'package:fitnessco/utils/remove_pic_dialogue.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/color_utils.dart';
-import '../widgets/FitnesscoTextField_widget.dart';
-import 'clientHome_screen.dart';
+import '../widgets/fitnessco_textfield_widget.dart';
+import 'client_home_screen.dart';
 
 class EditClientProfile extends StatefulWidget {
   const EditClientProfile({Key? key}) : super(key: key);
@@ -200,19 +200,13 @@ class _EditClientProfileState extends State<EditClientProfile> {
                           ),
                         ),
                         const SizedBox(height: 16.0),
-                        fitnesscoTextField(
-                          'First Name',
-                          Icons.person,
-                          false,
-                          _firstNameController,
-                        ),
+                        fitnesscoTextField('First Name', TextInputType.name,
+                            _firstNameController,
+                            icon: Icons.person),
                         const SizedBox(height: 16.0),
-                        fitnesscoTextField(
-                          'Last Name',
-                          Icons.person_outline,
-                          false,
-                          _lastNameController,
-                        ),
+                        fitnesscoTextField('Last Name', TextInputType.name,
+                            _lastNameController,
+                            icon: Icons.person_outline),
                         const SizedBox(height: 32.0),
                         ElevatedButton(
                           onPressed: _updateProfile,

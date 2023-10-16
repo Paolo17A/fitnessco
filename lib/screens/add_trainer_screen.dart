@@ -4,8 +4,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../utils/color_utils.dart';
-import '../widgets/OvalButton_widget.dart';
-import '../widgets/FitnesscoTextField_widget.dart';
+import '../widgets/custom_button_widgets.dart';
+import '../widgets/fitnessco_textfield_widget.dart';
 
 class AddTrainerScreen extends StatefulWidget {
   const AddTrainerScreen({super.key});
@@ -79,20 +79,28 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
             padding: const EdgeInsets.fromLTRB(20, 50, 20, 0),
             child: Column(
               children: [
+                fitnesscoTextField("Enter ID Number", TextInputType.number,
+                    _idNumberController,
+                    icon: Icons.work),
+                const SizedBox(height: 30),
                 fitnesscoTextField(
-                    "Enter ID Number", Icons.work, false, _idNumberController),
+                  "Enter First Name",
+                  TextInputType.name,
+                  _firstNameController,
+                  icon: Icons.person_outline,
+                ),
                 const SizedBox(height: 30),
-                fitnesscoTextField("Enter First Name", Icons.person_outline,
-                    false, _firstNameController),
+                fitnesscoTextField(
+                    "Enter Last Name", TextInputType.name, _lastNameController,
+                    icon: Icons.person_outline),
                 const SizedBox(height: 30),
-                fitnesscoTextField("Enter Last Name", Icons.person_outline,
-                    false, _lastNameController),
+                fitnesscoTextField("Enter Email Address",
+                    TextInputType.emailAddress, _emailTextController,
+                    icon: Icons.email),
                 const SizedBox(height: 30),
-                fitnesscoTextField("Enter Email Address", Icons.email, false,
-                    _emailTextController),
-                const SizedBox(height: 30),
-                fitnesscoTextField("Enter Password", Icons.lock_outline, true,
-                    _passwordTextController),
+                fitnesscoTextField("Enter Password",
+                    TextInputType.visiblePassword, _passwordTextController,
+                    icon: Icons.lock_outline),
                 const SizedBox(height: 40),
                 ovalButton(context, "ADD NEW TRAINER", () => _signUp(context)),
               ],
