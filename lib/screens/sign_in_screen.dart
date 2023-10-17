@@ -103,9 +103,24 @@ class _SignInScreenState extends State<SignInScreen> {
       FirebaseAuth.instance.signOut();
       showErrorMessage(context,
           label: "Your account has been deleted by the admin.");
-    } else {
-      Navigator.of(context).pushNamed('/trainerHome');
+      return;
     }
+    if (!userData.containsKey('profileData')) {
+      await updateCurrentUserData({
+        'profileDetails': {
+          'sex': '',
+          'age': '',
+          'contactNumber': '',
+          'address': '',
+          'certifications': [],
+          'interests': [],
+          'speciality': []
+        },
+        'email': _emailTextController.text,
+        'password': _passwordTextController.text
+      });
+    }
+    Navigator.of(context).pushNamed('/trainerHome');
   }
 
   void _goToAdminHomeScreen() {

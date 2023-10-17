@@ -77,15 +77,17 @@ void showSuccessMessage(BuildContext context,
                           const SizedBox(height: 20),
                           SizedBox(
                             height: MediaQuery.of(context).size.height * 0.3,
-                            child: SingleChildScrollView(
-                              child: futuraText(label,
-                                  textStyle: blackBoldStyle(size: 25)),
+                            child: Center(
+                              child: SingleChildScrollView(
+                                child: futuraText(label,
+                                    textStyle: blackBoldStyle(size: 25)),
+                              ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 10),
                             child: gradientOvalButton(
-                                label: 'CONTINUE', onTap: () => onPress),
+                                label: 'CONTINUE', onTap: () => onPress()),
                           )
                         ],
                       )),

@@ -1,5 +1,6 @@
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 TextField fitnesscoTextField(
     String text, TextInputType textInputType, TextEditingController controller,
@@ -16,7 +17,7 @@ TextField fitnesscoTextField(
           textInputType == TextInputType.visiblePassword ? true : false,
       cursorColor: CustomColors.purpleSnail,
       maxLines: textInputType == TextInputType.multiline ? maxLines : 1,
-      style: TextStyle(color: typeColor),
+      style: GoogleFonts.nunitoSans(textStyle: TextStyle(color: typeColor)),
       decoration: InputDecoration(
           prefixIcon: icon != null
               ? Icon(
@@ -25,7 +26,8 @@ TextField fitnesscoTextField(
                 )
               : null,
           labelText: text,
-          labelStyle: TextStyle(color: typeColor),
+          labelStyle:
+              GoogleFonts.nunitoSans(textStyle: TextStyle(color: typeColor)),
           alignLabelWithHint: true,
           filled: true,
           floatingLabelBehavior: FloatingLabelBehavior.never,

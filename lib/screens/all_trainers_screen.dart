@@ -15,6 +15,7 @@ class AllTrainersScreen extends StatefulWidget {
 }
 
 class AllTrainersScreenState extends State<AllTrainersScreen> {
+  bool _isLoading = true;
   bool isBeingViewedByAdmin = false;
   late Stream<QuerySnapshot> _trainersStream;
   @override
@@ -31,6 +32,9 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
   Future initializeAllTrainersScreen() async {
     final userData = await getCurrentUserData();
     isBeingViewedByAdmin = await userData['accountType'] == 'ADMIN';
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _goToAddTrainersScreen(BuildContext context) {
@@ -45,6 +49,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.yellow,
         title: const Text(
           'All Trainers',
           style: TextStyle(fontWeight: FontWeight.bold),

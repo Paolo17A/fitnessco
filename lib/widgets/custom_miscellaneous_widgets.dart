@@ -2,6 +2,7 @@ import 'package:fitnessco/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
+import 'custom_container_widget.dart';
 import 'custom_text_widgets.dart';
 
 Widget fitnesscoLogo() {
@@ -76,6 +77,7 @@ Widget buildProfileImage(
   if (profileImageURL != '') {
     return CircleAvatar(
       radius: radius,
+      backgroundColor: Colors.white,
       backgroundImage: NetworkImage(profileImageURL),
     );
   } else {
@@ -129,4 +131,33 @@ Widget gymRatingRow(
       ],
     ),
   );
+}
+
+GestureDetector trainerItemDeleter(BuildContext context,
+    {required Function onDelete, required item, required Widget child}) {
+  return GestureDetector(
+      onLongPress: () {
+        showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                backgroundColor: CustomColors.mercury,
+                content: roundedContainer(
+                    child: Text('Do you want to remove $item?')),
+                actions: [
+                  TextButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      child: Text('CANCEL',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.normal))),
+                  TextButton(
+                      onPressed: () => onDelete(),
+                      child: Text('REMOVE',
+                          style: TextStyle(
+                              fontSize: 15, fontWeight: FontWeight.normal)))
+                ],
+              );
+            });
+      },
+      child: child);
 }

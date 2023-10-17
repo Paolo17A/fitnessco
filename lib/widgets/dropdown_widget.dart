@@ -7,9 +7,10 @@ Widget dropdownWidget(
     Function(String?) onDropdownValueChanged,
     List<String> dropdownItems,
     String label,
-    bool searchable) {
+    bool searchable,
+    {double? padding = 8}) {
   return Padding(
-    padding: const EdgeInsets.all(8.0),
+    padding: EdgeInsets.all(padding != null ? padding : 0),
     child: DropdownSearch<String>(
         popupProps: PopupProps.menu(
             showSelectedItems: true,

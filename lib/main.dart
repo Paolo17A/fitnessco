@@ -7,6 +7,7 @@ import 'package:fitnessco/screens/camera_workout_screen.dart';
 import 'package:fitnessco/screens/client_home_screen.dart';
 import 'package:fitnessco/screens/complete_profile_screen.dart';
 import 'package:fitnessco/screens/edit_client_profile_screen.dart';
+import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/forgot_password_screen.dart';
 import 'package:fitnessco/screens/gym_rates_screen.dart';
 import 'package:fitnessco/screens/profile_completed_screen.dart';
@@ -56,7 +57,8 @@ class _MyAppState extends State<MyApp> {
     '/bmiHistory': (context) => const BMIHistoryScreen(),
     '/workoutHistory': (context) => const WorkoutHistoryScreen(),
     '/cameraWorkoutScreen': (context) => const CameraWorkoutScreen(),
-    '/editClientProfile': (context) => const EditClientProfile()
+    '/editClientProfile': (context) => const EditClientProfile(),
+    '/editTrainerProfile': (context) => const EditTrainerProfile(),
   };
 
   final ThemeData _themeData = ThemeData(
@@ -85,8 +87,8 @@ class _MyAppState extends State<MyApp> {
       textButtonTheme: TextButtonThemeData(
           style: TextButton.styleFrom(
               foregroundColor: CustomColors.purpleSnail,
-              textStyle:
-                  TextStyle(fontWeight: FontWeight.bold, fontSize: 20))));
+              textStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 20))),
+      tabBarTheme: TabBarTheme(labelColor: Colors.black));
 
   // This widget is the root of your application.
   @override

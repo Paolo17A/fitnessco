@@ -1,5 +1,3 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
 import 'package:fitnessco/screens/trainer_schedule_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
@@ -23,6 +21,8 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   String _firstName = '';
   String _lastName = '';
   String _idNumber = '';
+  String _email = '';
+  String _address = '';
   String _profileImageURL = '';
   List<dynamic> _currentClients = [];
 
@@ -35,31 +35,19 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   Future<void> _fetchUserData() async {
     final userData = await getCurrentUserData();
     setState(() {
-      _firstName = userData['firstName'] as String;
-      _lastName = userData['lastName'] as String;
-      _idNumber = userData['idNumber'] as String;
-      _profileImageURL = userData['profileImageURL'] as String;
+      _firstName = userData['firstName'];
+      _lastName = userData['lastName'];
+      _idNumber = userData['idNumber'].toString();
+      _email = userData['email'];
+      _address = userData['profileDetails']['address'];
+      _profileImageURL = userData['profileImageURL'];
       _currentClients = userData['currentClients'];
       _isLoading = false;
     });
   }
 
-  void _onProfileUpdated(String newFirstName, String newLastName) {
-    setState(() {
-      _firstName = newFirstName;
-      _lastName = newLastName;
-    });
-  }
-
   void _goToEditTrainerProfileScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => EditTrainerProfile(
-          uid: FirebaseAuth.instance.currentUser!.uid,
-          onProfileUpdated: _onProfileUpdated,
-        ),
-      ),
-    );
+    Navigator.of(context).pushNamed('/editTrainerProfile');
   }
 
   void _goToTrainerScheduleScreen() {
@@ -125,23 +113,20 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   }
 
   Widget _diagonalDataContent() {
-    String ageFormatted = 'email address';
     String currentBMIFormatted = '$_idNumber';
     return Column(children: [
       Container(
         height: 20,
         width: 200,
-        child: futuraText(ageFormatted, textStyle: blackBoldStyle(size: 15)),
+        child: futuraText(_email, textStyle: blackBoldStyle(size: 15)),
       ),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
         child: futuraText(currentBMIFormatted,
             textStyle: blackBoldStyle(size: 15)),
       ),
-      GestureDetector(
-        onTap: () {},
-        child: futuraText('Location', textStyle: whiteBoldStyle(size: 15)),
-      )
+      futuraText(_address.isNotEmpty ? _address : 'NO ADDRESS',
+          textStyle: whiteBoldStyle(size: 15))
     ]);
   }
 
