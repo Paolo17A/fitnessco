@@ -49,6 +49,7 @@ dependencies:
   flutter_launcher_icons: ^0.13.1
   google_fonts: ^6.1.0
   dropdown_search: ^5.0.6
+  flutter_rating_bar: ^4.0.1
   
 dev_dependencies:
   flutter_test:

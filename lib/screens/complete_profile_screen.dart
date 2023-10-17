@@ -235,50 +235,10 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
                 child: stackedLoadingContainer(context, _isLoading, [
                   Column(
                     children: [
-                      futuraText('PLEASE COMPLETE YOUR PROFILE',
-                          textStyle: blackBoldStyle(size: 21)),
-                      futuraText(
-                          currentPhase == ProfileScreenPhases.BIOMETRICS
-                              ? 'BASIC BIOMETRICS'
-                              : currentPhase == ProfileScreenPhases.HEALTH
-                                  ? 'HEALTH CONCERNS'
-                                  : 'WORKOUT PLAN',
-                          textStyle: whiteBoldStyle()),
-                      Stack(
-                        children: [
-                          Divider(
-                            thickness: 5,
-                            color: Colors.black,
-                          ),
-                          Row(
-                            children: [
-                              Container(
-                                width: MediaQuery.of(context).size.width *
-                                    ((currentPhase.index + 1) * 0.33),
-                                height: 20,
-                                color: CustomColors.nearMoon,
-                              )
-                            ],
-                          ),
-                        ],
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: roundedContainer(
-                            color: Colors.white,
-                            child: Padding(
-                                padding: EdgeInsets.all(10),
-                                child: currentPhase ==
-                                        ProfileScreenPhases.BIOMETRICS
-                                    ? _biometricsContainer()
-                                    : currentPhase == ProfileScreenPhases.HEALTH
-                                        ? _healthContainer()
-                                        : _workoutContainer())),
-                      ),
-                      gradientOvalButton(
-                          label: 'CONTINUE',
-                          width: 250,
-                          onTap: () => handleContinueButtonPress())
+                      _completeProfileHeader(),
+                      _progressBar(),
+                      _currentProfileFields(),
+                      _continueButton()
                     ],
                   )
                 ])),
@@ -286,6 +246,59 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         ),
       ),
     );
+  }
+
+  Widget _completeProfileHeader() {
+    return Column(children: [
+      futuraText('PLEASE COMPLETE YOUR PROFILE',
+          textStyle: blackBoldStyle(size: 21)),
+      futuraText(
+          currentPhase == ProfileScreenPhases.BIOMETRICS
+              ? 'BASIC BIOMETRICS'
+              : currentPhase == ProfileScreenPhases.HEALTH
+                  ? 'HEALTH CONCERNS'
+                  : 'WORKOUT PLAN',
+          textStyle: whiteBoldStyle())
+    ]);
+  }
+
+  Widget _progressBar() {
+    return Stack(children: [
+      Divider(
+        thickness: 5,
+        color: Colors.black,
+      ),
+      Row(children: [
+        Container(
+          width: MediaQuery.of(context).size.width *
+              ((currentPhase.index + 1) * 0.33),
+          height: 20,
+          color: CustomColors.nearMoon,
+        )
+      ])
+    ]);
+  }
+
+  Widget _currentProfileFields() {
+    return Padding(
+      padding: const EdgeInsets.all(20),
+      child: roundedContainer(
+          color: Colors.white,
+          child: Padding(
+              padding: EdgeInsets.all(10),
+              child: currentPhase == ProfileScreenPhases.BIOMETRICS
+                  ? _biometricsContainer()
+                  : currentPhase == ProfileScreenPhases.HEALTH
+                      ? _healthContainer()
+                      : _workoutContainer())),
+    );
+  }
+
+  Widget _continueButton() {
+    return gradientOvalButton(
+        label: 'CONTINUE',
+        width: 250,
+        onTap: () => handleContinueButtonPress());
   }
 
   Widget _biometricsContainer() {
@@ -396,7 +409,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
             typeColor: Colors.black),
       ),
       Padding(
-        padding: EdgeInsets.symmetric(vertical: 15),
+        padding: EdgeInsets.symmetric(vertical: 5),
         child: fitnesscoTextField('Any gym drug-related substances?',
             TextInputType.text, _steroidsController,
             typeColor: Colors.black),
@@ -412,9 +425,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
   Widget _workoutContainer() {
     return Column(children: [
-      Row(
-        children: [futuraText('What is your body concern?')],
-      ),
+      Row(children: [futuraText('What is your body concern?')]),
       dropdownWidget(bodyConcern, (newValue) {
         setState(() {
           bodyConcern = newValue!;

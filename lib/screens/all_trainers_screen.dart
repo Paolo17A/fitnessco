@@ -1,21 +1,21 @@
 // ignore_for_file: file_names
 
 import 'package:fitnessco/screens/add_trainer_screen.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../widgets/UserOverview_widget.dart';
 
 class AllTrainersScreen extends StatefulWidget {
-  final bool isBeingViewedByAdmin;
-
-  const AllTrainersScreen({super.key, this.isBeingViewedByAdmin = false});
+  const AllTrainersScreen({super.key});
 
   @override
   AllTrainersScreenState createState() => AllTrainersScreenState();
 }
 
 class AllTrainersScreenState extends State<AllTrainersScreen> {
+  bool isBeingViewedByAdmin = false;
   late Stream<QuerySnapshot> _trainersStream;
   @override
   void initState() {
@@ -25,6 +25,12 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
         .where('accountType', isEqualTo: 'TRAINER')
         .where('isDeleted', isEqualTo: false)
         .snapshots();
+    initializeAllTrainersScreen();
+  }
+
+  Future initializeAllTrainersScreen() async {
+    final userData = await getCurrentUserData();
+    isBeingViewedByAdmin = await userData['accountType'] == 'ADMIN';
   }
 
   void _goToAddTrainersScreen(BuildContext context) {
@@ -43,13 +49,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
           'All Trainers',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: widget.isBeingViewedByAdmin
+        actions: isBeingViewedByAdmin
             ? [
                 IconButton(
                   icon: const Icon(Icons.add),
@@ -84,7 +84,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
                   accountType: users[index]['accountType'],
                   firstName: users[index]['firstName'],
                   lastName: users[index]['lastName'],
-                  isBeingViewedByAdmin: widget.isBeingViewedByAdmin,
+                  isBeingViewedByAdmin: isBeingViewedByAdmin,
                 );
               },
             );

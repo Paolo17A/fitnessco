@@ -160,7 +160,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _enterPassword() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 30),
+      padding: EdgeInsets.symmetric(vertical: 20),
       child: fitnesscoTextField("Enter Password", TextInputType.visiblePassword,
           _passwordTextController,
           icon: Icons.lock_outline),

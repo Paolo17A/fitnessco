@@ -93,10 +93,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
           content: Text(
               'This training request has already been accepted by the trainer')));
       navigatorState.pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (context) => const AllTrainersScreen(
-                    isBeingViewedByAdmin: false,
-                  )),
+          MaterialPageRoute(builder: (context) => const AllTrainersScreen()),
           (Route<dynamic> route) => false);
       return;
     } else if (trainerData.data()!['isDeleted'] == true) {

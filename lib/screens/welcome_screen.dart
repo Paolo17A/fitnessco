@@ -53,7 +53,7 @@ class WelcomeScreen extends StatelessWidget {
         TextButton(
             onPressed: () => Navigator.of(context).pushNamed('/signIn'),
             child: Text('Sign in Here')),
-        const SizedBox(height: 20)
+        const SizedBox(height: 15)
       ],
     );
   }

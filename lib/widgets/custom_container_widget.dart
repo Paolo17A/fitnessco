@@ -76,6 +76,21 @@ Widget homeBackgroundContainer(BuildContext context, {required Widget child}) {
   );
 }
 
+Widget gymRatesBackgroundContainer(BuildContext context,
+    {required Widget child}) {
+  return SingleChildScrollView(
+    child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image:
+                    AssetImage('assets/images/backgrounds/view gym rates.png'),
+                fit: BoxFit.cover)),
+        child: child),
+  );
+}
+
 Widget borderedTextContainer(String label, String textInput) {
   return Padding(
     padding: const EdgeInsets.all(8.0),

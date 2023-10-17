@@ -1,14 +1,15 @@
-// ignore_for_file: file_names
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
 import 'package:fitnessco/screens/trainer_schedule_screen.dart';
+import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/home_app_bar_widget.dart';
 import 'package:flutter/material.dart';
 import '../utils/quit_dialogue_util.dart';
-import '../widgets/LogOut_Widget.dart';
-import '../widgets/SquareIconButton_widget.dart';
+import '../widgets/custom_miscellaneous_widgets.dart';
+import '../widgets/custom_text_widgets.dart';
 
 class TrainerHomeScreen extends StatefulWidget {
   const TrainerHomeScreen({super.key});
@@ -18,13 +19,12 @@ class TrainerHomeScreen extends StatefulWidget {
 }
 
 class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
-  final double _buttonWidth = 250;
-
   bool _isLoading = true;
-  late String _firstName;
-  late String _lastName;
-  late String _idNumber;
-  late String _profileImageURL;
+  String _firstName = '';
+  String _lastName = '';
+  String _idNumber = '';
+  String _profileImageURL = '';
+  List<dynamic> _currentClients = [];
 
   @override
   void initState() {
@@ -33,21 +33,15 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   }
 
   Future<void> _fetchUserData() async {
-    final docSnapshot = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
-    final userData = docSnapshot.data();
-    if (userData != null) {
-      setState(() {
-        _firstName = userData['firstName'] as String;
-        _lastName = userData['lastName'] as String;
-        _idNumber = userData['idNumber'] as String;
-        _profileImageURL = userData['profileImageURL'] as String;
-
-        _isLoading = false;
-      });
-    }
+    final userData = await getCurrentUserData();
+    setState(() {
+      _firstName = userData['firstName'] as String;
+      _lastName = userData['lastName'] as String;
+      _idNumber = userData['idNumber'] as String;
+      _profileImageURL = userData['profileImageURL'] as String;
+      _currentClients = userData['currentClients'];
+      _isLoading = false;
+    });
   }
 
   void _onProfileUpdated(String newFirstName, String newLastName) {
@@ -57,7 +51,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
     });
   }
 
-  void _goToEditTrainerProfileScreen(BuildContext context) {
+  void _goToEditTrainerProfileScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => EditTrainerProfile(
@@ -68,12 +62,12 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
     );
   }
 
-  void _goToTrainerScheduleScreen(BuildContext context) {
+  void _goToTrainerScheduleScreen() {
     Navigator.of(context).push(
         MaterialPageRoute(builder: (context) => const TrainerScheduleScreen()));
   }
 
-  void _goToTrainerCurrentClientsScreen(BuildContext context) {
+  void _goToTrainerCurrentClientsScreen() {
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => const TrainerCurrentClients(),
@@ -81,102 +75,163 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
     );
   }
 
-  Widget _buildProfileImage() {
-    if (_profileImageURL != '') {
-      return CircleAvatar(
-        radius: 50,
-        backgroundImage: NetworkImage(_profileImageURL),
-      );
-    } else {
-      return const CircleAvatar(radius: 50, child: Icon(Icons.person));
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final Size screenSize = MediaQuery.of(context).size;
-
     return WillPopScope(
       onWillPop: () => displayQuitDialogue(context),
-      child: Scaffold(
-        body: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Container(
-                color: Colors.white,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  children: [
-                    Container(
-                      color: Colors.purpleAccent.withOpacity(0.1),
-                      child: Padding(
-                        padding: EdgeInsets.all(screenSize.width * 0.04),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildProfileImage(),
-                            Column(
-                              children: [
-                                const SizedBox(height: 15),
-                                Text(
-                                  '$_firstName $_lastName',
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 15),
-                                Text(
-                                  "ID Number: $_idNumber",
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                                const SizedBox(height: 20),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: Container(
-                        padding: const EdgeInsets.all(15),
-                        child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              squareIconButton_Widget(
-                                  context,
-                                  'View My Clients',
-                                  Icons.people,
-                                  buttonWidth: _buttonWidth,
-                                  () => _goToTrainerCurrentClientsScreen(
-                                      context)),
-                              squareIconButton_Widget(
-                                  context,
-                                  'View My Schedule',
-                                  Icons.calendar_month,
-                                  buttonWidth: _buttonWidth,
-                                  () => _goToTrainerScheduleScreen(context)),
-                              squareIconButton_Widget(
-                                  context,
-                                  'Profile Settings',
-                                  Icons.edit,
-                                  buttonWidth: _buttonWidth,
-                                  () => _goToEditTrainerProfileScreen(context)),
-                              LogOutWidget(screenSize: screenSize)
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      child: DefaultTabController(
+        length: 3,
+        child: Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: homeAppBar(
+              context,
+              title: _profileInfoHeader(),
+            ),
+            body: switchedLoadingContainer(
+                _isLoading,
+                homeBackgroundContainer(context,
+                    child: SafeArea(
+                        child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        _profileImage(),
+                        SizedBox(height: 25),
+                        _diagonalDataContent(),
+                        _homeRowContainers(),
+                        _trainerDetailsTabs()
+                      ],
+                    ))))),
       ),
     );
+  }
+
+  Widget _profileInfoHeader() {
+    return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+      Column(children: [
+        futuraText('$_firstName $_lastName', textStyle: blackBoldStyle()),
+        futuraText(
+            '${_currentClients.length} Client${_currentClients.length != 1 ? 's' : ''}',
+            textStyle: blackBoldStyle(size: 15))
+      ])
+    ]);
+  }
+
+  Widget _profileImage() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      child: buildProfileImage(profileImageURL: _profileImageURL, radius: 50),
+    );
+  }
+
+  Widget _diagonalDataContent() {
+    String ageFormatted = 'email address';
+    String currentBMIFormatted = '$_idNumber';
+    return Column(children: [
+      Container(
+        height: 20,
+        width: 200,
+        child: futuraText(ageFormatted, textStyle: blackBoldStyle(size: 15)),
+      ),
+      Padding(
+        padding: const EdgeInsets.symmetric(vertical: 5),
+        child: futuraText(currentBMIFormatted,
+            textStyle: blackBoldStyle(size: 15)),
+      ),
+      GestureDetector(
+        onTap: () {},
+        child: futuraText('Location', textStyle: whiteBoldStyle(size: 15)),
+      )
+    ]);
+  }
+
+  Widget _homeRowContainers() {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 30),
+        child: Container(
+            child: Padding(
+                padding: EdgeInsets.all(15),
+                child: Column(children: [
+                  homeRowContainer(
+                      iconPath: 'assets/images/icons/view_my_clients.png',
+                      label: 'View My Clients',
+                      onPress: () => _goToTrainerCurrentClientsScreen()),
+                  homeRowContainer(
+                      iconPath: 'assets/images/icons/view_my_schedule.png',
+                      label: 'View My Schedule',
+                      onPress: () => _goToTrainerScheduleScreen()),
+                  homeRowContainer(
+                      iconPath: 'assets/images/icons/profile_description.png',
+                      label: 'Profile Description',
+                      onPress: () => _goToEditTrainerProfileScreen()),
+                ]))));
+  }
+
+  Widget _trainerDetailsTabs() {
+    return Column(children: [
+      SizedBox(
+        child: TabBar(tabs: [
+          Tab(
+              child: futuraText('CERTIFICATIONS',
+                  textStyle: blackBoldStyle(size: 12))),
+          Tab(
+              child:
+                  futuraText('INTERESTS', textStyle: blackBoldStyle(size: 15))),
+          Tab(
+              child: futuraText('TRAINING SPECIALTY',
+                  textStyle: blackBoldStyle(size: 14)))
+        ]),
+      ),
+      SizedBox(
+        height: 200,
+        child: TabBarView(children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 50),
+                  child: Container(
+                    height: 80,
+                    width: double.infinity,
+                    color: CustomColors.love,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 50),
+                  child: Container(
+                    height: 80,
+                    width: double.infinity,
+                    color: CustomColors.love,
+                  ),
+                )
+              ],
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            child: Stack(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 50),
+                  child: Container(
+                    height: 80,
+                    width: double.infinity,
+                    color: CustomColors.love,
+                  ),
+                )
+              ],
+            ),
+          )
+        ]),
+      )
+    ]);
   }
 }

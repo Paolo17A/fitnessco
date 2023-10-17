@@ -1,11 +1,17 @@
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fitnessco/screens/admin_home_screen.dart';
+import 'package:fitnessco/screens/all_trainers_screen.dart';
+import 'package:fitnessco/screens/bmi_history_screen.dart';
+import 'package:fitnessco/screens/camera_workout_screen.dart';
 import 'package:fitnessco/screens/client_home_screen.dart';
 import 'package:fitnessco/screens/complete_profile_screen.dart';
+import 'package:fitnessco/screens/edit_client_profile_screen.dart';
 import 'package:fitnessco/screens/forgot_password_screen.dart';
+import 'package:fitnessco/screens/gym_rates_screen.dart';
 import 'package:fitnessco/screens/profile_completed_screen.dart';
 import 'package:fitnessco/screens/trainer_home_screen.dart';
+import 'package:fitnessco/screens/workout_history_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
@@ -42,9 +48,15 @@ class _MyAppState extends State<MyApp> {
     '/forgotPassword': (context) => const ForgotPasswordScreen(),
     '/completeProfile': (context) => CompleteProfileScreen(),
     '/profileCompleted': (context) => ProfileCompletedScreen(),
-    '/clientHome': (context) => ClientHomeScreen(),
-    '/trainerHome': (context) => TrainerHomeScreen(),
-    '/adminHome': (context) => AdminHomeScreen()
+    '/clientHome': (context) => const ClientHomeScreen(),
+    '/trainerHome': (context) => const TrainerHomeScreen(),
+    '/adminHome': (context) => const AdminHomeScreen(),
+    '/gymRates': (context) => const GymRatesScreen(),
+    '/viewAllTrainers': (context) => const AllTrainersScreen(),
+    '/bmiHistory': (context) => const BMIHistoryScreen(),
+    '/workoutHistory': (context) => const WorkoutHistoryScreen(),
+    '/cameraWorkoutScreen': (context) => const CameraWorkoutScreen(),
+    '/editClientProfile': (context) => const EditClientProfile()
   };
 
   final ThemeData _themeData = ThemeData(

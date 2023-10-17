@@ -4,7 +4,6 @@ import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:fitnessco/widgets/home_app_bar_widget.dart';
 import 'package:flutter/material.dart';
-import '../utils/log_out_util.dart';
 import '../utils/quit_dialogue_util.dart';
 import '../widgets/custom_container_widget.dart';
 import 'all_trainers_screen.dart';
@@ -15,9 +14,7 @@ class AdminHomeScreen extends StatelessWidget {
   void _goToAllTrainersScreen(BuildContext context) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const AllTrainersScreen(
-          isBeingViewedByAdmin: true,
-        ),
+        builder: (context) => const AllTrainersScreen(),
       ),
     );
   }
