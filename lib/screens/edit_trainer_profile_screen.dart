@@ -68,7 +68,8 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       _cellphoneNumberController.text =
           userData['profileDetails']['contactNumber'];
       _addressController.text = userData['profileDetails']['address'];
-      certifications = userData['profileDetails']['certifications'];
+      certifications =
+          userData['profileDetails']['certifications'] as List<dynamic>;
       interests = userData['profileDetails']['interests'];
       specialty = userData['profileDetails']['specialty'];
 
@@ -139,7 +140,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       setState(() {
         _isLoading = true;
       });
-      certifications.add(_certificationsController.text.trim());
+      certifications.add(_certificationsController.text.trim().toString());
       await _updateProfileDetails();
 
       showSuccessMessage(context,
@@ -217,7 +218,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       specialty.add(_specialtyController.text.trim());
       await _updateProfileDetails();
       showSuccessMessage(context,
-          label: 'Successfully added speciality.',
+          label: 'Successfully added specialty.',
           onPress: () => Navigator.of(context).pop());
     } catch (error) {
       showErrorMessage(context, label: 'Error adding specialty: $error');
@@ -247,7 +248,9 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
     await updateCurrentUserData({
       'profileDetails': {
         'sex': _sex,
-        'age': double.parse(_ageController.text),
+        'age': _ageController.text.isNotEmpty
+            ? double.parse(_ageController.text)
+            : 0,
         'contactNumber': _cellphoneNumberController.text,
         'address': _addressController.text,
         'certifications': certifications,
@@ -292,30 +295,36 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 4,
-        child: Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: AppBar(
-            title: Center(
-                child: futuraText('Edit Profile Description',
-                    textStyle: whiteBoldStyle(size: 25))),
-          ),
-          body: GestureDetector(
-            onTap: () => FocusScope.of(context).unfocus(),
-            child: stackedLoadingContainer(context, _isLoading, [
-              userAuthBackgroundContainer(context,
-                  child: Column(
-                    children: [
-                      const SizedBox(height: 50),
-                      _profileImageContainer(),
-                      _profileTabs(),
-                      _confirmChangesButton()
-                    ],
-                  ))
-            ]),
-          ),
-        ));
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushReplacementNamed('/trainerHome');
+        return true;
+      },
+      child: DefaultTabController(
+          length: 4,
+          child: Scaffold(
+            extendBodyBehindAppBar: true,
+            appBar: AppBar(
+              title: Center(
+                  child: futuraText('Edit Profile Description',
+                      textStyle: whiteBoldStyle(size: 25))),
+            ),
+            body: GestureDetector(
+              onTap: () => FocusScope.of(context).unfocus(),
+              child: stackedLoadingContainer(context, _isLoading, [
+                userAuthBackgroundContainer(context,
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 50),
+                        _profileImageContainer(),
+                        _profileTabs(),
+                        _confirmChangesButton()
+                      ],
+                    ))
+              ]),
+            ),
+          )),
+    );
   }
 
   Widget _profileImageContainer() {
@@ -499,19 +508,23 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
               Container(
                 height: MediaQuery.of(context).size.height * 0.4,
                 child: SingleChildScrollView(
-                  child: Wrap(
+                  child: Column(
                     children: certifications
                         .map((cert) => trainerItemDeleter(
                               context,
                               item: cert,
                               onDelete: () => _deleteCertification(cert),
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.18,
+                                width: MediaQuery.of(context).size.width * 0.7,
                                 child: Center(
-                                  child: futuraText(cert,
-                                      textStyle: TextStyle(
-                                          color: CustomColors.purpleSnail,
-                                          fontWeight: FontWeight.bold)),
+                                  child: Row(
+                                    children: [
+                                      futuraText(cert,
+                                          textStyle: TextStyle(
+                                              color: CustomColors.purpleSnail,
+                                              fontWeight: FontWeight.bold)),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ))
@@ -543,20 +556,19 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
               Container(
                 height: MediaQuery.of(context).size.height * 0.4,
                 child: SingleChildScrollView(
-                  child: Wrap(
+                  child: Column(
                     children: interests
-                        .map((interest) => trainerItemDeleter(
-                              context,
-                              onDelete: () => _deleteInterest(interest),
-                              item: interest,
-                              child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.18,
-                                child: futuraText(interest,
-                                    textStyle: TextStyle(
-                                        color: CustomColors.purpleSnail,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                            ))
+                        .map((interest) => trainerItemDeleter(context,
+                            onDelete: () => _deleteInterest(interest),
+                            item: interest,
+                            child: SizedBox(
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                child: Row(children: [
+                                  futuraText(interest,
+                                      textStyle: TextStyle(
+                                          color: CustomColors.purpleSnail,
+                                          fontWeight: FontWeight.bold)),
+                                ]))))
                         .toList(),
                   ),
                 ),
@@ -585,18 +597,20 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
               Container(
                 height: MediaQuery.of(context).size.height * 0.4,
                 child: SingleChildScrollView(
-                  child: Wrap(
+                  child: Column(
                     children: specialty
                         .map((special) => trainerItemDeleter(
                               context,
                               onDelete: () => _deleteSpecialty(special),
                               item: special,
                               child: SizedBox(
-                                width: MediaQuery.of(context).size.width * 0.18,
-                                child: futuraText(special,
-                                    textStyle: TextStyle(
-                                        color: CustomColors.purpleSnail,
-                                        fontWeight: FontWeight.bold)),
+                                width: MediaQuery.of(context).size.width * 0.7,
+                                child: Row(children: [
+                                  futuraText(special,
+                                      textStyle: TextStyle(
+                                          color: CustomColors.purpleSnail,
+                                          fontWeight: FontWeight.bold))
+                                ]),
                               ),
                             ))
                         .toList(),

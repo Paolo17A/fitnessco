@@ -1,7 +1,6 @@
 // ignore_for_file: file_names
 
 import 'package:fitnessco/screens/selectedClientProfile_screen.dart';
-import 'package:fitnessco/screens/selectedTrainerProfile_screen.dart';
 import 'package:flutter/material.dart';
 
 class UserOverview extends StatelessWidget {
@@ -41,12 +40,11 @@ class UserOverview extends StatelessWidget {
                 child: const Text("View Profile"),
                 onPressed: () {
                   if (accountType == "TRAINER") {
-                    Navigator.push(
+                    /*Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => SelectedTrainerProfile(
-                                uid: uid,
-                                isBeingViewedByAdmin: isBeingViewedByAdmin)));
+                            builder: (context) =>
+                                SelectedTrainerProfile(trainerDoc: uid)));*/
                   } else if (accountType == "CLIENT") {
                     Navigator.push(
                       context,

@@ -25,6 +25,9 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   String _address = '';
   String _profileImageURL = '';
   List<dynamic> _currentClients = [];
+  List<dynamic> _certifications = [];
+  List<dynamic> _interests = [];
+  List<dynamic> _specialties = [];
 
   @override
   void initState() {
@@ -42,6 +45,9 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
       _address = userData['profileDetails']['address'];
       _profileImageURL = userData['profileImageURL'];
       _currentClients = userData['currentClients'];
+      _certifications = userData['profileDetails']['certifications'];
+      _interests = userData['profileDetails']['interests'];
+      _specialties = userData['profileDetails']['specialty'];
       _isLoading = false;
     });
   }
@@ -170,53 +176,125 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
       SizedBox(
         height: 200,
         child: TabBarView(children: [
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 50),
-                  child: Container(
-                    height: 80,
-                    width: double.infinity,
-                    color: CustomColors.love,
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 50),
-                  child: Container(
-                    height: 80,
-                    width: double.infinity,
-                    color: CustomColors.love,
-                  ),
-                )
-              ],
-            ),
-          ),
-          Container(
-            width: MediaQuery.of(context).size.width * 0.9,
-            child: Stack(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 50),
-                  child: Container(
-                    height: 80,
-                    width: double.infinity,
-                    color: CustomColors.love,
-                  ),
-                )
-              ],
-            ),
-          )
+          _trainerCertifications(),
+          _trainerInterests(),
+          _trainerSpecialty()
         ]),
       )
     ]);
+  }
+
+  Widget _trainerCertifications() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50),
+            child: Container(
+              height: 80,
+              width: double.infinity,
+              color: CustomColors.love,
+            ),
+          ),
+          if (_certifications.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 25),
+              child: SizedBox(
+                height: 130,
+                child: Center(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _certifications.length,
+                      itemBuilder: (context, index) {
+                        if (index % 2 == 0) {
+                          return sunGradientBox(label: _certifications[index]);
+                        } else {
+                          return moonGradientBox(label: _certifications[index]);
+                        }
+                      }),
+                ),
+              ),
+            )
+        ],
+      ),
+    );
+  }
+
+  Widget _trainerInterests() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50),
+            child: Container(
+              height: 80,
+              width: double.infinity,
+              color: CustomColors.love,
+            ),
+          ),
+          if (_interests.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 25),
+              child: SizedBox(
+                height: 130,
+                child: Center(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _interests.length,
+                      itemBuilder: (context, index) {
+                        if (index % 2 == 0) {
+                          return sunGradientBox(label: _interests[index]);
+                        } else {
+                          return moonGradientBox(label: _interests[index]);
+                        }
+                      }),
+                ),
+              ),
+            )
+        ],
+      ),
+    );
+  }
+
+  Widget _trainerSpecialty() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      child: Stack(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 50),
+            child: Container(
+              height: 80,
+              width: double.infinity,
+              color: CustomColors.love,
+            ),
+          ),
+          if (_specialties.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 25),
+              child: SizedBox(
+                height: 130,
+                child: Center(
+                  child: ListView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: _specialties.length,
+                      itemBuilder: (context, index) {
+                        if (index % 2 == 0) {
+                          return sunGradientBox(label: _specialties[index]);
+                        } else {
+                          return moonGradientBox(label: _specialties[index]);
+                        }
+                      }),
+                ),
+              ),
+            )
+        ],
+      ),
+    );
   }
 }

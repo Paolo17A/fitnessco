@@ -73,24 +73,22 @@ Widget homeRowContainer(
 }
 
 Widget buildProfileImage(
-    {required String profileImageURL, required double radius}) {
+    {required String profileImageURL,
+    required double radius,
+    Color? backgroundColor = Colors.white,
+    Color? iconColor = CustomColors.purpleSnail}) {
   if (profileImageURL != '') {
     return CircleAvatar(
       radius: radius,
-      backgroundColor: Colors.white,
+      backgroundColor: backgroundColor,
       backgroundImage: NetworkImage(profileImageURL),
     );
   } else {
     return CircleAvatar(
         radius: radius,
-        backgroundColor: Colors.white,
+        backgroundColor: backgroundColor,
         child: Transform.scale(
-          scale: 2,
-          child: Icon(
-            Icons.person,
-            color: CustomColors.purpleSnail,
-          ),
-        ));
+            scale: 2, child: Icon(Icons.person, color: iconColor)));
   }
 }
 
@@ -160,4 +158,67 @@ GestureDetector trainerItemDeleter(BuildContext context,
             });
       },
       child: child);
+}
+
+Widget clientProfileImage(String profileImageURL) {
+  return buildProfileImage(
+      profileImageURL: profileImageURL,
+      radius: 50,
+      backgroundColor: Color.fromARGB(255, 165, 163, 163),
+      iconColor: Colors.white);
+}
+
+Widget trainerProfileImage(String profileImageURL) {
+  return buildProfileImage(
+      profileImageURL: profileImageURL,
+      radius: 50,
+      backgroundColor: CustomColors.mercury,
+      iconColor: Color.fromARGB(255, 165, 163, 163));
+}
+
+Widget trainerProfileContent(BuildContext context, String firstName,
+    String lastName, List<dynamic> currentClients) {
+  return Padding(
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.05),
+      child: Column(children: [
+        SizedBox(
+          width: MediaQuery.of(context).size.width * 0.5,
+          child: futuraText('$firstName $lastName',
+              textStyle: TextStyle(
+                  color: CustomColors.purpleSnail,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 23)),
+        ),
+        futuraText('${currentClients.length.toString()} Clients',
+            textStyle: blackBoldStyle(size: 15))
+      ]));
+}
+
+Widget clientProfileContent(BuildContext context, String firstName,
+    String lastName, String sex, num age) {
+  return Padding(
+      padding: EdgeInsets.symmetric(
+          horizontal: MediaQuery.of(context).size.width * 0.05),
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width * 0.5,
+        child: Column(
+          children: [
+            futuraText('$firstName $lastName',
+                textStyle: TextStyle(
+                    color: CustomColors.purpleSnail,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 23)),
+            futuraText(sex, textStyle: blackBoldStyle(size: 13)),
+            futuraText('${age.toInt().toString()} years old')
+          ],
+        ),
+      ));
+}
+
+Widget userDivider() {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 10),
+    child: Divider(thickness: 2, color: Colors.grey),
+  );
 }

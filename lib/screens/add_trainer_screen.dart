@@ -102,9 +102,10 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Center(
-        child: futuraText('ADD NEW TRAINER', textStyle: blackBoldStyle()),
-      )),
+            child: futuraText('ADD NEW TRAINER', textStyle: blackBoldStyle()),
+          )),
       body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           child: stackedLoadingContainer(context, _isLoading, [

@@ -105,7 +105,7 @@ class _SignInScreenState extends State<SignInScreen> {
           label: "Your account has been deleted by the admin.");
       return;
     }
-    if (!userData.containsKey('profileData')) {
+    if (!userData.containsKey('profileDetails')) {
       await updateCurrentUserData({
         'profileDetails': {
           'sex': '',
@@ -114,7 +114,7 @@ class _SignInScreenState extends State<SignInScreen> {
           'address': '',
           'certifications': [],
           'interests': [],
-          'speciality': []
+          'specialty': []
         },
         'email': _emailTextController.text,
         'password': _passwordTextController.text

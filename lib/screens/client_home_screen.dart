@@ -60,14 +60,6 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
     }
   }
 
-  void _onTrainerRemoved() {
-    Navigator.pop(context);
-    setState(() {
-      //_isConfirmed = false;
-      _trainerUID = '';
-    });
-  }
-
   void _goToAllTrainersScreen() {
     Navigator.of(context).pushNamed('/viewAllTrainers');
   }
@@ -205,7 +197,8 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                       iconPath: 'assets/images/icons/personal_history.png',
                       imageScale: 60,
                       label: 'Personal History',
-                      onPress: () => _settingModalBottomSheet()),
+                      onPress: () =>
+                          Navigator.of(context).pushNamed('/workoutHistory')),
                 ]))));
   }
 

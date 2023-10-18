@@ -1,6 +1,10 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
+
+import '../widgets/navigation_bar_widgets.dart';
 
 class WorkoutHistoryScreen extends StatefulWidget {
   const WorkoutHistoryScreen({super.key});
@@ -12,6 +16,7 @@ class WorkoutHistoryScreen extends StatefulWidget {
 class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   bool _isLoading = true;
   List<dynamic> _workoutHistory = [];
+  String _firstName = '';
 
   @override
   void didChangeDependencies() {
@@ -20,13 +25,11 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   }
 
   void _getWorkoutHistory() async {
-    final currentUserData = await FirebaseFirestore.instance
-        .collection('users')
-        .doc(FirebaseAuth.instance.currentUser!.uid)
-        .get();
+    final currentUserData = await getCurrentUserData();
 
-    _workoutHistory = currentUserData.data()!['workoutHistory'];
-
+    _firstName = currentUserData['firstName'];
+    _workoutHistory = currentUserData['workoutHistory'];
+    _workoutHistory = List.from(_workoutHistory.reversed);
     setState(() {
       _isLoading = false;
     });
@@ -35,138 +38,104 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: const Text('Workout History')),
-        body: _isLoading
-            ? const Center(
-                child: CircularProgressIndicator(),
-              )
-            : Padding(
-                padding: const EdgeInsets.all(10),
-                child: Center(
-                    child: _workoutHistory.isEmpty
-                        ? const Text('You have no Workout History')
-                        : ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: _workoutHistory.length,
-                            itemBuilder: (context, index) {
-                              List<String> muscleGroups =
-                                  (_workoutHistory[index]['workout']
-                                          as Map<String, dynamic>)
-                                      .keys
-                                      .toList();
-                              return Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 8.0),
-                                  child: Container(
-                                      decoration: BoxDecoration(
-                                          color: Colors.deepPurple
-                                              .withOpacity(0.6),
-                                          borderRadius:
-                                              BorderRadius.circular(20)),
-                                      child: Column(children: [
-                                        Padding(
-                                            padding: const EdgeInsets.all(9),
-                                            child: Text(
-                                                '${(_workoutHistory[index]['dateTime']['month']).toString()} - ${(_workoutHistory[index]['dateTime']['day']).toString()} - ${(_workoutHistory[index]['dateTime']['year']).toString()}',
-                                                style: const TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 25,
-                                                    color: Colors.white))),
-                                        Column(
-                                            children:
-                                                muscleGroups.map((muscleGroup) {
-                                          List<String> workouts =
-                                              (_workoutHistory[index]['workout']
-                                                          [muscleGroup]
-                                                      as Map<String, dynamic>)
-                                                  .keys
-                                                  .toList();
-                                          return Padding(
-                                              padding: const EdgeInsets.all(8),
-                                              child: Container(
-                                                  width: double.infinity,
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.deepPurple
-                                                        .withOpacity(0.5),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            10),
-                                                  ),
-                                                  child: Padding(
-                                                      padding:
-                                                          const EdgeInsets.all(
-                                                              8.0),
-                                                      child: Column(
-                                                          crossAxisAlignment:
-                                                              CrossAxisAlignment
-                                                                  .start,
-                                                          children: [
-                                                            Row(
-                                                                mainAxisAlignment:
-                                                                    MainAxisAlignment
-                                                                        .center,
-                                                                children: [
-                                                                  Text(
-                                                                      muscleGroup
-                                                                          .toUpperCase(),
-                                                                      style:
-                                                                          const TextStyle(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                        fontSize:
-                                                                            20,
-                                                                      ))
-                                                                ]),
-                                                            Column(
-                                                                children:
-                                                                    workouts.map(
-                                                                        (workout) {
-                                                              List<dynamic>
-                                                                  repsDone =
-                                                                  _workoutHistory[index]['workout']
-                                                                              [
-                                                                              muscleGroup]
-                                                                          [
-                                                                          workout]
-                                                                      [
-                                                                      'repsDone'];
-                                                              int repsQuota = _workoutHistory[
-                                                                              index]
-                                                                          [
-                                                                          'workout']
-                                                                      [
-                                                                      muscleGroup]
-                                                                  [
-                                                                  workout]['repsQuota'];
-                                                              return SizedBox(
-                                                                  width: double
-                                                                      .infinity,
-                                                                  child: Padding(
-                                                                      padding: const EdgeInsets.all(8.0),
-                                                                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                                                                        Text(
-                                                                          workout,
-                                                                          style: const TextStyle(
-                                                                              color: Colors.white,
-                                                                              fontWeight: FontWeight.bold,
-                                                                              fontSize: 15),
-                                                                        ),
-                                                                        Padding(
-                                                                          padding:
-                                                                              const EdgeInsets.symmetric(horizontal: 20),
-                                                                          child: Column(
-                                                                              children: repsDone.map((reps) {
-                                                                            return Text('Set: $reps / $repsQuota',
-                                                                                style: const TextStyle(color: Colors.white));
-                                                                          }).toList()),
-                                                                        )
-                                                                      ])));
-                                                            }).toList())
-                                                          ]))));
-                                        }).toList())
-                                      ])));
-                            }))));
+        extendBodyBehindAppBar: true,
+        appBar: _workoutHistoryAppBar(),
+        bottomNavigationBar: clientNavBar(currentIndex: 2),
+        body: switchedLoadingContainer(
+            _isLoading,
+            userAuthBackgroundContainer(context,
+                child: _workoutHistoryContainer())));
+  }
+
+  AppBar _workoutHistoryAppBar() {
+    return AppBar(
+        title: Center(
+            child: futuraText('WORKOUT HISTORY', textStyle: blackBoldStyle())),
+        automaticallyImplyLeading: false);
+  }
+
+  Widget _workoutHistoryContainer() {
+    return Column(
+      children: [
+        SizedBox(
+            height: MediaQuery.of(context).size.height * 0.9,
+            child: SafeArea(
+                child: _workoutHistory.isEmpty
+                    ? Center(child: futuraText('You have no Workout History'))
+                    : _workoutEntries())),
+      ],
+    );
+  }
+
+  Widget _workoutEntries() {
+    return ListView.builder(
+        shrinkWrap: true,
+        itemCount: _workoutHistory.length,
+        itemBuilder: (context, index) {
+          final currentWorkoutHistory = _workoutHistory[index];
+          final workoutMuscles = currentWorkoutHistory['workout'];
+          final dateTime = currentWorkoutHistory['dateTime'];
+          String formattedTime =
+              '${dateTime['month']} - ${dateTime['day']} - ${dateTime['year']}';
+          return _workoutHistoryEntry(
+              formattedTime: formattedTime,
+              workoutMuscles: workoutMuscles,
+              isFirst: index == 0);
+        });
+  }
+
+  Widget _workoutHistoryEntry(
+      {required String formattedTime,
+      required Map<dynamic, dynamic> workoutMuscles,
+      required bool isFirst}) {
+    return Padding(
+        padding: const EdgeInsets.all(20),
+        child: Container(
+            height: isFirst ? 350 : 250,
+            decoration: BoxDecoration(
+                gradient: LinearGradient(colors: [
+                  CustomColors.electricLavender,
+                  CustomColors.rosePink
+                ]),
+                borderRadius: BorderRadius.circular(20)),
+            child: SingleChildScrollView(
+              child: Column(children: [
+                if (isFirst)
+                  Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      child: Column(children: [
+                        futuraText('Hi, $_firstName',
+                            textStyle: whiteBoldStyle(size: 32)),
+                        Divider(color: Colors.grey, thickness: 1),
+                        futuraText('This is what you\'ve achieved so far',
+                            textStyle:
+                                TextStyle(color: Colors.white, fontSize: 15)),
+                        Divider(color: Colors.grey, thickness: 1)
+                      ])),
+                //TIME
+                Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: futuraText(formattedTime,
+                        textStyle: blackBoldStyle(size: 30))),
+                //WORKOUT
+                Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 15),
+                    child: Row(children: [
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: workoutMuscles.keys.map((muscleGroup) {
+                            final currentMuscleGroup =
+                                (workoutMuscles[muscleGroup]
+                                    as Map<String, dynamic>);
+                            final workouts = currentMuscleGroup.keys.toList();
+                            return Column(
+                                children: workouts
+                                    .map((workout) => futuraText(workout,
+                                        textStyle: blackBoldStyle(size: 18)))
+                                    .toList());
+                          }).toList()),
+                    ]))
+              ]),
+            )));
   }
 }

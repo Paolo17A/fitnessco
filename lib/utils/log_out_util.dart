@@ -46,7 +46,7 @@ void _showLogOutDialog(BuildContext context, Function onPress) {
   showDialog(
       context: context,
       builder: (context) => AlertDialog(
-            backgroundColor: CustomColors.purpleSnail.withOpacity(0.75),
+            backgroundColor: CustomColors.plasmaTrail.withOpacity(0.75),
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             content: Container(

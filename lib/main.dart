@@ -1,5 +1,6 @@
 import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fitnessco/screens/add_trainer_screen.dart';
 import 'package:fitnessco/screens/admin_home_screen.dart';
 import 'package:fitnessco/screens/all_trainers_screen.dart';
 import 'package:fitnessco/screens/bmi_history_screen.dart';
@@ -59,6 +60,7 @@ class _MyAppState extends State<MyApp> {
     '/cameraWorkoutScreen': (context) => const CameraWorkoutScreen(),
     '/editClientProfile': (context) => const EditClientProfile(),
     '/editTrainerProfile': (context) => const EditTrainerProfile(),
+    '/addTrainer': (context) => const AddTrainerScreen()
   };
 
   final ThemeData _themeData = ThemeData(
@@ -67,8 +69,10 @@ class _MyAppState extends State<MyApp> {
       snackBarTheme:
           const SnackBarThemeData(backgroundColor: CustomColors.purpleSnail),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: CustomColors.purpleSnail,
-          selectedItemColor: CustomColors.nightSnow),
+          backgroundColor: Colors.white,
+          selectedItemColor: CustomColors.nightSnow,
+          showSelectedLabels: false,
+          showUnselectedLabels: false),
       dialogBackgroundColor: CustomColors.plasmaTrail,
       appBarTheme: AppBarTheme(
           backgroundColor: Colors.transparent,

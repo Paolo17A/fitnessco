@@ -17,3 +17,10 @@ TextStyle whiteBoldStyle({double? size = 20}) {
   return TextStyle(
       fontSize: size, color: Colors.white, fontWeight: FontWeight.bold);
 }
+
+TextStyle greyBoldStyle({double? size = 20}) {
+  return TextStyle(
+      fontSize: size,
+      color: const Color.fromARGB(255, 94, 90, 90),
+      fontWeight: FontWeight.bold);
+}

@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/current_client_card_widget.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 
 class CurrentClientContainer extends StatefulWidget {
@@ -23,22 +27,16 @@ class CurrentClientContainerState extends State<CurrentClientContainer> {
 
   void getAllCurrentClients() async {
     try {
-      String? currentUID = FirebaseAuth.instance.currentUser?.uid;
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(currentUID)
-          .get();
-      final userData = docSnapshot.data();
-      if (userData != null && userData.containsKey('currentClients')) {
-        _currentClients = List<String>.from(userData['currentClients']);
-      }
+      final userData = await getCurrentUserData();
+      _currentClients = List<String>.from(userData['currentClients']);
+
       if (_currentClients.isEmpty) {
         setState(() {
           _isLoading = false;
         });
       } else {
         // Fetch documents with UIDs in _requestedClients list
-        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+        final querySnapshot = await FirebaseFirestore.instance
             .collection('users')
             .where(FieldPath.documentId, whereIn: _currentClients)
             .get();
@@ -49,52 +47,70 @@ class CurrentClientContainerState extends State<CurrentClientContainer> {
         });
       }
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error denying training request: $error"),
-        backgroundColor: Colors.purple,
-      ));
+      showErrorMessage(context,
+          label: "Error getting current client requests: $error");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    } else {
-      if (_currentClients.isEmpty) {
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Text(
-              'No Current Clients',
-              style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w500),
-            ),
-          ),
-        );
-      } else {
-        return SizedBox(
-          height: 250,
-          child: ListView.builder(
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushReplacementNamed('/trainerHome');
+        return true;
+      },
+      child: switchedLoadingContainer(
+          _isLoading,
+          roundedContainer(
+              color: CustomColors.love,
+              height: MediaQuery.of(context).size.height * 0.45,
+              child: Column(children: [
+                _currentClientsHeader(),
+                _currentClientsContainer()
+              ]))),
+    );
+  }
+
+  Widget _currentClientsHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: futuraText('CURRENT CLIENTS', textStyle: greyBoldStyle(size: 18)),
+    );
+  }
+
+  Widget _currentClientsContainer() {
+    return Padding(
+        padding: const EdgeInsets.all(5),
+        child: roundedContainer(
+            color: Colors.white.withOpacity(0.75),
+            child: SizedBox(
+              height: MediaQuery.of(context).size.height * 0.37,
+              child: _currentClients.isNotEmpty
+                  ? _currentClientEntries()
+                  : Center(
+                      child: futuraText('No Current Clients',
+                          textStyle: greyBoldStyle(size: 15))),
+            )));
+  }
+
+  Widget _currentClientEntries() {
+    return Padding(
+        padding: const EdgeInsets.all(5),
+        child: ListView.builder(
             shrinkWrap: true,
             itemCount: _clientSnapshots.length,
             itemBuilder: (context, index) {
-              QueryDocumentSnapshot documentSnapshot = _clientSnapshots[index];
+              final documentSnapshot = _clientSnapshots[index];
               String firstName = documentSnapshot['firstName'];
               String lastName = documentSnapshot['lastName'];
+              String profileImageURL = documentSnapshot['profileImageURL'];
 
               return CurrentClientCard(
-                clientUID: _clientSnapshots[index].id,
-                firstName: firstName,
-                lastName: lastName,
-                isClient: false,
-              );
-            },
-          ),
-        );
-      }
-    }
+                  clientUID: _clientSnapshots[index].id,
+                  firstName: firstName,
+                  lastName: lastName,
+                  isClient: false,
+                  profileImageURL: profileImageURL);
+            }));
   }
 }

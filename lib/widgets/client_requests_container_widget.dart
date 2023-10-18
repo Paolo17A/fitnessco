@@ -2,6 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/widgets/client_request_card_widget.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 
 class ClientRequestsContainer extends StatefulWidget {
@@ -157,51 +159,45 @@ class ClientRequestsContainerState extends State<ClientRequestsContainer> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    } else {
-      if (_requestedClients.isEmpty) {
-        return Center(
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'No Client Requests',
-              style: _thisTextStyle(),
-            ),
+    return switchedLoadingContainer(
+        _isLoading,
+        Column(children: [
+          Text(
+            'Client Requests',
+            textAlign: TextAlign.left,
+            style: greyBoldStyle(size: 18),
           ),
-        );
-      } else {
-        return SizedBox(
-          height: 250,
-          child: SingleChildScrollView(
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: _clientSnapshots.length,
-              itemBuilder: (context, index) {
-                QueryDocumentSnapshot documentSnapshot =
-                    _clientSnapshots[index];
-                String firstName = documentSnapshot['firstName'];
-                String lastName = documentSnapshot['lastName'];
-
-                return ClientRequestCard(
-                  clientUID: _clientSnapshots[index].id,
-                  firstName: firstName,
-                  lastName: lastName,
-                  approveReq: () =>
-                      _approveRequest(context, _clientSnapshots[index].id),
-                  denyReq: () =>
-                      _denyRequest(context, _clientSnapshots[index].id),
-                );
-              },
-            ),
-          ),
-        );
-      }
-    }
+          Divider(thickness: 1.5),
+          roundedContainer(
+              height: MediaQuery.of(context).size.height * 0.15,
+              child: _requestedClients.isNotEmpty
+                  ? ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: _clientSnapshots.length,
+                      itemBuilder: (context, index) {
+                        QueryDocumentSnapshot documentSnapshot =
+                            _clientSnapshots[index];
+                        String firstName = documentSnapshot['firstName'];
+                        String lastName = documentSnapshot['lastName'];
+                        String profileImageURL =
+                            documentSnapshot['profileImageURL'];
+                        return ClientRequestCard(
+                          clientUID: _clientSnapshots[index].id,
+                          firstName: firstName,
+                          lastName: lastName,
+                          profileImageURL: profileImageURL,
+                          approveReq: () => _approveRequest(
+                              context, _clientSnapshots[index].id),
+                          denyReq: () =>
+                              _denyRequest(context, _clientSnapshots[index].id),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: futuraText('No Client Requests',
+                          textStyle: blackBoldStyle()),
+                    )),
+          Divider(thickness: 1.5)
+        ]));
   }
-}
-
-TextStyle _thisTextStyle() {
-  return const TextStyle(
-      fontSize: 15, color: Colors.white, fontWeight: FontWeight.w500);
 }

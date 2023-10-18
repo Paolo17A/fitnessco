@@ -1,11 +1,11 @@
-// ignore_for_file: file_names
-
-import 'package:fitnessco/screens/add_trainer_screen.dart';
+import 'package:fitnessco/screens/selected_trainer_profile_screen.dart';
+import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-import '../widgets/UserOverview_widget.dart';
 
 class AllTrainersScreen extends StatefulWidget {
   const AllTrainersScreen({super.key});
@@ -17,85 +17,121 @@ class AllTrainersScreen extends StatefulWidget {
 class AllTrainersScreenState extends State<AllTrainersScreen> {
   bool _isLoading = true;
   bool isBeingViewedByAdmin = false;
-  late Stream<QuerySnapshot> _trainersStream;
+  List<DocumentSnapshot> allTrainers = [];
+
   @override
   void initState() {
     super.initState();
-    _trainersStream = FirebaseFirestore.instance
-        .collection('users')
-        .where('accountType', isEqualTo: 'TRAINER')
-        .where('isDeleted', isEqualTo: false)
-        .snapshots();
     initializeAllTrainersScreen();
   }
 
   Future initializeAllTrainersScreen() async {
-    final userData = await getCurrentUserData();
-    isBeingViewedByAdmin = await userData['accountType'] == 'ADMIN';
-    setState(() {
-      _isLoading = false;
-    });
+    try {
+      final userData = await getCurrentUserData();
+      isBeingViewedByAdmin = await userData['accountType'] == 'ADMIN';
+
+      final trainers = await FirebaseFirestore.instance
+          .collection('users')
+          .where('accountType', isEqualTo: 'TRAINER')
+          .where('isDeleted', isEqualTo: false)
+          .get();
+      allTrainers = trainers.docs;
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (error) {
+      setState(() {
+        _isLoading = false;
+      });
+      showErrorMessage(context, label: 'Error getting all trainers: $error');
+    }
   }
 
   void _goToAddTrainersScreen(BuildContext context) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const AddTrainerScreen(),
-      ),
-    );
+    Navigator.of(context).pushNamed('/addTrainer');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.yellow,
-        title: const Text(
-          'All Trainers',
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: isBeingViewedByAdmin
-            ? [
-                IconButton(
-                  icon: const Icon(Icons.add),
-                  onPressed: () {
-                    _goToAddTrainersScreen(context);
-                  },
-                )
-              ]
-            : null,
-      ),
-      body: Container(
-        padding: const EdgeInsets.all(10.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _trainersStream,
-          builder:
-              (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
-            }
-
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            final List<QueryDocumentSnapshot> users = snapshot.data!.docs;
-            List<String> trainerUids = users.map((doc) => doc.id).toList();
-            return ListView.builder(
-              itemCount: users.length,
-              itemBuilder: (BuildContext context, int index) {
-                return UserOverview(
-                  uid: trainerUids[index],
-                  accountType: users[index]['accountType'],
-                  firstName: users[index]['firstName'],
-                  lastName: users[index]['lastName'],
-                  isBeingViewedByAdmin: isBeingViewedByAdmin,
-                );
-              },
-            );
-          },
-        ),
+      extendBodyBehindAppBar: true,
+      appBar: _allTrainersAppBar(),
+      body: switchedLoadingContainer(
+        _isLoading,
+        viewTrainerBackgroundContainer(context, child: _allTrainersContainer()),
       ),
     );
+  }
+
+  AppBar _allTrainersAppBar() {
+    return AppBar(
+      toolbarHeight: 85,
+      flexibleSpace: Ink(
+        decoration: BoxDecoration(
+            gradient: LinearGradient(
+                colors: [CustomColors.jigglypuff, CustomColors.love])),
+      ),
+      title: Center(
+          child: Text('All Trainers',
+              style: TextStyle(fontWeight: FontWeight.bold))),
+      actions: isBeingViewedByAdmin
+          ? [
+              IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _goToAddTrainersScreen(context))
+            ]
+          : null,
+    );
+  }
+
+  Widget _allTrainersContainer() {
+    return SafeArea(
+        child: Padding(
+      padding: const EdgeInsets.all(15),
+      child: allTrainers.isNotEmpty
+          ? ListView.builder(
+              shrinkWrap: true,
+              itemCount: allTrainers.length,
+              itemBuilder: ((context, index) {
+                return _trainerContainer(allTrainers[index]);
+              }))
+          : Center(
+              child: Text(
+              'NO TRAINERS AVAILABLE',
+              style: TextStyle(
+                  fontSize: 35,
+                  color: CustomColors.purpleSnail,
+                  fontWeight: FontWeight.bold),
+            )),
+    ));
+  }
+
+  Widget _trainerContainer(DocumentSnapshot trainerDocument) {
+    final trainerData = trainerDocument.data() as Map<dynamic, dynamic>;
+    String profileImageURL = trainerData['profileImageURL'];
+    String firstName = trainerData['firstName'];
+    String lastName = trainerData['lastName'];
+    List<dynamic> currentClients = trainerData['currentClients'];
+    return GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+              builder: (context) =>
+                  SelectedTrainerProfile(trainerDoc: trainerDocument)));
+        },
+        child: Padding(
+            padding: EdgeInsets.all(10),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        trainerProfileImage(profileImageURL),
+                        trainerProfileContent(
+                            context, firstName, lastName, currentClients)
+                      ]),
+                  userDivider()
+                ])));
   }
 }

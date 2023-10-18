@@ -1,6 +1,8 @@
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/color_utils.dart';
+
 Widget stackedLoadingContainer(
     BuildContext context, bool isLoading, List<Widget> children) {
   return Stack(children: [
@@ -91,6 +93,21 @@ Widget gymRatesBackgroundContainer(BuildContext context,
   );
 }
 
+Widget viewTrainerBackgroundContainer(BuildContext context,
+    {required Widget child}) {
+  return SingleChildScrollView(
+    child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(
+                    'assets/images/backgrounds/VIEW TRAINER BACKGROUND.png'),
+                fit: BoxFit.cover)),
+        child: child),
+  );
+}
+
 Widget borderedTextContainer(String label, String textInput) {
   return Padding(
     padding: const EdgeInsets.all(8.0),
@@ -114,6 +131,38 @@ Widget borderedTextContainer(String label, String textInput) {
               child: futuraText(textInput),
             )),
       ],
+    ),
+  );
+}
+
+Widget sunGradientBox({required String label}) {
+  return Padding(
+    padding: const EdgeInsets.all(10),
+    child: Container(
+      width: 130,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+              colors: [CustomColors.bananaMilk, CustomColors.jigglypuff])),
+      child: Center(
+          child: SingleChildScrollView(
+              child: futuraText(label, textStyle: blackBoldStyle()))),
+    ),
+  );
+}
+
+Widget moonGradientBox({required String label}) {
+  return Padding(
+    padding: const EdgeInsets.all(10),
+    child: Container(
+      width: 130,
+      decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+              colors: [CustomColors.mintZest, CustomColors.trueSky])),
+      child: Center(
+          child: SingleChildScrollView(
+              child: futuraText(label, textStyle: blackBoldStyle()))),
     ),
   );
 }
