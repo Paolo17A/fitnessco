@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../utils/color_utils.dart';
+import '../widgets/app_bar_widgets.dart';
+import 'selected_client_profile_screen.dart';
 
 class AllClientsScreen extends StatefulWidget {
   const AllClientsScreen({super.key});
@@ -28,7 +30,6 @@ class AllClientsScreenState extends State<AllClientsScreen> {
       final clients = await FirebaseFirestore.instance
           .collection('users')
           .where('accountType', isEqualTo: 'CLIENT')
-          .where('accountInitialized', isEqualTo: true)
           .get();
       allClients = clients.docs;
       setState(() {
@@ -46,26 +47,11 @@ class AllClientsScreenState extends State<AllClientsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         extendBodyBehindAppBar: true,
-        appBar: _allClientsAppBar(),
+        appBar: largeGradientAppBar('All Clients'),
         body: switchedLoadingContainer(
             _isLoading,
             viewTrainerBackgroundContainer(context,
                 child: _allClientsContainer())));
-  }
-
-  AppBar _allClientsAppBar() {
-    return AppBar(
-      toolbarHeight: 85,
-      flexibleSpace: Ink(
-          decoration: BoxDecoration(
-              gradient: LinearGradient(colors: [
-        CustomColors.jigglypuff,
-        CustomColors.love,
-      ]))),
-      title: Center(
-          child: Text('All Clients',
-              style: TextStyle(fontWeight: FontWeight.bold))),
-    );
   }
 
   Widget _allClientsContainer() {
@@ -98,21 +84,26 @@ class AllClientsScreenState extends State<AllClientsScreen> {
     String sex = trainerData['profileDetails']['sex'];
     num age = trainerData['profileDetails']['age'];
     return GestureDetector(
-        onTap: () {},
-        child: Padding(
-            padding: EdgeInsets.all(10),
-            child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        clientProfileImage(profileImageURL),
-                        clientProfileContent(
-                            context, firstName, lastName, sex, age)
-                      ]),
-                  userDivider()
-                ])));
+      onTap: () => Navigator.of(context).push(
+        MaterialPageRoute(
+            builder: ((context) =>
+                SelectedClientProfile(clientUID: trainerDocument.id))),
+      ),
+      child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      clientProfileImage(profileImageURL),
+                      clientProfileContent(
+                          context, firstName, lastName, sex, age)
+                    ]),
+                userDivider()
+              ])),
+    );
   }
 }

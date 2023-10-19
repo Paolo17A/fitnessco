@@ -44,7 +44,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
         _isConfirmed = userData['isConfirmed'] as bool;
         _trainerUID = userData['currentTrainer'] as String;
         _hasPrescribedWorkout =
-            (userData['prescribedWorkout'] as Map<String, dynamic>).isNotEmpty;
+            (userData['prescribedWorkouts'] as Map<String, dynamic>).isNotEmpty;
         _profileImageURL = userData['profileImageURL'] as String;
         _paymentInterval = userData['paymentInterval'] as String;
         _profileDetails = userData['profileDetails'];
@@ -87,29 +87,6 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
 
   void _goToCameraWorkoutScreen() {
     Navigator.of(context).pushNamed('/cameraWorkoutScreen');
-  }
-
-  void _settingModalBottomSheet() {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext bc) {
-          return Wrap(children: <Widget>[
-            ListTile(
-                leading: const Icon(Icons.list),
-                title: const Text('BMI'),
-                onTap: () {
-                  Navigator.pop(context);
-                  Navigator.of(context).pushNamed('/bmiHistory');
-                }),
-            ListTile(
-                leading: const Icon(Icons.fitness_center),
-                title: const Text('Workout'),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).pushNamed('/workoutHistory');
-                })
-          ]);
-        });
   }
 
   @override

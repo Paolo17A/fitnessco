@@ -1,4 +1,5 @@
 import 'package:fitnessco/screens/chat_screen.dart';
+import 'package:fitnessco/screens/selected_client_profile_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
@@ -51,7 +52,12 @@ class CurrentClientCard extends StatelessWidget {
                           SizedBox(
                             height: 30,
                             child: ElevatedButton(
-                                onPressed: () {},
+                                onPressed: () => Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                        builder: (context) =>
+                                            SelectedClientProfile(
+                                              clientUID: clientUID,
+                                            ))),
                                 style: ElevatedButton.styleFrom(
                                     backgroundColor: Colors.white,
                                     shape: RoundedRectangleBorder(

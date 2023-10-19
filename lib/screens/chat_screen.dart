@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 //import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:flutter/material.dart';
 import '../widgets/chat_messages.dart';
 import '../widgets/new_message_widget.dart';
@@ -259,23 +260,23 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('$_otherUserFirstName $_otherUserLastName'),
-        actions: widget.isClient
-            ? [
-                IconButton(
-                    onPressed: _showConfirmationDialog,
-                    icon: const Icon(Icons.delete))
-              ]
-            : [
-                IconButton(
-                    onPressed: () => _selectDate(context),
-                    icon: const Icon(Icons.calendar_month))
-              ],
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Column(children: [
+        appBar: AppBar(
+          title: Text('$_otherUserFirstName $_otherUserLastName'),
+          actions: widget.isClient
+              ? [
+                  IconButton(
+                      onPressed: _showConfirmationDialog,
+                      icon: const Icon(Icons.delete))
+                ]
+              : [
+                  IconButton(
+                      onPressed: () => _selectDate(context),
+                      icon: const Icon(Icons.calendar_month))
+                ],
+        ),
+        body: switchedLoadingContainer(
+            _isLoading,
+            Column(children: [
               Expanded(
                   child: ChatMessages(
                 otherUID: widget.otherPersonUID,
@@ -285,7 +286,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 otherUID: widget.otherPersonUID,
                 isClient: widget.isClient,
               )
-            ]),
-    );
+            ])));
   }
 }

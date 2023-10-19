@@ -1,12 +1,13 @@
+import 'package:fitnessco/utils/color_utils.dart';
 import 'package:flutter/material.dart';
 
 Widget gymHistoryEntryWidget(
     Map<dynamic, dynamic> timeIn, Map<dynamic, dynamic> timeOut) {
   return Padding(
-    padding: const EdgeInsets.all(8.0),
+    padding: const EdgeInsets.all(5),
     child: Container(
       decoration: BoxDecoration(
-          color: Colors.deepPurple.withOpacity(0.5),
+          color: CustomColors.rosePink.withOpacity(0.75),
           borderRadius: BorderRadius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -20,7 +21,7 @@ Widget gymHistoryEntryWidget(
                 Text(_dateMapToString(timeIn), style: _style())
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 5),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

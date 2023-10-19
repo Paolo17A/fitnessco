@@ -1,5 +1,3 @@
-import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
-import 'package:fitnessco/screens/trainer_schedule_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
@@ -57,16 +55,11 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   }
 
   void _goToTrainerScheduleScreen() {
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (context) => const TrainerScheduleScreen()));
+    Navigator.of(context).pushNamed('/trainerSchedule');
   }
 
   void _goToTrainerCurrentClientsScreen() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => const TrainerCurrentClients(),
-      ),
-    );
+    Navigator.of(context).pushNamed('/trainerCurrentClients');
   }
 
   @override

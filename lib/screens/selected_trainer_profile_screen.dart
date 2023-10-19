@@ -219,7 +219,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
         Padding(
             padding: const EdgeInsets.symmetric(vertical: 15),
             child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Column(children: [
@@ -256,54 +256,60 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                                   ]))
                             ]))
                   ]),
-                  Column(children: [
-                    trainerProfileContent(context, trainerData['firstName'],
-                        trainerData['lastName'], trainerData['currentClients']),
-                    //ADMIN OPTIONS
-                    if (isBeingViewedByAdmin)
-                      ElevatedButton(
-                        onPressed: () => _deleteTrainer(context),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30))),
-                        child: const Text('DELETE TRAINER'),
-                      )
-                    //  CLIENT OPTIONS
-                    else if (!isTrainingRequestSent)
-                      ElevatedButton(
-                        onPressed: () => _sendTrainerRequest(context),
-                        style: ElevatedButton.styleFrom(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30))),
-                        child: const Text('SEND TRAINING REQUEST'),
-                      )
-                    else if (isViewingCurrentTrainer && !isConfirmed)
-                      Column(
-                        children: [
-                          roundedContainer(
-                              color: CustomColors.purpleSnail,
-                              child: Text('REQUEST PENDING')),
-                          ElevatedButton(
-                            onPressed: () => _cancelTrainer(),
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.red,
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(30))),
-                            child: const Text('CANCEL REQUEST'),
-                          ),
-                        ],
-                      )
-                    else if (isViewingCurrentTrainer && isConfirmed)
-                      ElevatedButton(
-                        onPressed: () => _cancelTrainer(),
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30))),
-                        child: const Text('REMOVE TRAINER'),
-                      )
-                  ])
+                  SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.45,
+                    child: Column(children: [
+                      trainerProfileContent(
+                          context,
+                          trainerData['firstName'],
+                          trainerData['lastName'],
+                          trainerData['currentClients']),
+                      //ADMIN OPTIONS
+                      if (isBeingViewedByAdmin)
+                        ElevatedButton(
+                          onPressed: () => _deleteTrainer(context),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30))),
+                          child: const Text('DELETE TRAINER'),
+                        )
+                      //  CLIENT OPTIONS
+                      else if (!isTrainingRequestSent)
+                        ElevatedButton(
+                          onPressed: () => _sendTrainerRequest(context),
+                          style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30))),
+                          child: const Text('SEND TRAINING REQUEST'),
+                        )
+                      else if (isViewingCurrentTrainer && !isConfirmed)
+                        Column(
+                          children: [
+                            roundedContainer(
+                                color: CustomColors.purpleSnail,
+                                child: Text('REQUEST PENDING')),
+                            ElevatedButton(
+                              onPressed: () => _cancelTrainer(),
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.red,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30))),
+                              child: const Text('CANCEL REQUEST'),
+                            ),
+                          ],
+                        )
+                      else if (isViewingCurrentTrainer && isConfirmed)
+                        ElevatedButton(
+                          onPressed: () => _cancelTrainer(),
+                          style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30))),
+                          child: const Text('REMOVE TRAINER'),
+                        )
+                    ]),
+                  )
                 ])),
         Divider(color: Colors.grey, thickness: 2)
       ],

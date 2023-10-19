@@ -50,6 +50,9 @@ dependencies:
   google_fonts: ^6.1.0
   dropdown_search: ^5.0.6
   flutter_rating_bar: ^4.0.1
+  flutter_calendar_carousel: ^2.4.2
+  carousel_slider: ^4.2.1
+  intl: ^0.18.1
   
 dev_dependencies:
   flutter_test:
@@ -80,6 +83,7 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+     - assets/images/gifs/
      - assets/images/backgrounds/
      - assets/images/icons/
      - assets/images/fitnessco_logo.png

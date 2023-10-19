@@ -12,7 +12,9 @@ import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/forgot_password_screen.dart';
 import 'package:fitnessco/screens/gym_rates_screen.dart';
 import 'package:fitnessco/screens/profile_completed_screen.dart';
+import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
 import 'package:fitnessco/screens/trainer_home_screen.dart';
+import 'package:fitnessco/screens/trainer_schedule_screen.dart';
 import 'package:fitnessco/screens/workout_history_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +62,9 @@ class _MyAppState extends State<MyApp> {
     '/cameraWorkoutScreen': (context) => const CameraWorkoutScreen(),
     '/editClientProfile': (context) => const EditClientProfile(),
     '/editTrainerProfile': (context) => const EditTrainerProfile(),
-    '/addTrainer': (context) => const AddTrainerScreen()
+    '/addTrainer': (context) => const AddTrainerScreen(),
+    '/trainerCurrentClients': (context) => const TrainerCurrentClients(),
+    '/trainerSchedule': (context) => const TrainerScheduleScreen()
   };
 
   final ThemeData _themeData = ThemeData(

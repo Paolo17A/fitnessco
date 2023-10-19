@@ -28,38 +28,34 @@ class _MembershipStatusDropdownState extends State<MembershipStatusDropdown> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        children: [
-          const Text(
-            'Membership Status:',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              value: _selectedMembershipStatus,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
-              ),
-              onChanged: (String? newValue) {
-                widget.onChanged!(newValue);
-              },
-              items: <String>['PAID', 'UNPAID']
-                  .map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-          ),
-        ],
-      ),
+    return SizedBox(
+      height: 35,
+      child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+          child: Row(children: [
+            const Text('Membership Status:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                )),
+            const SizedBox(width: 10),
+            Expanded(
+                child: DropdownButtonFormField<String>(
+                    value: _selectedMembershipStatus,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                    ),
+                    onChanged: (String? newValue) {
+                      widget.onChanged!(newValue);
+                    },
+                    items: <String>['PAID', 'UNPAID']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList()))
+          ])),
     );
   }
 }

@@ -68,7 +68,12 @@ void _showLogOutDialog(BuildContext context, Function onPress) {
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       _logOutDialogButton(
-                          label: 'CANCEL', color: Colors.red, onPress: onPress),
+                          label: 'CANCEL',
+                          color: Colors.red,
+                          onPress: () {
+                            Navigator.of(context).pop();
+                            Navigator.of(context).pop();
+                          }),
                       _logOutDialogButton(
                           label: 'CONFIRM',
                           color: Colors.green,

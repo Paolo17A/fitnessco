@@ -1,12 +1,20 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/prescribe_workout_screen.dart';
-import 'package:fitnessco/widgets/workout_card_widget.dart';
+import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/utils/workout_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
+import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../widgets/custom_miscellaneous_widgets.dart';
 
 class ClientWorkoutsScreen extends StatefulWidget {
-  final String
-      clientUID; //  we must pass it through here because we can access this screen via client or via trainer
+  final String clientUID;
   const ClientWorkoutsScreen({Key? key, required this.clientUID})
       : super(key: key);
 
@@ -17,8 +25,12 @@ class ClientWorkoutsScreen extends StatefulWidget {
 class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
   bool _isLoading = true;
   bool _isTrainer = false;
+  final workoutDescriptionController = TextEditingController();
   Map<String, dynamic> prescribedWorkouts = {};
   Map<String, dynamic> appointment = {};
+  DateTime _selectedDate = DateTime.now();
+  Map<dynamic, dynamic> _selectedDateWorkout = {};
+  String workoutID = '';
 
   @override
   void initState() {
@@ -28,32 +40,11 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
 
   void _getPrescribedWorkout() async {
     try {
-      final clientUserData = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.clientUID)
-          .get();
+      final clientUser = await getThisUserData(widget.clientUID);
+      final clientUserData = clientUser.data() as Map<dynamic, dynamic>;
 
-      prescribedWorkouts = clientUserData.data()!['prescribedWorkout'];
+      prescribedWorkouts = clientUserData['prescribedWorkouts'];
       _isTrainer = widget.clientUID != FirebaseAuth.instance.currentUser!.uid;
-      appointment = clientUserData.data()!['appointment'];
-
-      //Check if the date is surpassed
-      if (appointment.isNotEmpty) {
-        DateTime oldAppointment = DateTime(
-            appointment['year'],
-            appointment['month'],
-            appointment['day'],
-            appointment['hour'],
-            appointment['minute']);
-
-        if (oldAppointment.isBefore(DateTime.now())) {
-          FirebaseFirestore.instance
-              .collection('users')
-              .doc(widget.clientUID)
-              .update({'appointment': {}});
-          appointment = {};
-        }
-      }
 
       setState(() {
         _isLoading = false;
@@ -67,116 +58,192 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
 
   void _goToPrescribeWorkoutScreen() {
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) => PrescribeWorkoutScreen(
-        clientUID: widget.clientUID,
-      ),
-    ));
+        builder: (context) => PrescribeWorkoutScreen(
+            clientUID: widget.clientUID,
+            dateTime: _selectedDate,
+            currentWorkouts: _selectedDateWorkout,
+            workoutID: workoutID,
+            viewingSchedule: false,
+            description: workoutDescriptionController.text.trim())));
   }
 
-  void _deleteWorkout(String muscle, String workout) async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
-      Map<String, dynamic> selectedMuscle = prescribedWorkouts[muscle];
-      if (selectedMuscle.length == 1) {
-        prescribedWorkouts.remove(muscle);
-      } else {
-        selectedMuscle.remove(workout);
-        prescribedWorkouts[muscle] = selectedMuscle;
+  bool _dateHasWorkout(DateTime _selectedDate) {
+    for (var prescribedWorkout in prescribedWorkouts.entries) {
+      final workoutData = prescribedWorkout.value as Map<String, dynamic>;
+      final workoutDate = (workoutData['workoutDate'] as Timestamp).toDate();
+      if (_isDateEqual(_selectedDate, workoutDate)) {
+        workoutDescriptionController.text = workoutData['description'];
+        _selectedDateWorkout = workoutData['workout'];
+        workoutID = prescribedWorkout.key;
+        return true;
       }
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.clientUID)
-          .update({'prescribedWorkout': prescribedWorkouts});
-
-      _getPrescribedWorkout();
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text('Error deleting workout: ${error.toString()}')));
     }
+    workoutID = '';
+    workoutDescriptionController.text = '';
+    _selectedDateWorkout = {};
+    return false;
   }
 
-  String _formatTwoDigits(int n) {
-    return n.toString().padLeft(2, '0');
+  bool _isDateEqual(DateTime _selectedDate, DateTime _workoutDate) {
+    return _selectedDate.year == _workoutDate.year &&
+        _selectedDate.month == _workoutDate.month &&
+        _selectedDate.day == _workoutDate.day;
   }
 
   @override
   Widget build(BuildContext context) {
-    List<String> muscleKeys = prescribedWorkouts.keys.toList();
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(_isTrainer ? "Client Workout" : "My Workout Plan"),
-        actions: [
-          if (_isTrainer)
-            IconButton(
-                onPressed: _goToPrescribeWorkoutScreen,
-                icon: const Icon(Icons.add))
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: () async {
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+            toolbarHeight: 105,
+            title: Center(
+                child: futuraText(
+                    _isTrainer ? "Client Workout Plan" : "My Workout Plan",
+                    textStyle: whiteBoldStyle(size: 25)))),
+        body: switchedLoadingContainer(
+          _isLoading,
+          viewTrainerBackgroundContainer(
+            context,
+            child: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(children: [
+                  _calendarCarousel(),
+                  _workoutDescription(),
+                  _workoutEntryContainer()
+                ]),
+              ),
+            ),
+          ),
+        ));
+  }
+
+  Widget _calendarCarousel() {
+    return CalendarCarousel(
+        height: 375,
+        width: MediaQuery.of(context).size.width * 0.9,
+        weekendTextStyle: whiteBoldStyle(),
+        daysTextStyle: whiteBoldStyle(),
+        showOnlyCurrentMonthDate: true,
+        daysHaveCircularBorder: true,
+        headerTextStyle: TextStyle(
+            color: CustomColors.purpleSnail,
+            fontWeight: FontWeight.bold,
+            fontSize: 20),
+        weekdayTextStyle: GoogleFonts.cambay(textStyle: blackBoldStyle()),
+        selectedDateTime: _selectedDate,
+        todayButtonColor: CustomColors.nearMoon,
+        todayBorderColor: CustomColors.nearMoon,
+        selectedDayButtonColor: Colors.transparent,
+        selectedDayBorderColor: Colors.transparent,
+        leftButtonIcon: Transform.scale(
+          scale: 1.5,
+          child: Icon(
+            Icons.arrow_circle_left_outlined,
+            color: CustomColors.purpleSnail,
+          ),
+        ),
+        rightButtonIcon: Transform.scale(
+          scale: 1.5,
+          child: Icon(
+            Icons.arrow_circle_right_outlined,
+            color: CustomColors.purpleSnail,
+          ),
+        ),
+        isScrollable: false,
+        onDayPressed: (selectedDate, _) {
           setState(() {
-            _isLoading = true;
-            _getPrescribedWorkout();
+            _selectedDate = selectedDate;
           });
         },
-        child: Padding(
-          padding: const EdgeInsets.all(8),
-          child: _isLoading
-              ? const Center(child: CircularProgressIndicator())
-              : Column(
-                  children: [
-                    if (prescribedWorkouts.isNotEmpty)
-                      appointment.isEmpty
-                          ? const Padding(
-                              padding: EdgeInsets.all(20),
-                              child: Text(
-                                'No Scheduled Training',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.deepPurple),
-                              ),
-                            )
-                          : Padding(
-                              padding: const EdgeInsets.all(15),
-                              child: Text(
-                                  'Next Workout: ${_formatTwoDigits(appointment['year'])}-${_formatTwoDigits(appointment['month'])}-${_formatTwoDigits(appointment['day'])} ${_formatTwoDigits((appointment['hour'] as int) % 12)}:${_formatTwoDigits(appointment['minute'])} ${(appointment['hour'] as int) >= 12 ? 'PM' : 'AM'} ',
-                                  style: const TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.deepPurple)),
-                            ),
-                    prescribedWorkouts.isEmpty
-                        ? const Center(
-                            child: Text(
-                            'No Prescribed Workouts',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                                fontSize: 40,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.purple),
-                          ))
-                        : Expanded(
-                            child: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: prescribedWorkouts.length,
-                                itemBuilder: (context, index) {
-                                  return WorkoutCardWidget(
-                                    muscle: muscleKeys[index],
-                                    workouts:
-                                        prescribedWorkouts[muscleKeys[index]],
-                                    viewedByTrainer: _isTrainer,
-                                    onDeleteCallback: _deleteWorkout,
-                                  );
-                                })),
-                  ],
-                ),
-        ),
-      ),
+        onDayLongPressed: (day) {
+          if (!_isTrainer || day.isBefore(DateTime.now())) {
+            return;
+          }
+          setState(() {
+            _selectedDate = day;
+          });
+
+          showSelectedDateOptions(context,
+              hasWorkout: _dateHasWorkout(day),
+              onSelectedPrescribe: _goToPrescribeWorkoutScreen,
+              onSelectedDelete: () {});
+        },
+        customDayBuilder: (isSelectable, index, isSelectedDay, isToday,
+            isPrevMonthDay, textStyle, isNextMonthDay, isThisMonthDay, day) {
+          return customDayWidget(isSelectedDay, day.day);
+        });
+  }
+
+  Widget _workoutDescription() {
+    return Padding(
+      padding: const EdgeInsets.all(10),
+      child: fitnesscoTextField(
+          '', TextInputType.text, workoutDescriptionController,
+          typeColor: Colors.black, isEditable: false),
+    );
+  }
+
+  Widget _workoutEntryContainer() {
+    return Padding(
+        padding: EdgeInsets.all(10),
+        child: _dateHasWorkout(_selectedDate)
+            ? _workoutSpread()
+            : futuraText('NO ASSIGNED WORKOUT FOR THIS DATE',
+                textStyle: blackBoldStyle(size: 35)));
+  }
+
+  Widget _workoutSpread() {
+    return Container(
+      child: Column(
+          //  THIS MAPS OUT ALL THE MUSCLES
+          children: _selectedDateWorkout.entries.map((muscle) {
+        final workouts = muscle.value as Map<dynamic, dynamic>;
+        return Column(
+          children: workouts.entries.map((workout) {
+            return Padding(
+              padding: const EdgeInsets.all(15),
+              child: Container(
+                  width: double.maxFinite,
+                  height: 100,
+                  color: CustomColors.love,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Container(
+                            height: 75,
+                            width: 75,
+                            color: Colors.white,
+                            child: Image.asset(
+                                'assets/images/gifs/${workout.key}.gif')),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              futuraText(workout.key,
+                                  textStyle: blackBoldStyle()),
+                              futuraText(
+                                  'Reps: ${workout.value['reps'].toString()}',
+                                  textStyle: TextStyle(
+                                      color: CustomColors.purpleSnail,
+                                      fontWeight: FontWeight.bold)),
+                              futuraText(
+                                  'Sets: ${workout.value['sets'].toString()}',
+                                  textStyle: TextStyle(
+                                      color: CustomColors.purpleSnail,
+                                      fontWeight: FontWeight.bold))
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  )),
+            );
+          }).toList(),
+        );
+      }).toList()),
     );
   }
 }

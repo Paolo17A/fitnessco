@@ -51,18 +51,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'firstName': _firstNameController.text,
         'lastName': _lastNameController.text,
         'accountInitialized': false,
-        'profileDetails': {},
         'accountType': 'CLIENT',
         'currentTrainer': '',
         'isConfirmed': false,
         'membershipStatus': 'UNPAID',
         'profileImageURL': '',
-        'prescribedWorkout': {},
+        'prescribedWorkouts': {},
         'bmiHistory': [],
         'workoutHistory': [],
         'gymHistory': [],
-        'appointment': {},
-        'paymentInterval': 'DAILY'
+        'expiryDate': DateTime.now(),
+        'paymentInterval': 'DAILY',
+        'profileDetails': {
+          'age': 0,
+          'sex': '',
+          'height': 0,
+          'weight': 0,
+          'workoutExperience': '',
+          'workoutFrequency': 0,
+          'sleepHours': 0,
+          'workoutAvailability': '',
+          'illnesses': '',
+          'allergies': '',
+          'recentlyDoctored': false,
+          'injuries': '',
+          'medications': '',
+          'steroids': '',
+          'foodDiet': '',
+          'bodyConcerns': '',
+          'muscleGoal': '',
+          'dedicationSpan': '',
+          'specialPlans': ''
+        },
+        'email': _emailTextController.text,
+        'password': _passwordTextController.text
       });
 
       // Send email confirmation link to user
@@ -131,7 +153,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       child: Padding(
                         padding: const EdgeInsets.all(20),
                         child: CircleAvatar(
-                          radius: 80,
+                          radius: 50,
                           backgroundColor: Colors.white,
                           backgroundImage: AssetImage(
                               'assets/images/fitnessco_logo_notext.png'),

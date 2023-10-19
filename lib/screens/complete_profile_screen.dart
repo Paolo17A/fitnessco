@@ -165,7 +165,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
 
       final userData = await getCurrentUserData();
       List<dynamic> bmiEntries = userData['bmiHistory'];
-      Map<String, dynamic> newBMI = {
+      Map<dynamic, dynamic> newBMI = {
         'dateTime': {
           'month': DateTime.now().month,
           'year': DateTime.now().year,
@@ -174,10 +174,10 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
         'bmiValue': BMI
       };
 
-      bmiEntries.add({newBMI});
+      bmiEntries.add(newBMI);
 
       await updateCurrentUserData({
-        'bmiHistory': newBMI,
+        'bmiHistory': bmiEntries,
         'accountInitialized': true,
         'profileDetails': {
           'age': double.parse(_ageController.text),
@@ -230,19 +230,20 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       child: Scaffold(
         body: GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
-          child: SafeArea(
-            child: userAuthBackgroundContainer(context,
-                child: stackedLoadingContainer(context, _isLoading, [
-                  Column(
+          child: stackedLoadingContainer(context, _isLoading, [
+            userAuthBackgroundContainer(context,
+                child: SafeArea(
+                    child: SingleChildScrollView(
+                  child: Column(
                     children: [
                       _completeProfileHeader(),
                       _progressBar(),
                       _currentProfileFields(),
                       _continueButton()
                     ],
-                  )
-                ])),
-          ),
+                  ),
+                )))
+          ]),
         ),
       ),
     );

@@ -6,7 +6,8 @@ TextField fitnesscoTextField(
     String text, TextInputType textInputType, TextEditingController controller,
     {IconData? icon,
     int? maxLines = 6,
-    Color? typeColor = CustomColors.purpleSnail}) {
+    Color? typeColor = CustomColors.purpleSnail,
+    bool? isEditable = true}) {
   return TextField(
       controller: controller,
       obscureText:
@@ -17,6 +18,7 @@ TextField fitnesscoTextField(
           textInputType == TextInputType.visiblePassword ? true : false,
       cursorColor: CustomColors.purpleSnail,
       maxLines: textInputType == TextInputType.multiline ? maxLines : 1,
+      enabled: isEditable,
       style: GoogleFonts.nunitoSans(textStyle: TextStyle(color: typeColor)),
       decoration: InputDecoration(
           prefixIcon: icon != null

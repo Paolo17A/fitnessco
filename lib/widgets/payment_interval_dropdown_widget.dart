@@ -12,10 +12,10 @@ class PaymentIntervalDropdownWidget extends StatefulWidget {
 
   @override
   State<PaymentIntervalDropdownWidget> createState() =>
-      _MembershipStatusDropdownState();
+      _PaymentIntervalDropdownWidgetState();
 }
 
-class _MembershipStatusDropdownState
+class _PaymentIntervalDropdownWidgetState
     extends State<PaymentIntervalDropdownWidget> {
   late String _selectedPaymentInterval;
 
@@ -27,42 +27,45 @@ class _MembershipStatusDropdownState
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Row(
-        children: [
-          const Text(
-            'Payment Plan:',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              value: _selectedPaymentInterval,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+    return SizedBox(
+      height: 35,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Row(
+          children: [
+            const Text(
+              'Payment Plan:',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
               ),
-              onChanged: (String? newValue) {
-                widget.onChanged!(newValue);
-              },
-              items: <String>[
-                'DAILY',
-                'WEEKLY',
-                'MONTHLY',
-                'DOWN WEEKLY',
-                'DOWN MONTHLY'
-              ].map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
             ),
-          ),
-        ],
+            const SizedBox(width: 10),
+            Expanded(
+              child: DropdownButtonFormField<String>(
+                value: _selectedPaymentInterval,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                ),
+                onChanged: (String? newValue) {
+                  widget.onChanged!(newValue);
+                },
+                items: <String>[
+                  'DAILY',
+                  'WEEKLY',
+                  'MONTHLY',
+                  'DOWN WEEKLY',
+                  'DOWN MONTHLY'
+                ].map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

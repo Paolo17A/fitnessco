@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
@@ -64,14 +65,12 @@ class _SignInScreenState extends State<SignInScreen> {
         _isLoading = false;
       });
       showErrorMessage(context, label: "Error logging in: $error");
-      /*_emailTextController.clear();
-      _passwordTextController.clear();*/
     }
   }
 
   void _goToClientHomeScreen() async {
     final userData = await getCurrentUserData();
-
+    final expiryDate = (userData['expiryDate'] as Timestamp).toDate();
     if (!userData.containsKey('paymentInterval')) {
       await updateCurrentUserData({'paymentInterval': 'DAILY'});
     }
@@ -80,6 +79,14 @@ class _SignInScreenState extends State<SignInScreen> {
       await FirebaseAuth.instance.signOut();
       showErrorMessage(context,
           label: "YOU ARE CURRENTLY UNPAID. PLEASE PAY FIRST AT THE COUNTER");
+      setState(() {
+        _isLoading = false;
+      });
+    } else if (userData['membershipStatus'] == 'PAID' &&
+        DateTime.now().isAfter(expiryDate)) {
+      showErrorMessage(context,
+          label: "YOUR MEMBERSHIP HAS EXPIRED. PLEASE RENEW AT THE COUNTER");
+      await updateCurrentUserData({'membershipStatus': 'UNPAID'});
       setState(() {
         _isLoading = false;
       });
