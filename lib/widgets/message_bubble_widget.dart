@@ -1,4 +1,6 @@
+import 'package:fitnessco/utils/color_utils.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 // A MessageBubble for showing a single chat message on the ChatScreen.
 class MessageBubble extends StatelessWidget {
@@ -57,9 +59,7 @@ class MessageBubble extends StatelessWidget {
               if (isFirstInSequence) const SizedBox(height: 18),
               Container(
                 decoration: BoxDecoration(
-                  color: isMe
-                      ? Colors.grey[300]
-                      : theme.colorScheme.secondary.withAlpha(200),
+                  color: isMe ? Colors.grey[300] : CustomColors.purpleSnail,
                   borderRadius: BorderRadius.only(
                     topLeft: !isMe && isFirstInSequence
                         ? Radius.zero
@@ -77,11 +77,12 @@ class MessageBubble extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(vertical: 4),
                 child: Text(
                   message,
-                  style: TextStyle(
+                  style: GoogleFonts.nunitoSans(
+                      textStyle: TextStyle(
                     height: 1.3,
                     color:
                         isMe ? Colors.black87 : theme.colorScheme.onSecondary,
-                  ),
+                  )),
                   softWrap: true,
                 ),
               ),

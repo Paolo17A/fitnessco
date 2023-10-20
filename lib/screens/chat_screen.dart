@@ -260,32 +260,25 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        extendBodyBehindAppBar: true,
         appBar: AppBar(
-          title: Text('$_otherUserFirstName $_otherUserLastName'),
-          actions: widget.isClient
-              ? [
-                  IconButton(
-                      onPressed: _showConfirmationDialog,
-                      icon: const Icon(Icons.delete))
-                ]
-              : [
-                  IconButton(
-                      onPressed: () => _selectDate(context),
-                      icon: const Icon(Icons.calendar_month))
-                ],
+          toolbarHeight: 40,
+          title: Text('$_otherUserFirstName $_otherUserLastName',
+              style: TextStyle(color: Colors.black)),
         ),
-        body: switchedLoadingContainer(
-            _isLoading,
-            Column(children: [
-              Expanded(
-                  child: ChatMessages(
-                otherUID: widget.otherPersonUID,
-                isClient: widget.isClient,
-              )),
-              NewMessage(
-                otherUID: widget.otherPersonUID,
-                isClient: widget.isClient,
-              )
-            ])));
+        body: stackedLoadingContainer(context, _isLoading, [
+          chatBackgroundContainer(context,
+              child: Column(children: [
+                Expanded(
+                    child: ChatMessages(
+                  otherUID: widget.otherPersonUID,
+                  isClient: widget.isClient,
+                )),
+                NewMessage(
+                  otherUID: widget.otherPersonUID,
+                  isClient: widget.isClient,
+                )
+              ]))
+        ]));
   }
 }

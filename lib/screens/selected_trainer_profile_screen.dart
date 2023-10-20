@@ -9,6 +9,7 @@ import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/color_utils.dart';
+import 'chat_screen.dart';
 
 class SelectedTrainerProfile extends StatefulWidget {
   final DocumentSnapshot trainerDoc;
@@ -193,7 +194,18 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                       _bottomHalf(),
                       if (isViewingCurrentTrainer && isConfirmed)
                         gradientOvalButton(
-                            label: 'CHAT TRAINER', width: 200, onTap: () {})
+                            label: 'CHAT TRAINER',
+                            width: 200,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                            otherPersonUID:
+                                                widget.trainerDoc.id,
+                                            isClient: !isBeingViewedByAdmin,
+                                          )));
+                            })
                     ],
                   ),
                 ))));
