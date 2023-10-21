@@ -40,7 +40,7 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: _workoutHistoryAppBar(),
-        bottomNavigationBar: clientNavBar(currentIndex: 2),
+        bottomNavigationBar: clientNavBar(context, currentIndex: 2),
         body: switchedLoadingContainer(
             _isLoading,
             userAuthBackgroundContainer(context,

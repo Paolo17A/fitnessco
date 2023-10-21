@@ -1,6 +1,7 @@
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -48,6 +49,7 @@ class AllClientsScreenState extends State<AllClientsScreen> {
     return Scaffold(
         extendBodyBehindAppBar: true,
         appBar: largeGradientAppBar('All Clients'),
+        bottomNavigationBar: adminNavBar(context, currentIndex: 1),
         body: switchedLoadingContainer(
             _isLoading,
             viewTrainerBackgroundContainer(context,

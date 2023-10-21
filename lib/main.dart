@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fitnessco/screens/add_trainer_screen.dart';
 import 'package:fitnessco/screens/admin_home_screen.dart';
+import 'package:fitnessco/screens/all_clients_screen.dart';
 import 'package:fitnessco/screens/all_trainers_screen.dart';
 import 'package:fitnessco/screens/bmi_history_screen.dart';
 import 'package:fitnessco/screens/camera_workout_screen.dart';
@@ -11,6 +12,7 @@ import 'package:fitnessco/screens/edit_client_profile_screen.dart';
 import 'package:fitnessco/screens/edit_trainer_profile_screen.dart';
 import 'package:fitnessco/screens/forgot_password_screen.dart';
 import 'package:fitnessco/screens/gym_rates_screen.dart';
+import 'package:fitnessco/screens/manage_gym_screen.dart';
 import 'package:fitnessco/screens/profile_completed_screen.dart';
 import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
 import 'package:fitnessco/screens/trainer_home_screen.dart';
@@ -56,6 +58,7 @@ class _MyAppState extends State<MyApp> {
     '/trainerHome': (context) => const TrainerHomeScreen(),
     '/adminHome': (context) => const AdminHomeScreen(),
     '/gymRates': (context) => const GymRatesScreen(),
+    '/viewAllClients': (context) => const AllClientsScreen(),
     '/viewAllTrainers': (context) => const AllTrainersScreen(),
     '/bmiHistory': (context) => const BMIHistoryScreen(),
     '/workoutHistory': (context) => const WorkoutHistoryScreen(),
@@ -64,7 +67,8 @@ class _MyAppState extends State<MyApp> {
     '/editTrainerProfile': (context) => const EditTrainerProfile(),
     '/addTrainer': (context) => const AddTrainerScreen(),
     '/trainerCurrentClients': (context) => const TrainerCurrentClients(),
-    '/trainerSchedule': (context) => const TrainerScheduleScreen()
+    '/trainerSchedule': (context) => const TrainerScheduleScreen(),
+    '/manageGym': (context) => const ManageGymScreen(),
   };
 
   final ThemeData _themeData = ThemeData(
@@ -75,7 +79,7 @@ class _MyAppState extends State<MyApp> {
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
           backgroundColor: Colors.white,
           selectedItemColor: CustomColors.nightSnow,
-          showSelectedLabels: false,
+          showSelectedLabels: true,
           showUnselectedLabels: false),
       dialogBackgroundColor: CustomColors.plasmaTrail,
       appBarTheme: AppBarTheme(

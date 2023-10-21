@@ -4,6 +4,7 @@ import 'package:fitnessco/widgets/custom_button_widgets.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -180,6 +181,7 @@ class ManageGymScreenState extends State<ManageGymScreen> {
                     textStyle: whiteBoldStyle()),
               ),
               elevation: 0),
+          bottomNavigationBar: adminNavBar(context, currentIndex: 2),
           body: switchedLoadingContainer(
               _isLoading,
               userAuthBackgroundContainer(

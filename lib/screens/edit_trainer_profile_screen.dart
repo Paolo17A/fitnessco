@@ -6,6 +6,7 @@ import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/utils/remove_pic_dialogue.dart';
 import 'package:fitnessco/widgets/custom_button_widgets.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../utils/color_utils.dart';
@@ -309,6 +310,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                   child: futuraText('Edit Profile Description',
                       textStyle: whiteBoldStyle(size: 25))),
             ),
+            bottomNavigationBar: trainerNavBar(context, currentIndex: 2),
             body: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
               child: stackedLoadingContainer(context, _isLoading, [
@@ -377,43 +379,40 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
   }
 
   Widget _profileTabs() {
-    return Padding(
-      padding: EdgeInsets.all(10),
-      child: roundedContainer(
-          width: MediaQuery.of(context).size.width * 0.85,
-          height: MediaQuery.of(context).size.height * 0.6,
-          color: CustomColors.love.withOpacity(0.6),
-          child: Column(
-            children: [
-              SizedBox(
-                width: double.maxFinite,
-                child: TabBar(tabs: [
-                  Tab(
-                      child: futuraText('PROFILE',
-                          textStyle: blackBoldStyle(size: 9))),
-                  Tab(
-                      child: futuraText('CERTIFICA-\nTION',
-                          textStyle: blackBoldStyle(size: 9))),
-                  Tab(
-                      child: futuraText('INTERESTS',
-                          textStyle: blackBoldStyle(size: 9))),
-                  Tab(
-                      child: futuraText('TRAINING\nSPECIALTY',
-                          textStyle: blackBoldStyle(size: 9))),
-                ]),
-              ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height * 0.53,
-                child: TabBarView(children: [
-                  _profileFields(),
-                  _certificationsContainer(),
-                  _interestsContainer(),
-                  _specialtyContainer()
-                ]),
-              )
-            ],
-          )),
-    );
+    return roundedContainer(
+        width: MediaQuery.of(context).size.width * 0.85,
+        height: MediaQuery.of(context).size.height * 0.6,
+        color: CustomColors.love.withOpacity(0.6),
+        child: Column(
+          children: [
+            SizedBox(
+              width: double.maxFinite,
+              child: TabBar(tabs: [
+                Tab(
+                    child: futuraText('PROFILE',
+                        textStyle: blackBoldStyle(size: 9))),
+                Tab(
+                    child: futuraText('CERTIFICA-\nTION',
+                        textStyle: blackBoldStyle(size: 9))),
+                Tab(
+                    child: futuraText('INTERESTS',
+                        textStyle: blackBoldStyle(size: 9))),
+                Tab(
+                    child: futuraText('TRAINING\nSPECIALTY',
+                        textStyle: blackBoldStyle(size: 9))),
+              ]),
+            ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.53,
+              child: TabBarView(children: [
+                _profileFields(),
+                _certificationsContainer(),
+                _interestsContainer(),
+                _specialtyContainer()
+              ]),
+            )
+          ],
+        ));
   }
 
   Widget _profileFields() {

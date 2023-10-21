@@ -4,6 +4,7 @@ import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -56,6 +57,9 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _allTrainersAppBar(),
+      bottomNavigationBar: isBeingViewedByAdmin
+          ? adminNavBar(context, currentIndex: 0)
+          : clientNavBar(context, currentIndex: 0),
       body: switchedLoadingContainer(
         _isLoading,
         viewTrainerBackgroundContainer(context, child: _allTrainersContainer()),

@@ -3,6 +3,7 @@ import 'package:fitnessco/screens/prescribe_workout_screen.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -102,6 +103,7 @@ class _TrainerScheduleScreenState extends State<TrainerScheduleScreen> {
             title: Center(
                 child: futuraText("My Client Schedule",
                     textStyle: whiteBoldStyle(size: 25)))),
+        bottomNavigationBar: trainerNavBar(context, currentIndex: 1),
         body: stackedLoadingContainer(context, _isLoading, [
           viewTrainerBackgroundContainer(context,
               child: SafeArea(

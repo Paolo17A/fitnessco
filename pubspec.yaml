@@ -53,6 +53,7 @@ dependencies:
   flutter_calendar_carousel: ^2.4.2
   carousel_slider: ^4.2.1
   intl: ^0.18.1
+  flutter_tts: ^3.8.3
   
 dev_dependencies:
   flutter_test:

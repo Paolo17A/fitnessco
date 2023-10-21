@@ -7,6 +7,7 @@ import 'package:fitnessco/utils/workout_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_calendar_carousel/flutter_calendar_carousel.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -100,6 +101,8 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
                 child: futuraText(
                     _isTrainer ? "Client Workout Plan" : "My Workout Plan",
                     textStyle: whiteBoldStyle(size: 25)))),
+        bottomNavigationBar:
+            _isTrainer ? null : clientNavBar(context, currentIndex: 1),
         body: switchedLoadingContainer(
           _isLoading,
           viewTrainerBackgroundContainer(
@@ -184,12 +187,17 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
   }
 
   Widget _workoutEntryContainer() {
-    return Padding(
-        padding: EdgeInsets.all(10),
-        child: _dateHasWorkout(_selectedDate)
-            ? _workoutSpread()
-            : futuraText('NO ASSIGNED WORKOUT FOR THIS DATE',
-                textStyle: blackBoldStyle(size: 35)));
+    return Column(
+      children: [
+        Padding(
+            padding: EdgeInsets.all(10),
+            child: _dateHasWorkout(_selectedDate)
+                ? _workoutSpread()
+                : futuraText('NO ASSIGNED WORKOUT FOR THIS DATE',
+                    textStyle: blackBoldStyle(size: 35))),
+        SizedBox(height: MediaQuery.of(context).size.height * 0.1)
+      ],
+    );
   }
 
   Widget _workoutSpread() {

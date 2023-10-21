@@ -3,6 +3,7 @@
 import 'package:fitnessco/widgets/client_requests_container_widget.dart';
 import 'package:fitnessco/widgets/current_clients_container_widget.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/navigation_bar_widgets.dart';
 import 'package:flutter/material.dart';
 
 import '../utils/color_utils.dart';
@@ -30,6 +31,7 @@ class _TrainerCurrentClientsState extends State<TrainerCurrentClients> {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: _myClientsAppBar(),
+      bottomNavigationBar: trainerNavBar(context, currentIndex: 0),
       body: viewTrainerBackgroundContainer(
         context,
         child: SafeArea(

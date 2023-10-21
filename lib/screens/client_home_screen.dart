@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/client_workout_screen.dart';
+import 'package:fitnessco/screens/start_workout_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
@@ -19,16 +21,18 @@ class ClientHomeScreen extends StatefulWidget {
 
 class ClientHomeScreenState extends State<ClientHomeScreen> {
   bool _isLoading = true;
+
   String _firstName = '';
   String _lastName = '';
   bool _isConfirmed = false;
   String _trainerUID = '';
   String _profileImageURL = '';
-  bool _hasPrescribedWorkout = false;
   String _paymentInterval = '';
   Map<dynamic, dynamic> _profileDetails = {};
   List<dynamic> _bmiHistory = [];
-
+  bool _hasWorkoutToday = false;
+  bool _workoutTodayFinished = false;
+  Map<dynamic, dynamic> workoutForToday = {};
   @override
   void initState() {
     super.initState();
@@ -43,13 +47,27 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
         _lastName = userData['lastName'] as String;
         _isConfirmed = userData['isConfirmed'] as bool;
         _trainerUID = userData['currentTrainer'] as String;
-        _hasPrescribedWorkout =
-            (userData['prescribedWorkouts'] as Map<String, dynamic>).isNotEmpty;
         _profileImageURL = userData['profileImageURL'] as String;
         _paymentInterval = userData['paymentInterval'] as String;
         _profileDetails = userData['profileDetails'];
         _bmiHistory = userData['bmiHistory'] as List<dynamic>;
-        print("BMI HISTORY: $_bmiHistory");
+
+        //  WORKOUT PRESCRIPTIONS
+        final workoutPrescriptions =
+            userData['prescribedWorkouts'] as Map<dynamic, dynamic>;
+        print('prescribedWorkouts: $workoutPrescriptions');
+        for (var workoutKey in workoutPrescriptions.keys) {
+          final workoutData =
+              workoutPrescriptions[workoutKey] as Map<String, dynamic>;
+          final workoutDate =
+              (workoutData['workoutDate'] as Timestamp).toDate();
+          if (_isDateEqual(DateTime.now(), workoutDate)) {
+            _hasWorkoutToday = true;
+            workoutForToday = workoutData['workout'];
+            print(workoutForToday);
+            break;
+          }
+        }
         _isLoading = false;
       });
     } catch (error) {
@@ -60,6 +78,12 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
     }
   }
 
+  bool _isDateEqual(DateTime _selectedDate, DateTime _workoutDate) {
+    return _selectedDate.year == _workoutDate.year &&
+        _selectedDate.month == _workoutDate.month &&
+        _selectedDate.day == _workoutDate.day;
+  }
+
   void _goToAllTrainersScreen() {
     Navigator.of(context).pushNamed('/viewAllTrainers');
   }
@@ -68,25 +92,30 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
     Navigator.of(context).pushNamed('/editClientProfile');
   }
 
+  void _goToStartWorkoutScreen() {
+    if (!_hasWorkoutToday) {
+      showErrorMessage(context, label: 'You have no assigned workout today.');
+      return;
+    } else if (_workoutTodayFinished) {
+      showErrorMessage(context, label: 'You already did today\'s workout.');
+      return;
+    }
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) =>
+            StartWorkoutScreen(workoutForToday: workoutForToday)));
+  }
+
   void _goToClientWorkoutScreen() {
     if (_trainerUID == '') {
       showErrorMessage(context, label: 'You have no assigned trainer yet');
 
       return;
     }
-    if (_hasPrescribedWorkout == false) {
-      showErrorMessage(context,
-          label: 'Your trainer has not yet prescribed a workout');
-      return;
-    }
+
     Navigator.of(context).push(MaterialPageRoute(
       builder: (context) => ClientWorkoutsScreen(
           clientUID: FirebaseAuth.instance.currentUser!.uid),
     ));
-  }
-
-  void _goToCameraWorkoutScreen() {
-    Navigator.of(context).pushNamed('/cameraWorkoutScreen');
   }
 
   @override
@@ -228,7 +257,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
                     width: MediaQuery.of(context).size.width * 0.75,
                     child: ElevatedButton(
                         onPressed: _isConfirmed
-                            ? () => _goToCameraWorkoutScreen()
+                            ? () => _goToStartWorkoutScreen()
                             : null,
                         style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
