@@ -23,6 +23,7 @@ import 'package:flutter/material.dart';
 
 import 'screens/sign_in_screen.dart';
 import 'screens/sign_up_screen.dart';
+import 'screens/warm_up_screen.dart';
 import 'screens/welcome_screen.dart';
 
 late List<CameraDescription> cameras;
@@ -69,6 +70,7 @@ class _MyAppState extends State<MyApp> {
     '/trainerCurrentClients': (context) => const TrainerCurrentClients(),
     '/trainerSchedule': (context) => const TrainerScheduleScreen(),
     '/manageGym': (context) => const ManageGymScreen(),
+    '/warmUp': (context) => const WarmUpScreen()
   };
 
   final ThemeData _themeData = ThemeData(

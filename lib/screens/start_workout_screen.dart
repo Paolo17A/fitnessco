@@ -26,7 +26,8 @@ class StartWorkoutScreen extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/warmUp'),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: CustomColors.plasmaTrail,
                           shape: RoundedRectangleBorder(

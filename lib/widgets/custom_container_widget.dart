@@ -152,6 +152,21 @@ Widget startWorkoutBackgroundContainer(BuildContext context,
   );
 }
 
+Widget simulationBackgroundContainer(BuildContext context,
+    {required Widget child}) {
+  return SingleChildScrollView(
+    child: Container(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        decoration: BoxDecoration(
+            image: DecorationImage(
+                image: AssetImage(
+                    'assets/images/backgrounds/SIMULATION Background.png'),
+                fit: BoxFit.cover)),
+        child: SafeArea(child: child)),
+  );
+}
+
 Widget borderedTextContainer(String label, String textInput) {
   return Padding(
     padding: const EdgeInsets.all(8.0),

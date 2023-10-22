@@ -1,6 +1,9 @@
 import 'dart:io';
 
 import 'package:camera/camera.dart';
+import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/widgets/custom_container_widget.dart';
+import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -73,12 +76,24 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
 
   Future<void> _getClientWorkouts() async {
     try {
-      final currentUserData = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(FirebaseAuth.instance.currentUser!.uid)
-          .get();
-      prescribedWorkouts = currentUserData.data()!['prescribedWorkout'];
-      muscleGroups = prescribedWorkouts.keys.toList();
+      final currentUserData = await getCurrentUserData();
+      final allPrescribedWorkouts = currentUserData['prescribedWorkouts'];
+      for (var workoutKey in allPrescribedWorkouts.keys) {
+        final workoutData =
+            allPrescribedWorkouts[workoutKey] as Map<String, dynamic>;
+        final workoutDate = (workoutData['workoutDate'] as Timestamp).toDate();
+        if (_isDateEqual(DateTime.now(), workoutDate)) {
+          prescribedWorkouts = workoutData['workout'];
+          _repsQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+              [workouts[currentWorkoutIndex]]['reps'];
+          _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+              [workouts[currentWorkoutIndex]]['sets'];
+          _repsDone = List<int>.filled(_setQuota, 0);
+          workoutHistory = currentUserData['workoutHistory'];
+          break;
+        }
+      }
+      /*muscleGroups = prescribedWorkouts.keys.toList();
       workouts = (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
               as Map<String, dynamic>)
           .keys
@@ -88,7 +103,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
       _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
           [workouts[currentWorkoutIndex]]['sets'];
       _repsDone = List<int>.filled(_setQuota, 0);
-      workoutHistory = currentUserData.data()!['workoutHistory'];
+      workoutHistory = currentUserData['workoutHistory'];*/
       setState(() {
         isLoading = false;
       });
@@ -97,6 +112,12 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           content: Text('Error getting client workouts: ${error.toString()}')));
       Navigator.pop(context);
     }
+  }
+
+  bool _isDateEqual(DateTime _selectedDate, DateTime _workoutDate) {
+    return _selectedDate.year == _workoutDate.year &&
+        _selectedDate.month == _workoutDate.month &&
+        _selectedDate.day == _workoutDate.day;
   }
 
   //  CAMERA FUNCTIONS
@@ -876,11 +897,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
       //  There is SOMETHING in the accomplishedWorkouts map
       else {
         Map<dynamic, dynamic> newWorkoutEntry = {
-          'dateTime': {
-            'month': DateTime.now().month,
-            'year': DateTime.now().year,
-            'day': DateTime.now().day
-          },
+          'dateTime': DateTime.now(),
           'workout': accomplishedWorkouts
         };
         workoutHistory.add(newWorkoutEntry);
@@ -916,83 +933,86 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                 icon: const Icon(Icons.cameraswitch))
           ],
         ),
-        body: isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Stack(children: [
-                Align(alignment: Alignment.topCenter, child: _liveFeedBody()),
-                Align(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                        width: double.infinity,
-                        height: 100,
-                        color: Colors.black.withOpacity(0.75),
-                        child: Center(
-                            child: Text(_currentWorkoutInstruction,
-                                textAlign: TextAlign.center,
-                                style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold))))),
-                Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Padding(
-                        padding: const EdgeInsets.all(6),
+        body: switchedLoadingContainer(
+            isLoading,
+            simulationBackgroundContainer(context,
+                child: SingleChildScrollView(
+                  child: Column(children: [
+                    Align(
+                        alignment: Alignment.topCenter,
                         child: Container(
                             width: double.infinity,
-                            height: MediaQuery.of(context).size.height * 0.3,
-                            decoration: BoxDecoration(
-                                color: Colors.purple.withOpacity(0.75),
-                                borderRadius: BorderRadius.circular(10)),
-                            child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 10),
-                                  Text(
-                                      'Current Muscle Group: ${muscleGroups[currentMuscleGroupIndex]}',
-                                      style: _textStyle()),
-                                  const SizedBox(height: 10),
-                                  Text(
-                                      'Current Workout: ${workouts[currentWorkoutIndex]}',
-                                      style: _textStyle()),
-                                  const SizedBox(height: 10),
-                                  Text('Current Set: $_currentSet / $_setQuota',
-                                      style: _textStyle()),
-                                  const SizedBox(height: 10),
-                                  Text('Reps Done: $_currentRep / $_repsQuota',
-                                      style: _textStyle()),
-                                  const SizedBox(height: 10),
-                                  Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
-                                          children: [
-                                            ElevatedButton(
-                                                onPressed: _skipWorkout,
-                                                child:
-                                                    const Text('Skip Workout')),
-                                            FloatingActionButton(
-                                              onPressed: () {
-                                                mayAddRep = true;
-                                                _addRepToCurrentSet();
-                                              },
-                                              child: const Icon(Icons.add),
-                                            ),
-                                            ElevatedButton(
-                                                onPressed:
-                                                    muscleGroups.length == 1
-                                                        ? null
-                                                        : _skipMuscle,
-                                                child:
-                                                    const Text('Skip Muscle'))
-                                          ]))
-                                ]))))
-              ]));
-  }
-
-  TextStyle _textStyle() {
-    return const TextStyle(
-        fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white);
+                            height: 100,
+                            color: Colors.black.withOpacity(0.75),
+                            child: Center(
+                                child: Text(_currentWorkoutInstruction,
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.bold))))),
+                    Align(
+                        alignment: Alignment.topCenter, child: _liveFeedBody()),
+                    Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Padding(
+                            padding: const EdgeInsets.all(6),
+                            child: Container(
+                                width: double.infinity,
+                                height:
+                                    MediaQuery.of(context).size.height * 0.3,
+                                decoration: BoxDecoration(
+                                    color: Colors.purple.withOpacity(0.75),
+                                    borderRadius: BorderRadius.circular(10)),
+                                child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(height: 10),
+                                      Text(
+                                          'Current Muscle Group: ${muscleGroups[currentMuscleGroupIndex]}',
+                                          style: whiteBoldStyle()),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                          'Current Workout: ${workouts[currentWorkoutIndex]}',
+                                          style: whiteBoldStyle()),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                          'Current Set: $_currentSet / $_setQuota',
+                                          style: whiteBoldStyle()),
+                                      const SizedBox(height: 10),
+                                      Text(
+                                          'Reps Done: $_currentRep / $_repsQuota',
+                                          style: whiteBoldStyle()),
+                                      const SizedBox(height: 10),
+                                      Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                              children: [
+                                                ElevatedButton(
+                                                    onPressed: _skipWorkout,
+                                                    child: const Text(
+                                                        'Skip Workout')),
+                                                FloatingActionButton(
+                                                  onPressed: () {
+                                                    mayAddRep = true;
+                                                    _addRepToCurrentSet();
+                                                  },
+                                                  child: const Icon(Icons.add),
+                                                ),
+                                                ElevatedButton(
+                                                    onPressed:
+                                                        muscleGroups.length == 1
+                                                            ? null
+                                                            : _skipMuscle,
+                                                    child: const Text(
+                                                        'Skip Muscle'))
+                                              ]))
+                                    ]))))
+                  ]),
+                ))));
   }
 
   Widget _liveFeedBody() {
