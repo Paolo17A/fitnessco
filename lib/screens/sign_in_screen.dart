@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/widgets/custom_button_widgets.dart';
@@ -7,6 +8,7 @@ import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/custom_container_widget.dart';
 
@@ -20,7 +22,6 @@ class SignInScreen extends StatefulWidget {
 class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordTextController = TextEditingController();
   final TextEditingController _emailTextController = TextEditingController();
-
   bool _isLoading = false;
 
   Future<void> signIn(BuildContext context) async {
@@ -38,8 +39,25 @@ class _SignInScreenState extends State<SignInScreen> {
           .signInWithEmailAndPassword(
               email: _emailTextController.text,
               password: _passwordTextController.text);
-
+      SharedPreferences sharedPreferences =
+          await SharedPreferences.getInstance();
+      sharedPreferences.setString('email', _emailTextController.text);
+      sharedPreferences.setString('password', _passwordTextController.text);
       final dataMap = await getCurrentUserData();
+
+      String currentToken = await getToken();
+
+      if (!dataMap.containsKey('pushTokens')) {
+        updateCurrentUserData({
+          'pushTokens': [currentToken]
+        });
+      } else {
+        List<dynamic> allTokens = dataMap['pushTokens'];
+        if (!allTokens.contains(currentToken)) {
+          allTokens.add(currentToken);
+          updateCurrentUserData({'pushTokens': allTokens});
+        }
+      }
 
       if (dataMap['accountType'] == "CLIENT") {
         if (userCredential.user!.emailVerified == false) {

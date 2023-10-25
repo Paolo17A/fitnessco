@@ -1,11 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:flutter/material.dart';
 
 class NewMessage extends StatefulWidget {
+  final List<dynamic> pushTokens;
+  final String otherName;
   final String otherUID;
   final bool isClient;
-  const NewMessage({super.key, required this.otherUID, required this.isClient});
+  const NewMessage(
+      {super.key,
+      required this.pushTokens,
+      required this.otherName,
+      required this.otherUID,
+      required this.isClient});
 
   @override
   State<NewMessage> createState() => _NewMessageState();
@@ -81,6 +89,10 @@ class _NewMessageState extends State<NewMessage> {
         'dateTimeSent': DateTime.now(),
         'messageContent': enteredMessage
       });
+      for (var token in widget.pushTokens) {
+        FirebaseMessagingUtil.sendMessageSentNotif(
+            token, widget.otherName, enteredMessage);
+      }
       return;
     } catch (error) {
       scaffoldMessenger.showSnackBar(

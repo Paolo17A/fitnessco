@@ -1,14 +1,19 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:camera/camera.dart';
+import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/utils/muscle_audio_util.dart';
+import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitnessco/screens/client_home_screen.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_tts/flutter_tts.dart';
 
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import '../utils/pose_detector_util.dart';
@@ -23,8 +28,11 @@ class CameraWorkoutScreen extends StatefulWidget {
   State<CameraWorkoutScreen> createState() => _CameraWorkoutScreenState();
 }
 
+enum WorkoutStates { NONE, REMINDER, INTRO, COUNTDOWN, WORKOUT, REST, DONE }
+
 class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   bool isLoading = true;
+  WorkoutStates _currentWorkoutState = WorkoutStates.NONE;
 
   //  ML Variables
   final PoseDetector _poseDetector =
@@ -42,6 +50,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
 
   //  Current Workout Variables
   Map<String, dynamic> prescribedWorkouts = {};
+  String workoutDescription = '';
   List<String> muscleGroups = [];
   int currentMuscleGroupIndex = 0;
   List<String> workouts = [];
@@ -57,11 +66,89 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   //  Accomplished Workout Variables
   List<dynamic> workoutHistory = [];
   Map<String, dynamic> accomplishedWorkouts = {};
+  bool isAlreadyUpdating = false;
+
+  late FlutterTts flutterTts;
+  String spokenMessage =
+      'But before we start, position yourself 3-5 feet away from your phone';
+  String additionalMessage = '';
+  String imageAssetPath = 'assets/images/warmups/stay_away.png';
+  Timer _timer = Timer(Duration(seconds: 3), () {});
+  bool timerAlreadyInitialized = false;
+  int _secondsRemaining = 30;
+  AudioPlayer audioPlayer = AudioPlayer();
+
+  WorkoutStates get CurrentWorkoutState {
+    return _currentWorkoutState;
+  }
+
+  void SetWorkoutState(WorkoutStates _state) {
+    additionalMessage = '';
+    switch (_state) {
+      case WorkoutStates.NONE:
+        break;
+      case WorkoutStates.REMINDER:
+        spokenMessage =
+            'Before we start, position yourself 3-5 feet away from your phone';
+        imageAssetPath = 'assets/images/warmups/stay_away.png';
+        break;
+      case WorkoutStates.INTRO:
+        spokenMessage = workouts[currentWorkoutIndex];
+        additionalMessage = getWorkoutIntro(workouts[currentWorkoutIndex]);
+        imageAssetPath =
+            'assets/images/gifs/${workouts[currentWorkoutIndex]}.gif';
+        break;
+      case WorkoutStates.COUNTDOWN:
+        spokenMessage = 'Are you ready?';
+        imageAssetPath = 'assets/images/warmups/countdown_3.png';
+        break;
+      case WorkoutStates.REST:
+        spokenMessage =
+            'Rest for 10 seconds. Then prepare for the next exercise';
+        imageAssetPath =
+            'assets/images/gifs/${workouts[currentWorkoutIndex]}.gif';
+        break;
+      case WorkoutStates.WORKOUT:
+        spokenMessage = getWorkoutExplanation(workouts[currentWorkoutIndex]);
+        imageAssetPath =
+            'assets/images/gifs/${workouts[currentWorkoutIndex]}.gif';
+        break;
+      case WorkoutStates.DONE:
+        print('WE ARE NOW DONE');
+        spokenMessage = 'You completed Today\'s workout. Congratulations';
+        imageAssetPath = 'assets/images/warmups/DONE.png';
+    }
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _currentWorkoutState = _state;
+    });
+    playMessage();
+  }
+
+  void playMessage() async {
+    await playback();
+    await flutterTts.awaitSpeakCompletion(true);
+    if (CurrentWorkoutState == WorkoutStates.COUNTDOWN) {
+      _initializeTimer(3);
+    } else if (CurrentWorkoutState == WorkoutStates.INTRO) {
+      await Future.delayed(Duration(seconds: 1));
+      goToNextState();
+    } else if (CurrentWorkoutState == WorkoutStates.REST) {
+      _initializeTimer(10);
+    } else if (CurrentWorkoutState == WorkoutStates.DONE) {
+      _addWorkoutToFirebase();
+    } else {
+      goToNextState();
+    }
+  }
 
   //declare detector
   @override
   void initState() {
     super.initState();
+    flutterTts = FlutterTts();
     _getClientWorkouts();
     _initialize();
   }
@@ -72,18 +159,28 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     _poseDetector.close();
     _stopLiveFeed();
     super.dispose();
+    _timer.cancel();
+    flutterTts.pause();
+    flutterTts.stop();
   }
 
   Future<void> _getClientWorkouts() async {
     try {
       final currentUserData = await getCurrentUserData();
-      final allPrescribedWorkouts = currentUserData['prescribedWorkouts'];
+      final allPrescribedWorkouts =
+          currentUserData['prescribedWorkouts'] as Map<dynamic, dynamic>;
       for (var workoutKey in allPrescribedWorkouts.keys) {
         final workoutData =
             allPrescribedWorkouts[workoutKey] as Map<String, dynamic>;
         final workoutDate = (workoutData['workoutDate'] as Timestamp).toDate();
         if (_isDateEqual(DateTime.now(), workoutDate)) {
           prescribedWorkouts = workoutData['workout'];
+          workoutDescription = workoutData['description'];
+          muscleGroups = prescribedWorkouts.keys.toList();
+          workouts = (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
+                  as Map<String, dynamic>)
+              .keys
+              .toList();
           _repsQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
               [workouts[currentWorkoutIndex]]['reps'];
           _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
@@ -93,17 +190,9 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           break;
         }
       }
-      /*muscleGroups = prescribedWorkouts.keys.toList();
-      workouts = (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
-              as Map<String, dynamic>)
-          .keys
-          .toList();
-      _repsQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
-          [workouts[currentWorkoutIndex]]['reps'];
-      _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
-          [workouts[currentWorkoutIndex]]['sets'];
-      _repsDone = List<int>.filled(_setQuota, 0);
-      workoutHistory = currentUserData['workoutHistory'];*/
+      Future.delayed(Duration(seconds: 2));
+      SetWorkoutState(WorkoutStates.REMINDER);
+
       setState(() {
         isLoading = false;
       });
@@ -118,6 +207,17 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     return _selectedDate.year == _workoutDate.year &&
         _selectedDate.month == _workoutDate.month &&
         _selectedDate.day == _workoutDate.day;
+  }
+
+  void goToNextState() async {
+    if (CurrentWorkoutState == WorkoutStates.REMINDER ||
+        CurrentWorkoutState == WorkoutStates.REST) {
+      SetWorkoutState(WorkoutStates.INTRO);
+    } else if (CurrentWorkoutState == WorkoutStates.INTRO) {
+      SetWorkoutState(WorkoutStates.COUNTDOWN);
+    } else if (CurrentWorkoutState == WorkoutStates.COUNTDOWN) {
+      SetWorkoutState(WorkoutStates.WORKOUT);
+    }
   }
 
   //  CAMERA FUNCTIONS
@@ -670,7 +770,12 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
 
   //WORKOUT RELATED FUNCTIONS
   //===============================================================================================
-  void _addRepToCurrentSet() {
+  void _addRepToCurrentSet() async {
+    if (CurrentWorkoutState != WorkoutStates.WORKOUT) {
+      return;
+    }
+    audioPlayer.play(AssetSource('audio/ding.mp3'));
+
     setState(() {
       _currentRep++;
       _repsDone[_currentSet] = _currentRep;
@@ -719,7 +824,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
 
             //  User has trained all the muscles in the prescribed workout plan
             if (currentMuscleGroupIndex == muscleGroups.length) {
-              _addWorkoutToFirebase();
+              SetWorkoutState(WorkoutStates.DONE);
             } else {
               workouts =
                   (prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
@@ -742,9 +847,15 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     _setQuota = prescribedWorkouts[muscleGroups[currentMuscleGroupIndex]]
         [workouts[currentWorkoutIndex]]['sets'];
     _repsDone = List<int>.filled(_setQuota, 0);
+    _goToRestScreen();
   }
 
-  void _skipWorkout() {
+  void _goToRestScreen() async {
+    await flutterTts.stop();
+    SetWorkoutState(WorkoutStates.REST);
+  }
+
+  void _skipWorkout() async {
     //  If there is only one workout, we display a confirmation pop-up dialogue
     if (workouts.length == 1) {
       showDialog(
@@ -759,8 +870,9 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                       child: const Text('Cancel'),
                     ),
                     TextButton(
-                      onPressed: () {
+                      onPressed: () async {
                         Navigator.of(context).pop();
+                        await flutterTts.stop();
                         setState(() {
                           currentMuscleGroupIndex++;
                           currentWorkoutIndex = 0;
@@ -768,7 +880,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                           _currentSet = 0;
                           //  This is either the last or the only muscle to be trained
                           if (currentMuscleGroupIndex == muscleGroups.length) {
-                            _addWorkoutToFirebase();
+                            SetWorkoutState(WorkoutStates.DONE);
                           }
                           //  Move on to the next muscle
                           else {
@@ -788,6 +900,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     }
     //  There are multiple prescribed workouts for this muscle group
     else {
+      await flutterTts.stop();
       setState(() {
         currentWorkoutIndex++;
         _currentRep = 0;
@@ -796,9 +909,9 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
         if (currentWorkoutIndex == workouts.length) {
           currentMuscleGroupIndex++;
           currentWorkoutIndex = 0;
-          //  If this is the final muscle group, time to updated the workout history in Firebase
+          //  If this is the final muscle group, time to update the workout history in Firebase
           if (currentMuscleGroupIndex == muscleGroups.length) {
-            _addWorkoutToFirebase();
+            SetWorkoutState(WorkoutStates.DONE);
           }
           //  Load the next workout of the same muscle group and set the proper related variables
           else {
@@ -842,7 +955,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                             _currentSet = 0;
                             if (currentMuscleGroupIndex ==
                                 muscleGroups.length) {
-                              _addWorkoutToFirebase();
+                              SetWorkoutState(WorkoutStates.DONE);
                             } else {
                               workouts = (prescribedWorkouts[
                                           muscleGroups[currentMuscleGroupIndex]]
@@ -863,7 +976,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
         _currentSet = 0;
         //  Proceed to updating workouts in Firebase if all muscles have been elapsed
         if (currentMuscleGroupIndex == muscleGroups.length) {
-          _addWorkoutToFirebase();
+          SetWorkoutState(WorkoutStates.DONE);
         }
         //  Reset workout variables to make way for the next workout
         else {
@@ -878,6 +991,12 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   }
 
   void _addWorkoutToFirebase() async {
+    if (isAlreadyUpdating) {
+      return;
+    }
+    isAlreadyUpdating = true;
+    print('ADDING WORKOUT');
+    await flutterTts.stop();
     setState(() {
       isLoading = true;
     });
@@ -891,8 +1010,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
                 'You skipped all your workouts. No history will be recorded')));
 
         navigator.pop();
-        navigator.pushReplacement(MaterialPageRoute(
-            builder: ((context) => const ClientHomeScreen())));
+        navigator.pushReplacementNamed('/clientHome');
       }
       //  There is SOMETHING in the accomplishedWorkouts map
       else {
@@ -901,17 +1019,20 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
           'workout': accomplishedWorkouts
         };
         workoutHistory.add(newWorkoutEntry);
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .update({'workoutHistory': workoutHistory});
-
-        scaffoldMessenger.showSnackBar(const SnackBar(
-            content: Text('Successfully updated Workout History')));
-
-        navigator.pop();
-        navigator.pushReplacement(MaterialPageRoute(
-            builder: ((context) => const ClientHomeScreen())));
+        await updateCurrentUserData({'workoutHistory': workoutHistory});
+        final userData = await getCurrentUserData();
+        List<dynamic> pushTokens = userData['pushTokens'];
+        for (var token in pushTokens) {
+          FirebaseMessagingUtil.sendWorkoutDoneNotif(
+              token, workoutDescription, DateTime.now());
+        }
+        showSuccessMessage(context,
+            label: 'Successfully added workout history. Congratulations!',
+            onPress: () {
+          navigator.pop();
+          navigator.pushReplacementNamed('/clientHome');
+        });
+        isAlreadyUpdating = false;
       }
     } catch (error) {
       scaffoldMessenger.showSnackBar(SnackBar(
@@ -920,99 +1041,194 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
   }
   //===============================================================================================
 
+//  Text to Speech Functions
+  //============================================================================
+  Future playback() async {
+    //flutterTts.stop();
+    await flutterTts
+        .setLanguage('en-US'); // Set the language (adjust as needed)
+    await flutterTts.setPitch(1.0); // Set pitch (adjust as needed)
+    await flutterTts.setSpeechRate(0.5); // Set speech rate (adjust as needed)
+    await flutterTts.speak(spokenMessage);
+    if (additionalMessage.isNotEmpty) {
+      await flutterTts.speak(additionalMessage);
+    }
+  }
+
+  void _initializeTimer(int duration) {
+    if (!mounted || timerAlreadyInitialized) {
+      return;
+    }
+    timerAlreadyInitialized = true;
+    setState(() {
+      _secondsRemaining = duration;
+    });
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_secondsRemaining > 0) {
+          _secondsRemaining--;
+          if (CurrentWorkoutState == WorkoutStates.COUNTDOWN) {
+            switch (_secondsRemaining) {
+              case 3:
+                imageAssetPath = 'assets/images/warmups/countdown_3.png';
+                break;
+              case 2:
+                imageAssetPath = 'assets/images/warmups/countdown_2.png';
+                break;
+              case 1:
+                imageAssetPath = 'assets/images/warmups/countdown_1.png';
+                break;
+            }
+          }
+        } else {
+          _timer.cancel(); // Stop the timer when countdown reaches 0
+          timerAlreadyInitialized = false;
+          goToNextState();
+        }
+      });
+    });
+  }
+  //============================================================================
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            "Pose Estimation",
+    return WillPopScope(
+      onWillPop: () async {
+        await flutterTts.pause();
+        await flutterTts.stop();
+        Navigator.of(context).pushReplacementNamed('/clientHome');
+        return true;
+      },
+      child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            title: const Text(
+              "Pose Estimation",
+            ),
+            actions: [
+              IconButton(
+                  onPressed: _switchLiveCamera,
+                  icon: const Icon(Icons.cameraswitch))
+            ],
           ),
-          actions: [
-            IconButton(
-                onPressed: _switchLiveCamera,
-                icon: const Icon(Icons.cameraswitch))
-          ],
+          body: switchedLoadingContainer(
+              isLoading,
+              simulationBackgroundContainer(context,
+                  child: SafeArea(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          if (CurrentWorkoutState == WorkoutStates.REMINDER ||
+                              CurrentWorkoutState == WorkoutStates.INTRO ||
+                              CurrentWorkoutState == WorkoutStates.COUNTDOWN ||
+                              CurrentWorkoutState == WorkoutStates.REST ||
+                              CurrentWorkoutState == WorkoutStates.DONE)
+                            _imageDisplayContainer()
+                          else if (CurrentWorkoutState == WorkoutStates.WORKOUT)
+                            _workoutContainer()
+                        ],
+                      ),
+                    ),
+                  )))),
+    );
+  }
+
+  Widget _imageDisplayContainer() {
+    return Column(
+      children: [
+        Padding(
+            padding: const EdgeInsets.all(10),
+            child: futuraText(spokenMessage, textStyle: blackBoldStyle())),
+        Container(
+          height: 500,
+          width: 400,
+          decoration: BoxDecoration(
+              image: DecorationImage(image: AssetImage(imageAssetPath))),
         ),
-        body: switchedLoadingContainer(
-            isLoading,
-            simulationBackgroundContainer(context,
-                child: SingleChildScrollView(
-                  child: Column(children: [
-                    Align(
-                        alignment: Alignment.topCenter,
-                        child: Container(
-                            width: double.infinity,
-                            height: 100,
-                            color: Colors.black.withOpacity(0.75),
-                            child: Center(
-                                child: Text(_currentWorkoutInstruction,
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold))))),
-                    Align(
-                        alignment: Alignment.topCenter, child: _liveFeedBody()),
-                    Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Padding(
-                            padding: const EdgeInsets.all(6),
-                            child: Container(
-                                width: double.infinity,
-                                height:
-                                    MediaQuery.of(context).size.height * 0.3,
-                                decoration: BoxDecoration(
-                                    color: Colors.purple.withOpacity(0.75),
-                                    borderRadius: BorderRadius.circular(10)),
-                                child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      const SizedBox(height: 10),
-                                      Text(
-                                          'Current Muscle Group: ${muscleGroups[currentMuscleGroupIndex]}',
-                                          style: whiteBoldStyle()),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                          'Current Workout: ${workouts[currentWorkoutIndex]}',
-                                          style: whiteBoldStyle()),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                          'Current Set: $_currentSet / $_setQuota',
-                                          style: whiteBoldStyle()),
-                                      const SizedBox(height: 10),
-                                      Text(
-                                          'Reps Done: $_currentRep / $_repsQuota',
-                                          style: whiteBoldStyle()),
-                                      const SizedBox(height: 10),
-                                      Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                ElevatedButton(
-                                                    onPressed: _skipWorkout,
-                                                    child: const Text(
-                                                        'Skip Workout')),
-                                                FloatingActionButton(
-                                                  onPressed: () {
-                                                    mayAddRep = true;
-                                                    _addRepToCurrentSet();
-                                                  },
-                                                  child: const Icon(Icons.add),
-                                                ),
-                                                ElevatedButton(
-                                                    onPressed:
-                                                        muscleGroups.length == 1
-                                                            ? null
-                                                            : _skipMuscle,
-                                                    child: const Text(
-                                                        'Skip Muscle'))
-                                              ]))
-                                    ]))))
-                  ]),
-                ))));
+        if (CurrentWorkoutState == WorkoutStates.REST)
+          futuraText(_secondsRemaining > 0 ? _secondsRemaining.toString() : '',
+              textStyle: blackBoldStyle(size: 75))
+      ],
+    );
+  }
+
+  Widget _workoutContainer() {
+    return Column(children: [
+      Container(
+          width: double.infinity,
+          height: 100,
+          color: Colors.black.withOpacity(0.75),
+          child: Center(
+              child: Text(_currentWorkoutInstruction,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold)))),
+      _liveFeedBody(),
+      Padding(
+          padding: const EdgeInsets.all(6),
+          child: Container(
+              width: double.infinity,
+              height: MediaQuery.of(context).size.height * 0.25,
+              decoration: BoxDecoration(color: CustomColors.jigglypuff),
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Padding(
+                        padding: const EdgeInsets.all(10),
+                        child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              ElevatedButton(
+                                  onPressed: _skipWorkout,
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: CustomColors.purpleSnail,
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30))),
+                                  child: futuraText('Skip Workout',
+                                      textStyle: whiteBoldStyle(size: 15))),
+                              FloatingActionButton(
+                                onPressed: () {
+                                  mayAddRep = true;
+                                  _addRepToCurrentSet();
+                                },
+                                backgroundColor:
+                                    Color.fromARGB(255, 55, 138, 185),
+                                child: futuraText('+',
+                                    textStyle: whiteBoldStyle()),
+                              ),
+                              ElevatedButton(
+                                  onPressed: muscleGroups.length == 1
+                                      ? null
+                                      : _skipMuscle,
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: const Color.fromARGB(
+                                          255, 73, 110, 175),
+                                      shape: RoundedRectangleBorder(
+                                          borderRadius:
+                                              BorderRadius.circular(30))),
+                                  child: futuraText('Skip Muscle',
+                                      textStyle: whiteBoldStyle(size: 15)))
+                            ])),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                        Column(children: [
+                          futuraText('$_currentRep / $_repsQuota',
+                              textStyle: greyBoldStyle(size: 40)),
+                          futuraText('REPS', textStyle: greyBoldStyle(size: 25))
+                        ]),
+                        Column(children: [
+                          futuraText('$_currentSet / $_setQuota',
+                              textStyle: greyBoldStyle(size: 40)),
+                          futuraText('SETS', textStyle: greyBoldStyle(size: 25))
+                        ])
+                      ],
+                    ),
+                  ])))
+    ]);
   }
 
   Widget _liveFeedBody() {
@@ -1021,7 +1237,7 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
     if (_controller?.value.isInitialized == false) return Container();
     return Container(
         color: Colors.white,
-        height: MediaQuery.of(context).size.height * 0.7,
+        height: MediaQuery.of(context).size.height * 0.6,
         width: double.infinity,
         child: _changingCameraLens
             ? const Center(

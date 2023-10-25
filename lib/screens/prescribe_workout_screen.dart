@@ -3,6 +3,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/screens/client_workout_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_button_widgets.dart';
@@ -109,6 +110,11 @@ class _PrescribeWorkoutScreenState extends State<PrescribeWorkoutScreen> {
           .doc(widget.clientUID)
           .update({'prescribedWorkouts': prescribedWorkouts});
 
+      List<dynamic> pushTokens = getUserData.data()!['pushTokens'];
+      for (var token in pushTokens) {
+        await FirebaseMessagingUtil.sendPrescribedWorkoutNotif(
+            token, workoutDescriptionController.text.trim(), widget.dateTime);
+      }
       navigatorState.pop();
       if (widget.viewingSchedule) {
         navigatorState.pushReplacementNamed('/trainerSchedule');

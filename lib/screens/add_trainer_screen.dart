@@ -63,6 +63,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
         'trainingRequests': [],
         'currentClients': [],
         'profileImageURL': '',
+        'pushTokens': [],
         'profileDetails': {
           'sex': '',
           'age': '',

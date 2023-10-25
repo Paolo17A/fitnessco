@@ -1,8 +1,10 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../widgets/navigation_bar_widgets.dart';
 
@@ -74,11 +76,11 @@ class _WorkoutHistoryScreenState extends State<WorkoutHistoryScreen> {
         itemBuilder: (context, index) {
           final currentWorkoutHistory = _workoutHistory[index];
           final workoutMuscles = currentWorkoutHistory['workout'];
-          final dateTime = currentWorkoutHistory['dateTime'];
-          String formattedTime =
-              '${dateTime['month']} - ${dateTime['day']} - ${dateTime['year']}';
+          final dateTime =
+              (currentWorkoutHistory['dateTime'] as Timestamp).toDate();
+
           return _workoutHistoryEntry(
-              formattedTime: formattedTime,
+              formattedTime: DateFormat('dd MMM yyy').format(dateTime),
               workoutMuscles: workoutMuscles,
               isFirst: index == 0);
         });

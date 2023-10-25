@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/screens/prescribe_workout_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/utils/muscle_audio_util.dart';
 import 'package:fitnessco/utils/workout_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
@@ -85,6 +87,41 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
     return false;
   }
 
+  bool isTodayOrFutureDate(DateTime date) {
+    DateTime currentDate = DateTime.now();
+
+    // Remove the time portion from both dates to compare only the dates
+    DateTime currentDateWithoutTime =
+        DateTime(currentDate.year, currentDate.month, currentDate.day);
+    DateTime inputDateWithoutTime = DateTime(date.year, date.month, date.day);
+
+    // Check if the input date is today or a future date
+    return inputDateWithoutTime.isAfter(currentDateWithoutTime) ||
+        inputDateWithoutTime.isAtSameMomentAs(currentDateWithoutTime);
+  }
+
+  Future _removeSelectedWorkout(DateTime _selectedDate) async {
+    final getUserData = await getThisUserData(widget.clientUID);
+
+    for (var prescribedWorkout in prescribedWorkouts.entries) {
+      final workoutData = prescribedWorkout.value as Map<String, dynamic>;
+      final workoutDate = (workoutData['workoutDate'] as Timestamp).toDate();
+      if (_isDateEqual(_selectedDate, workoutDate)) {
+        prescribedWorkouts.remove(prescribedWorkout.key);
+        await updateThisUserData(
+            widget.clientUID, {'prescribedWorkouts': prescribedWorkouts});
+        List<dynamic> pushTokens = getUserData.data()!['pushTokens'];
+        for (var token in pushTokens) {
+          await FirebaseMessagingUtil.sendRemovedWorkoutNotif(
+              token, workoutData['description'], _selectedDate);
+        }
+        Navigator.of(context).pop();
+        _getPrescribedWorkout();
+        break;
+      }
+    }
+  }
+
   bool _isDateEqual(DateTime _selectedDate, DateTime _workoutDate) {
     return _selectedDate.year == _workoutDate.year &&
         _selectedDate.month == _workoutDate.month &&
@@ -159,7 +196,7 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
           });
         },
         onDayLongPressed: (day) {
-          if (!_isTrainer || day.isBefore(DateTime.now())) {
+          if (!_isTrainer || !isTodayOrFutureDate(day)) {
             return;
           }
           setState(() {
@@ -169,7 +206,7 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
           showSelectedDateOptions(context,
               hasWorkout: _dateHasWorkout(day),
               onSelectedPrescribe: _goToPrescribeWorkoutScreen,
-              onSelectedDelete: () {});
+              onSelectedDelete: () => _removeSelectedWorkout(day));
         },
         customDayBuilder: (isSelectable, index, isSelectedDay, isToday,
             isPrevMonthDay, textStyle, isNextMonthDay, isThisMonthDay, day) {
@@ -210,44 +247,89 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
           children: workouts.entries.map((workout) {
             return Padding(
               padding: const EdgeInsets.all(15),
-              child: Container(
-                  width: double.maxFinite,
-                  height: 100,
-                  color: CustomColors.love,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Container(
-                            height: 75,
-                            width: 75,
-                            color: Colors.white,
-                            child: Image.asset(
-                                'assets/images/gifs/${workout.key}.gif')),
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              futuraText(workout.key,
-                                  textStyle: blackBoldStyle()),
-                              futuraText(
-                                  'Reps: ${workout.value['reps'].toString()}',
-                                  textStyle: TextStyle(
-                                      color: CustomColors.purpleSnail,
-                                      fontWeight: FontWeight.bold)),
-                              futuraText(
-                                  'Sets: ${workout.value['sets'].toString()}',
-                                  textStyle: TextStyle(
-                                      color: CustomColors.purpleSnail,
-                                      fontWeight: FontWeight.bold))
-                            ],
+              child: GestureDetector(
+                onLongPress: () {
+                  if (!_isTrainer) {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            backgroundColor: CustomColors.plasmaTrail,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20)),
+                            content: Container(
+                              width: MediaQuery.of(context).size.width * 0.75,
+                              height: MediaQuery.of(context).size.height * 0.75,
+                              child: SingleChildScrollView(
+                                child: Padding(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      Image.asset(
+                                          'assets/images/gifs/${workout.key}.gif'),
+                                      Padding(
+                                        padding: const EdgeInsets.all(10),
+                                        child: futuraText(workout.key,
+                                            textStyle:
+                                                whiteBoldStyle(size: 30)),
+                                      ),
+                                      SizedBox(
+                                          width: MediaQuery.of(context)
+                                                  .size
+                                                  .width *
+                                              0.7,
+                                          child: futuraText(
+                                              getWorkoutIntro(workout.key),
+                                              textStyle:
+                                                  whiteBoldStyle(size: 15)))
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          );
+                        });
+                  }
+                },
+                child: Container(
+                    width: double.maxFinite,
+                    height: 100,
+                    color: CustomColors.love,
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Container(
+                              height: 75,
+                              width: 75,
+                              color: Colors.white,
+                              child: Image.asset(
+                                  'assets/images/gifs/${workout.key}.gif')),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                futuraText(workout.key,
+                                    textStyle: blackBoldStyle()),
+                                futuraText(
+                                    'Reps: ${workout.value['reps'].toString()}',
+                                    textStyle: TextStyle(
+                                        color: CustomColors.purpleSnail,
+                                        fontWeight: FontWeight.bold)),
+                                futuraText(
+                                    'Sets: ${workout.value['sets'].toString()}',
+                                    textStyle: TextStyle(
+                                        color: CustomColors.purpleSnail,
+                                        fontWeight: FontWeight.bold))
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  )),
+                        ],
+                      ),
+                    )),
+              ),
             );
           }).toList(),
         );

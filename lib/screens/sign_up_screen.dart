@@ -62,6 +62,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'gymHistory': [],
         'expiryDate': DateTime.now().add(Duration(days: 1)),
         'paymentInterval': 'DAILY',
+        'pushTokens': [],
         'profileDetails': {
           'age': 0,
           'sex': '',

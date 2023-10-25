@@ -3,6 +3,7 @@ import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void showLogOutModal(BuildContext context) {
   showModalBottomSheet(
@@ -24,6 +25,10 @@ void showLogOutModal(BuildContext context) {
                   ),
                   onTap: () => _showLogOutDialog(context, () async {
                         await FirebaseAuth.instance.signOut();
+                        SharedPreferences sharedPreferences =
+                            await SharedPreferences.getInstance();
+                        sharedPreferences.remove('email');
+                        sharedPreferences.remove('password');
                         Navigator.of(context)
                             .popUntil((route) => route.isFirst);
                       })),
@@ -36,6 +41,10 @@ void showLogOutModal(BuildContext context) {
                   ),
                   onTap: () => _showLogOutDialog(context, () async {
                         await FirebaseAuth.instance.signOut();
+                        SharedPreferences sharedPreferences =
+                            await SharedPreferences.getInstance();
+                        sharedPreferences.remove('email');
+                        sharedPreferences.remove('password');
                         SystemNavigator.pop();
                       })),
             ],

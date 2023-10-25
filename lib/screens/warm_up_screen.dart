@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
@@ -45,6 +46,8 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
   int _secondsRemaining = 30;
   Timer _timer = Timer(Duration(seconds: 3), () {});
 
+  AudioPlayer audioPlayer = AudioPlayer();
+
   //  CURRENT WARMUP STATE GETTERS AND SETTERS
   //============================================================================
   WarmUpStates get GetCurrentWarmUpState {
@@ -55,7 +58,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
     additionalExplanation = '';
     switch (_state) {
       case WarmUpStates.START:
-        spokenMessage = 'Hi. Let\'s begin with some whole body warm ups.';
+        spokenMessage = 'Hi. Let us begin with some whole body warm ups.';
         imageAssetPath = 'assets/images/warmups/warmup_start.png';
         break;
       case WarmUpStates.STAY_AWAY:
@@ -66,7 +69,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
       case WarmUpStates.JOG:
         spokenMessage = 'For our first warm up, jogging in place';
         additionalExplanation =
-            'THIS IS THE ADDITIONAL EXPLANATION FOR JOGGING IN PLACE';
+            'Jogging in place is an aerobic exercise that requires you to constantly move and contract your muscles, which improves muscle strength,.... stability,.... and flexibility. You must use proper form in order to maximize the benefits of running in place.';
         imageAssetPath = 'assets/images/warmups/jogging.gif';
         break;
       case WarmUpStates.JOG_COUNTDOWN:
@@ -76,8 +79,9 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
         break;
       case WarmUpStates.JOG_DURATION:
         spokenMessage = 'Jog in place for 30 seconds.';
+        additionalExplanation =
+            '1. Stand straight with your feet a little wider than shoulder-width apart.  2. Bend the knees slightly and place your hands on the hips. 3.  Slowly rotate your hips, making big circles. 4. Complete a set in one direction and then switch to the opposite direction. 5.  dont force your self to do much if you are a novice or beginner. Good job continue your work.';
         imageAssetPath = 'assets/images/warmups/jogging.gif';
-
         break;
       case WarmUpStates.JOG_DONE:
         spokenMessage = 'DONE';
@@ -89,7 +93,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
       case WarmUpStates.JUMPING_JACK:
         spokenMessage = 'For our second warm up, jumping jacks';
         additionalExplanation =
-            'THIS IS THE ADDITIONAL EXPLANATION FOR JUMPING JACKS';
+            'Jumping jacks offer full-body exercise, working muscles in your arms, legs, and core. They can strengthen your muscles, improve coordination, and boost your fitness. You can add traditional jumping jacks to your workouts. ';
         imageAssetPath = 'assets/images/warmups/jumping_jack.gif';
         break;
       case WarmUpStates.JUMPING_JACK_COUNTDOWN:
@@ -98,6 +102,8 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
         break;
       case WarmUpStates.JUMPING_JACK_DURATION:
         spokenMessage = 'Do jumping jacks for 30 seconds. ';
+        additionalExplanation =
+            '1. Stand up straight, hold your arms at your sides, and stand with your feet shoulder-width apart 2. Jump and extend your arms overhead. 3. Extend your legs. and Land in the starting position.  4. dont force your self to do much if you are a novice or beginner.';
         imageAssetPath = 'assets/images/warmups/jumping_jack.gif';
         break;
       case WarmUpStates.JUMPING_JACK_DONE:
@@ -111,7 +117,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
       case WarmUpStates.HIP_CIRCLES:
         spokenMessage = 'For our last warm up, hip circles';
         additionalExplanation =
-            'THIS IS THE ADDITIONAL EXPLANATION FOR HIP CIRCLES';
+            'Hip circles involve rotating your hips in a circular motion. It helps to strengthen your hips and core muscles. It is beneficial for improving flexibility and balance.';
         imageAssetPath = 'assets/images/warmups/hip_circle.gif';
         break;
       case WarmUpStates.HIP_CIRCLES_COUNTDOWN:
@@ -120,6 +126,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
         break;
       case WarmUpStates.HIP_CIRCLES_DURATION:
         spokenMessage = 'Do hip circles for 30 seconds.';
+        additionalExplanation = '';
         imageAssetPath = 'assets/images/warmups/hip_circle.gif';
         break;
       case WarmUpStates.HIP_CIRCLES_DONE:
@@ -155,25 +162,40 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
     flutterTts.pause();
     flutterTts.stop();
     _timer.cancel();
+    audioPlayer.dispose();
   }
 
   void playMessage() async {
-    await playback();
-    await flutterTts.awaitSpeakCompletion(true);
+    if (GetCurrentWarmUpState == WarmUpStates.JOG_DONE ||
+        GetCurrentWarmUpState == WarmUpStates.JUMPING_JACK_DONE ||
+        GetCurrentWarmUpState == WarmUpStates.HIP_CIRCLES_DONE) {
+      await audioPlayer.play(AssetSource('audio/ding.mp3'));
+    } else {
+      await playback();
+      //await flutterTts.awaitSpeakCompletion(true);
+    }
+
     if (GetCurrentWarmUpState == WarmUpStates.JOG_COUNTDOWN ||
         GetCurrentWarmUpState == WarmUpStates.HIP_CIRCLES_COUNTDOWN ||
         GetCurrentWarmUpState == WarmUpStates.JUMPING_JACK_COUNTDOWN) {
       _initializeTimer(4);
     } else if (GetCurrentWarmUpState == WarmUpStates.FIRST_REST ||
-        GetCurrentWarmUpState == WarmUpStates.SECOND_REST ||
-        GetCurrentWarmUpState == WarmUpStates.LAST_REST) {
+        GetCurrentWarmUpState == WarmUpStates.SECOND_REST) {
       _initializeTimer(10);
     } else if (GetCurrentWarmUpState == WarmUpStates.JOG_DURATION ||
         GetCurrentWarmUpState == WarmUpStates.JUMPING_JACK_DURATION ||
-        GetCurrentWarmUpState == WarmUpStates.HIP_CIRCLES_DURATION) {
+        GetCurrentWarmUpState == WarmUpStates.HIP_CIRCLES_DURATION ||
+        GetCurrentWarmUpState == WarmUpStates.LAST_REST) {
+      flutterTts.speak(additionalExplanation);
       _initializeTimer(30);
+    } else if (GetCurrentWarmUpState == WarmUpStates.JOG ||
+        GetCurrentWarmUpState == WarmUpStates.JUMPING_JACK ||
+        GetCurrentWarmUpState == WarmUpStates.HIP_CIRCLES) {
+      await flutterTts.speak(additionalExplanation);
+      await flutterTts.awaitSpeakCompletion(true);
+      goToNextState();
     } else {
-      await Future.delayed(Duration(seconds: 3));
+      await Future.delayed(Duration(seconds: 2));
       goToNextState();
     }
   }
@@ -232,9 +254,6 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
     await flutterTts.setPitch(1.0); // Set pitch (adjust as needed)
     await flutterTts.setSpeechRate(0.5); // Set speech rate (adjust as needed)
     await flutterTts.speak(spokenMessage);
-    if (additionalExplanation.isNotEmpty) {
-      await flutterTts.speak(additionalExplanation);
-    }
   }
   //============================================================================
 
@@ -242,6 +261,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        await audioPlayer.stop();
         await flutterTts.pause();
         await flutterTts.stop();
         return true;

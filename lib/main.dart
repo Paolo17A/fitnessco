@@ -14,11 +14,13 @@ import 'package:fitnessco/screens/forgot_password_screen.dart';
 import 'package:fitnessco/screens/gym_rates_screen.dart';
 import 'package:fitnessco/screens/manage_gym_screen.dart';
 import 'package:fitnessco/screens/profile_completed_screen.dart';
+import 'package:fitnessco/screens/send_otp_screen.dart';
 import 'package:fitnessco/screens/trainer_current_clients_screen.dart';
 import 'package:fitnessco/screens/trainer_home_screen.dart';
 import 'package:fitnessco/screens/trainer_schedule_screen.dart';
 import 'package:fitnessco/screens/workout_history_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
+import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:flutter/material.dart';
 
 import 'screens/sign_in_screen.dart';
@@ -31,6 +33,7 @@ late List<CameraDescription> cameras;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  await FirebaseMessagingUtil.initNotifications();
   cameras = await availableCameras();
   runApp(const MyApp());
 }
@@ -52,6 +55,7 @@ class _MyAppState extends State<MyApp> {
     '/': (context) => const WelcomeScreen(),
     '/signIn': (context) => const SignInScreen(),
     '/signUp': (context) => const SignUpScreen(),
+    '/sendOTP': (context) => const SendOTPScreen(),
     '/forgotPassword': (context) => const ForgotPasswordScreen(),
     '/completeProfile': (context) => CompleteProfileScreen(),
     '/profileCompleted': (context) => ProfileCompletedScreen(),

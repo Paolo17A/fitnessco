@@ -55,16 +55,23 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
         //  WORKOUT PRESCRIPTIONS
         final workoutPrescriptions =
             userData['prescribedWorkouts'] as Map<dynamic, dynamic>;
-        print('prescribedWorkouts: $workoutPrescriptions');
-        for (var workoutKey in workoutPrescriptions.keys) {
-          final workoutData =
-              workoutPrescriptions[workoutKey] as Map<String, dynamic>;
+        for (var prescribedWorkout in workoutPrescriptions.entries) {
+          final workoutData = prescribedWorkout.value as Map<String, dynamic>;
           final workoutDate =
               (workoutData['workoutDate'] as Timestamp).toDate();
           if (_isDateEqual(DateTime.now(), workoutDate)) {
             _hasWorkoutToday = true;
             workoutForToday = workoutData['workout'];
-            print(workoutForToday);
+            break;
+          }
+        }
+
+        final workoutHistory = userData['workoutHistory'] as List<dynamic>;
+        for (var historyEntry in workoutHistory) {
+          final historyEntryDate =
+              (historyEntry['dateTime'] as Timestamp).toDate();
+          if (_isDateEqual(DateTime.now(), historyEntryDate)) {
+            _workoutTodayFinished = true;
             break;
           }
         }

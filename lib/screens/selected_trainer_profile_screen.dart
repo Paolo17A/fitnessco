@@ -173,6 +173,18 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
       'currentTrainer': '',
       'isConfirmed': false,
     });
+
+    final messageThread = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('trainerUID', isEqualTo: widget.trainerDoc.id)
+        .where('clientUID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    if (messageThread.docs.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('messages')
+          .doc(messageThread.docs[0].id)
+          .delete();
+    }
     setState(() {
       isTrainingRequestSent = false;
       isViewingCurrentTrainer = false;
