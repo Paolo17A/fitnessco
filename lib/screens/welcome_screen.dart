@@ -113,8 +113,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
         Navigator.of(context).pushNamed('/clientHome');
       } else {
         await updateCurrentUserData({'accountInitialized': false});
-        //FirebaseAuth.instance.currentUser!.updatePhoneNumber(PhoneAuthProvider.credential(verificationId: verificationId, smsCode: smsCode).);
-        Navigator.of(context).pushNamed('/completeProfile');
+        Navigator.of(context).pushNamed('/sendOTP');
       }
     }
   }

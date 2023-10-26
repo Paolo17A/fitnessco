@@ -18,9 +18,9 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   bool _isLoading = true;
   String _firstName = '';
   String _lastName = '';
-  String _idNumber = '';
   String _email = '';
   String _address = '';
+  String _contactNumber = '';
   String _profileImageURL = '';
   List<dynamic> _currentClients = [];
   List<dynamic> _certifications = [];
@@ -38,7 +38,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
     setState(() {
       _firstName = userData['firstName'];
       _lastName = userData['lastName'];
-      _idNumber = userData['idNumber'].toString();
+      _contactNumber = userData['profileDetails']['contactNumber'];
       _email = userData['email'];
       _address = userData['profileDetails']['address'];
       _profileImageURL = userData['profileImageURL'];
@@ -112,7 +112,6 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
   }
 
   Widget _diagonalDataContent() {
-    String currentBMIFormatted = '$_idNumber';
     return Column(children: [
       Container(
         height: 20,
@@ -121,8 +120,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
       ),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 5),
-        child: futuraText(currentBMIFormatted,
-            textStyle: blackBoldStyle(size: 15)),
+        child: futuraText(_contactNumber, textStyle: blackBoldStyle(size: 15)),
       ),
       futuraText(_address.isNotEmpty ? _address : 'NO ADDRESS',
           textStyle: whiteBoldStyle(size: 15))

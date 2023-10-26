@@ -350,17 +350,6 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
                   futuraText('Height: $height meters'),
                   futuraText('Weight: $weight KG'),
                   const SizedBox(height: 10),
-                  if (!viewedByAdmin)
-                    SizedBox(
-                      height: 30,
-                      child: ElevatedButton(
-                          onPressed: () {},
-                          style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.red,
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(30))),
-                          child: futuraText('REMOVE CLIENT')),
-                    )
                 ]))
           ]),
     );
@@ -641,7 +630,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       Padding(
         padding: const EdgeInsets.all(10),
         child: futuraText(
-            'ELABORATE SOME SPECIFIC BOSY PLANS FOR YOUR TRAINER TO SEE',
+            'ELABORATE SOME SPECIFIC BODY PLANS FOR YOUR TRAINER TO SEE',
             textStyle: blackBoldStyle(size: 10)),
       ),
       Padding(

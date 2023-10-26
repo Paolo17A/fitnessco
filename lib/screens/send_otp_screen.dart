@@ -1,3 +1,6 @@
+import 'dart:math';
+
+import 'package:emailjs/emailjs.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
@@ -17,63 +20,53 @@ class SendOTPScreen extends StatefulWidget {
 
 class _SendOTPScreenState extends State<SendOTPScreen> {
   bool _isLoading = false;
-  final TextEditingController _numberController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
-  bool _otpSentToPhone = false;
-  String _verificationCode = '';
+  bool _otpSentToEmail = false;
+  String sentOTP = '';
 
   @override
   void initState() {
     super.initState();
   }
 
-  void verifyPhoneNumber(String phoneNumber) async {
-    if (_numberController.text.length != 10) {
-      showErrorMessage(context,
-          label: 'Your number must have exactly 10 digits');
+  void sendOTPToEmail() async {
+    if (_emailController.text != FirebaseAuth.instance.currentUser!.email) {
+      showErrorMessage(context, label: 'Please enter YOUR email address');
       return;
     }
-    setState(() {
-      _isLoading = true;
-    });
-    //FirebaseAuth.instance.setSettings(appVerificationDisabledForTesting: true);
-    await FirebaseAuth.instance.verifyPhoneNumber(
-      phoneNumber: '+63$phoneNumber',
-      verificationCompleted: (PhoneAuthCredential credential) {},
-      verificationFailed: (FirebaseAuthException e) {
-        showErrorMessage(context, label: 'Error handling OTP: ${e.toString()}');
-        setState(() {
-          _isLoading = false;
-        });
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        setState(() {
-          _verificationCode = verificationId;
-          _isLoading = false;
-          _otpSentToPhone = true;
-        });
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
-
-  Future processSubmittedOTP() async {
     try {
-      PhoneAuthCredential phoneAuthCredential = PhoneAuthProvider.credential(
-        verificationId: _verificationCode,
-        smsCode: _otpController.text,
-      );
-      await FirebaseAuth.instance.currentUser!
-          .linkWithCredential(phoneAuthCredential);
-      print('Phone number verified successfully');
-      Navigator.of(context).pushNamed('/completeProfile');
-    } catch (e) {
-      showErrorMessage(context,
-          label: 'Error signing in with code: ${e.toString()}');
-    } finally {
+      setState(() {
+        _isLoading = true;
+      });
+      Random rand = new Random();
+      int otp = rand.nextInt(999999);
+      sentOTP = otp.toString();
+      await EmailJS.send(
+          'service_0qlz3p8',
+          'template_lheagkb',
+          {'OTP': sentOTP, 'to_email': _emailController.text},
+          Options(
+              publicKey: 'WvT2mxhjyZepCXb9u',
+              privateKey: 'CIm00txRTKaizbXd5T0os'));
+      setState(() {
+        _isLoading = false;
+        _otpSentToEmail = true;
+      });
+    } catch (error) {
+      showErrorMessage(context, label: 'Error sending OTP to email" $error');
       setState(() {
         _isLoading = false;
       });
+    }
+  }
+
+  Future processSubmittedOTP() async {
+    if (sentOTP == _otpController.text) {
+      print('Phone number verified successfully');
+      Navigator.of(context).pushNamed('/completeProfile');
+    } else {
+      showErrorMessage(context, label: 'Incorrect OTP');
     }
   }
 
@@ -109,17 +102,17 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                               child: Column(
                                 children: [
                                   Text(
-                                    _otpSentToPhone
-                                        ? 'Enter the OTP sent to ${_numberController.text}'
-                                        : 'Enter your phone number (format: 9*********)',
+                                    _otpSentToEmail
+                                        ? 'Enter the OTP sent to ${_emailController.text}'
+                                        : 'Re-enter your email address',
                                     style: blackBoldStyle(),
                                   ),
                                   const SizedBox(height: 30),
-                                  if (!_otpSentToPhone)
+                                  if (!_otpSentToEmail)
                                     fitnesscoTextField(
-                                      "Phone Number",
-                                      TextInputType.number,
-                                      _numberController,
+                                      "Email Address",
+                                      TextInputType.emailAddress,
+                                      _emailController,
                                       icon: Icons.email,
                                     )
                                   else
@@ -131,13 +124,13 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
                           ),
                           gradientOvalButton(
                               label:
-                                  _otpSentToPhone ? "Verify OTP" : 'Send OTP',
+                                  _otpSentToEmail ? "Verify OTP" : 'Send OTP',
                               width: 250,
                               onTap: () {
-                                if (_otpSentToPhone) {
+                                if (_otpSentToEmail) {
                                   processSubmittedOTP();
                                 } else {
-                                  verifyPhoneNumber(_numberController.text);
+                                  sendOTPToEmail();
                                 }
                               })
                         ],

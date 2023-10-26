@@ -305,11 +305,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
           length: 4,
           child: Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              title: Center(
-                  child: futuraText('Edit Profile Description',
-                      textStyle: whiteBoldStyle(size: 25))),
-            ),
+            appBar: AppBar(),
             bottomNavigationBar: trainerNavBar(context, currentIndex: 2),
             body: GestureDetector(
               onTap: () => FocusScope.of(context).unfocus(),
@@ -318,6 +314,9 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                     child: Column(
                       children: [
                         const SizedBox(height: 50),
+                        Center(
+                            child: futuraText('Edit Profile Description',
+                                textStyle: whiteBoldStyle(size: 25))),
                         _profileImageContainer(),
                         _profileTabs(),
                         _confirmChangesButton()
@@ -536,9 +535,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                   SizedBox(
                       height: 30,
                       child: fitnesscoTextField(
-                          '',
-                          TextInputType.numberWithOptions(decimal: false),
-                          _certificationsController,
+                          '', TextInputType.text, _certificationsController,
                           typeColor: Colors.black))
                 ],
               ),
@@ -577,9 +574,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                   SizedBox(
                       height: 30,
                       child: fitnesscoTextField(
-                          '',
-                          TextInputType.numberWithOptions(decimal: false),
-                          _interestsController,
+                          '', TextInputType.text, _interestsController,
                           typeColor: Colors.black))
                 ],
               ),
@@ -621,9 +616,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                   SizedBox(
                       height: 30,
                       child: fitnesscoTextField(
-                          '',
-                          TextInputType.numberWithOptions(decimal: false),
-                          _specialtyController,
+                          '', TextInputType.text, _specialtyController,
                           typeColor: Colors.black))
                 ],
               ),

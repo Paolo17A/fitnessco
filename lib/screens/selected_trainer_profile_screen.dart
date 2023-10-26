@@ -151,8 +151,23 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
               width: MediaQuery.of(context).size.width * 0.7,
               height: MediaQuery.of(context).size.height * 0.4,
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  futuraText('Trianing request successfully sent'),
+                  roundedContainer(
+                      height: MediaQuery.of(context).size.height * 0.25,
+                      width: MediaQuery.of(context).size.width * 0.6,
+                      color: Colors.white,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: futuraText(
+                              'Training request successfully sent.',
+                              textStyle: TextStyle(
+                                  color: CustomColors.purpleSnail,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 30)),
+                        ),
+                      )),
                   gradientOvalButton(
                       label: 'CONTINUE',
                       onTap: () => Navigator.of(context).pop())
@@ -191,36 +206,70 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
     });
   }
 
+  void _removeTrainer() async {
+    //  Upon cancellation, we will first remove the client UID from the trainer's trainingRequests list in Firebase
+    await updateThisUserData(widget.trainerDoc.id, {
+      'currentClients':
+          FieldValue.arrayRemove([FirebaseAuth.instance.currentUser!.uid])
+    });
+    await updateCurrentUserData({
+      'currentTrainer': '',
+      'isConfirmed': false,
+    });
+
+    final messageThread = await FirebaseFirestore.instance
+        .collection('messages')
+        .where('trainerUID', isEqualTo: widget.trainerDoc.id)
+        .where('clientUID', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
+        .get();
+    if (messageThread.docs.isNotEmpty) {
+      await FirebaseFirestore.instance
+          .collection('messages')
+          .doc(messageThread.docs[0].id)
+          .delete();
+    }
+    setState(() {
+      isTrainingRequestSent = false;
+      isViewingCurrentTrainer = false;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        extendBodyBehindAppBar: true,
-        appBar: _selectedTrainerAppBar(),
-        body: switchedLoadingContainer(
-            _isLoading,
-            viewTrainerBackgroundContainer(context,
-                child: SafeArea(
-                  child: Column(
-                    children: [
-                      _trainerTopHalf(),
-                      _bottomHalf(),
-                      if (isViewingCurrentTrainer && isConfirmed)
-                        gradientOvalButton(
-                            label: 'CHAT TRAINER',
-                            width: 200,
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => ChatScreen(
-                                            otherPersonUID:
-                                                widget.trainerDoc.id,
-                                            isClient: !isBeingViewedByAdmin,
-                                          )));
-                            })
-                    ],
-                  ),
-                ))));
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushReplacementNamed('/viewAllTrainers');
+        return true;
+      },
+      child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: _selectedTrainerAppBar(),
+          body: switchedLoadingContainer(
+              _isLoading,
+              viewTrainerBackgroundContainer(context,
+                  child: SafeArea(
+                    child: Column(
+                      children: [
+                        _trainerTopHalf(),
+                        _bottomHalf(),
+                        if (isViewingCurrentTrainer && isConfirmed)
+                          gradientOvalButton(
+                              label: 'CHAT TRAINER',
+                              width: 200,
+                              onTap: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => ChatScreen(
+                                              otherPersonUID:
+                                                  widget.trainerDoc.id,
+                                              isClient: !isBeingViewedByAdmin,
+                                            )));
+                              })
+                      ],
+                    ),
+                  )))),
+    );
   }
 
   AppBar _selectedTrainerAppBar() {
@@ -305,7 +354,10 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                           style: ElevatedButton.styleFrom(
                               shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(30))),
-                          child: const Text('SEND TRAINING REQUEST'),
+                          child: const Text(
+                            'SEND TRAINING REQUEST',
+                            textAlign: TextAlign.center,
+                          ),
                         )
                       else if (isViewingCurrentTrainer && !isConfirmed)
                         Column(
@@ -325,7 +377,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                         )
                       else if (isViewingCurrentTrainer && isConfirmed)
                         ElevatedButton(
-                          onPressed: () => _cancelTrainer(),
+                          onPressed: () => _removeTrainer(),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               shape: RoundedRectangleBorder(

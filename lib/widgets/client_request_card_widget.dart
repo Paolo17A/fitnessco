@@ -3,6 +3,8 @@ import 'package:fitnessco/widgets/custom_miscellaneous_widgets.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/selected_client_profile_screen.dart';
+
 class ClientRequestCard extends StatelessWidget {
   final String clientUID;
   final String firstName;
@@ -42,7 +44,11 @@ class ClientRequestCard extends StatelessWidget {
                             textStyle: greyBoldStyle(size: 14)),
                       ),
                       ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () =>
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => SelectedClientProfile(
+                                        clientUID: clientUID,
+                                      ))),
                           style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
