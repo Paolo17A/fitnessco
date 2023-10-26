@@ -80,7 +80,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
       case WarmUpStates.JOG_DURATION:
         spokenMessage = 'Jog in place for 30 seconds.';
         additionalExplanation =
-            '1. Stand straight with your feet a little wider than shoulder-width apart.  2. Bend the knees slightly and place your hands on the hips. 3.  Slowly rotate your hips, making big circles. 4. Complete a set in one direction and then switch to the opposite direction. 5.  dont force your self to do much if you are a novice or beginner. Good job continue your work.';
+            'Start standing with feet hip distance apart. Lift one foot then the other to jog in place working your legs and increasing your heart rate. Start slow and increase speed depending on your ability. Make your knees higher. Dont force your self to do much if you are a novice or beginner. Good job continue your work';
         imageAssetPath = 'assets/images/warmups/jogging.gif';
         break;
       case WarmUpStates.JOG_DONE:
@@ -103,7 +103,7 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
       case WarmUpStates.JUMPING_JACK_DURATION:
         spokenMessage = 'Do jumping jacks for 30 seconds. ';
         additionalExplanation =
-            '1. Stand up straight, hold your arms at your sides, and stand with your feet shoulder-width apart 2. Jump and extend your arms overhead. 3. Extend your legs. and Land in the starting position.  4. dont force your self to do much if you are a novice or beginner.';
+            'Stand up straight, hold your arms at your sides, and stand with your feet shoulder-width apart. Jump and extend your arms overhead. Extend your legs. and Land in the starting position. Dont force your self to do much if you are a novice or beginner.';
         imageAssetPath = 'assets/images/warmups/jumping_jack.gif';
         break;
       case WarmUpStates.JUMPING_JACK_DONE:
@@ -126,7 +126,8 @@ class _WarmUpScreenState extends State<WarmUpScreen> {
         break;
       case WarmUpStates.HIP_CIRCLES_DURATION:
         spokenMessage = 'Do hip circles for 30 seconds.';
-        additionalExplanation = '';
+        additionalExplanation =
+            'Stand straight with your feet a little wider than shoulder-width apart. Bend the knees slightly and place your hands on the hips. Slowly rotate your hips, making big circles. Complete a set in one direction and then switch to the opposite direction. Dont force your self to do much if you are a novice or beginner. Good job continue your work.';
         imageAssetPath = 'assets/images/warmups/hip_circle.gif';
         break;
       case WarmUpStates.HIP_CIRCLES_DONE:
