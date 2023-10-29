@@ -116,6 +116,10 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
     String firstName = trainerData['firstName'];
     String lastName = trainerData['lastName'];
     List<dynamic> currentClients = trainerData['currentClients'];
+    String sex = trainerData['profileDetails']['sex'];
+    num age = trainerData['profileDetails']['age'].toString().isNotEmpty
+        ? trainerData['profileDetails']['age']
+        : 0;
     return GestureDetector(
         onTap: () {
           Navigator.of(context).push(MaterialPageRoute(
@@ -132,8 +136,8 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         trainerProfileImage(profileImageURL),
-                        trainerProfileContent(
-                            context, firstName, lastName, currentClients)
+                        trainerProfileContent(context, firstName, lastName,
+                            currentClients, sex, age)
                       ]),
                   userDivider()
                 ])));

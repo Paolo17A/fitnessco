@@ -177,7 +177,7 @@ Widget trainerProfileImage(String profileImageURL) {
 }
 
 Widget trainerProfileContent(BuildContext context, String firstName,
-    String lastName, List<dynamic> currentClients) {
+    String lastName, List<dynamic> currentClients, String sex, num age) {
   return Padding(
       padding: EdgeInsets.symmetric(
           horizontal: MediaQuery.of(context).size.width * 0.05),
@@ -190,6 +190,11 @@ Widget trainerProfileContent(BuildContext context, String firstName,
                   fontWeight: FontWeight.bold,
                   fontSize: 23)),
         ),
+        Row(children: [
+          futuraText(sex, textStyle: blackBoldStyle(size: 13)),
+          const SizedBox(width: 10),
+          futuraText('${age.toInt().toString()} years old')
+        ]),
         futuraText('${currentClients.length.toString()} Clients',
             textStyle: blackBoldStyle(size: 15))
       ]));

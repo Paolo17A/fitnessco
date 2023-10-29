@@ -236,40 +236,34 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        Navigator.of(context).pushReplacementNamed('/viewAllTrainers');
-        return true;
-      },
-      child: Scaffold(
-          extendBodyBehindAppBar: true,
-          appBar: _selectedTrainerAppBar(),
-          body: switchedLoadingContainer(
-              _isLoading,
-              viewTrainerBackgroundContainer(context,
-                  child: SafeArea(
-                    child: Column(
-                      children: [
-                        _trainerTopHalf(),
-                        _bottomHalf(),
-                        if (isViewingCurrentTrainer && isConfirmed)
-                          gradientOvalButton(
-                              label: 'CHAT TRAINER',
-                              width: 200,
-                              onTap: () {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => ChatScreen(
-                                              otherPersonUID:
-                                                  widget.trainerDoc.id,
-                                              isClient: !isBeingViewedByAdmin,
-                                            )));
-                              })
-                      ],
-                    ),
-                  )))),
-    );
+    return Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: _selectedTrainerAppBar(),
+        body: switchedLoadingContainer(
+            _isLoading,
+            viewTrainerBackgroundContainer(context,
+                child: SafeArea(
+                  child: Column(
+                    children: [
+                      _trainerTopHalf(),
+                      _bottomHalf(),
+                      if (isViewingCurrentTrainer && isConfirmed)
+                        gradientOvalButton(
+                            label: 'CHAT TRAINER',
+                            width: 200,
+                            onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => ChatScreen(
+                                            otherPersonUID:
+                                                widget.trainerDoc.id,
+                                            isClient: !isBeingViewedByAdmin,
+                                          )));
+                            })
+                    ],
+                  ),
+                ))));
   }
 
   AppBar _selectedTrainerAppBar() {
@@ -336,7 +330,9 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                           context,
                           trainerData['firstName'],
                           trainerData['lastName'],
-                          trainerData['currentClients']),
+                          trainerData['currentClients'],
+                          trainerData['profileDetails']['sex'],
+                          trainerData['profileDetails']['age']),
                       //ADMIN OPTIONS
                       if (isBeingViewedByAdmin)
                         ElevatedButton(
