@@ -22,6 +22,7 @@ import 'package:fitnessco/screens/workout_history_screen.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_messaging_util.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'screens/sign_in_screen.dart';
 import 'screens/sign_up_screen.dart';
@@ -32,6 +33,7 @@ late List<CameraDescription> cameras;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Firebase.initializeApp();
   await FirebaseMessagingUtil.initNotifications();
   cameras = await availableCameras();

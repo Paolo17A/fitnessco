@@ -1,7 +1,9 @@
 import 'dart:io';
 
+//import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
@@ -214,6 +216,7 @@ class _EditClientProfileState extends State<EditClientProfile> {
     if (pickedFile != null) {
       setState(() {
         _imageFile = File(pickedFile.path);
+        _isLoading = true;
       });
       final storageRef = firebase_storage.FirebaseStorage.instance
           .ref()
@@ -230,45 +233,89 @@ class _EditClientProfileState extends State<EditClientProfile> {
       await updateCurrentUserData({
         'profileImageURL': downloadURL,
       });
+      setState(() {
+        _profileImageURL = downloadURL;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _removeProfilePic() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await updateCurrentUserData({
+        'profileImageURL': '',
+      });
+
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profilePics')
+          .child(FirebaseAuth.instance.currentUser!.uid);
+
+      await storageRef.delete();
+
+      setState(() {
+        _imageFile = null;
+        _profileImageURL = '';
+        _isLoading = false;
+      });
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error removing profile pic: $error')));
+      setState(() {
+        _imageFile = null;
+        _profileImageURL = '';
+        _isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-        length: 4,
-        child: Scaffold(
-            extendBodyBehindAppBar: true,
-            appBar: AppBar(
-              title: Center(
-                child: futuraText('Edit Profile Description',
-                    textStyle: whiteBoldStyle(size: 25)),
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.of(context).pushReplacementNamed('/clientHome');
+        return true;
+      },
+      child: DefaultTabController(
+          length: 4,
+          child: Scaffold(
+              extendBodyBehindAppBar: true,
+              appBar: AppBar(
+                title: Center(
+                  child: futuraText('Edit Profile Description',
+                      textStyle: whiteBoldStyle(size: 25)),
+                ),
               ),
-            ),
-            body: GestureDetector(
-                onTap: () => FocusScope.of(context).unfocus(),
-                child: switchedLoadingContainer(
-                    _isLoading,
-                    userAuthBackgroundContainer(context,
-                        child: Column(children: [
-                          const SizedBox(height: 50),
-                          Padding(
-                              padding: EdgeInsets.all(20),
-                              child: Column(children: [
-                                Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        vertical: 20),
-                                    child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          _profileImageContainer(),
-                                          _bmiContainer()
-                                        ])),
-                                _profileTabs(),
-                                _confirmChangesButton()
-                              ]))
-                        ]))))));
+              body: GestureDetector(
+                  onTap: () => FocusScope.of(context).unfocus(),
+                  child: switchedLoadingContainer(
+                      _isLoading,
+                      userAuthBackgroundContainer(context,
+                          child: Column(children: [
+                            const SizedBox(height: 50),
+                            Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Column(children: [
+                                  Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 20),
+                                      child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            _profileImageContainer(),
+                                            _bmiContainer()
+                                          ])),
+                                  _profileTabs(),
+                                  _confirmChangesButton()
+                                ]))
+                          ])))))),
+    );
   }
 
   Widget _profileImageContainer() {
@@ -294,11 +341,12 @@ class _EditClientProfileState extends State<EditClientProfile> {
                     child: futuraText('UPLOAD',
                         textStyle: TextStyle(fontSize: 14)),
                   )),
-              if (_imageFile == null && _profileImageURL != '')
+              if (_profileImageURL.isNotEmpty)
                 SizedBox(
                   height: 25,
                   child: ElevatedButton(
-                      onPressed: () => removeProfilePicDialogue(context),
+                      onPressed: () => removeProfilePicDialogue(context,
+                          onRemove: _removeProfilePic),
                       style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                           shape: RoundedRectangleBorder(

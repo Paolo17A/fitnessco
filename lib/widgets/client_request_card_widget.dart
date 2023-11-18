@@ -74,7 +74,7 @@ class ClientRequestCard extends StatelessWidget {
                       SizedBox(
                         height: 30,
                         child: ElevatedButton(
-                            onPressed: () => denyReq,
+                            onPressed: () => denyReq(),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 shape: RoundedRectangleBorder(

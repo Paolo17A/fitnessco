@@ -16,6 +16,7 @@ class BMIHistoryScreen extends StatefulWidget {
 
 class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
   bool _isLoading = true;
+  bool _isInitialized = false;
   List<dynamic> bmiHistory = [];
   double latestBMI = 0;
 
@@ -24,19 +25,21 @@ class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
 
   @override
   void didChangeDependencies() {
+    print('changing dependencies');
     super.didChangeDependencies();
-    _getBMIHistory();
+    if (!_isInitialized) _getBMIHistory();
   }
 
-  @override
+  /*@override
   void dispose() {
     super.dispose();
     _heightController.dispose();
     _weightController.dispose();
-  }
+  }*/
 
   void _getBMIHistory() async {
     try {
+      print('getting bmi history');
       //  First we get the current client's data from Firebase
       final currentUserData = await getCurrentUserData();
 
@@ -56,6 +59,7 @@ class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
 
       setState(() {
         _isLoading = false;
+        _isInitialized = true;
       });
     } catch (error) {
       showErrorMessage(context,
@@ -117,13 +121,25 @@ class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
         sequentialBMIEntries.add(newBMI);
       }
 
+      var userData = await getCurrentUserData();
+      var profileDetails = userData['profileDetails'] as Map<dynamic, dynamic>;
+      profileDetails['height'] = double.parse(_heightController.text);
+      profileDetails['weight'] = double.parse(_weightController.text);
+
       //  We update the BMI history in Firebase
-      await updateCurrentUserData({'bmiHistory': sequentialBMIEntries});
+      await updateCurrentUserData({
+        'bmiHistory': sequentialBMIEntries,
+        'profileDetails': profileDetails
+      });
       showSuccessMessage(context, label: 'Successfully updated BMI History',
           onPress: () {
         Navigator.of(context).pop();
         Navigator.of(context).pop();
         Navigator.of(context).pushReplacementNamed('/editClientProfile');
+      });
+      _getBMIHistory();
+      setState(() {
+        _isLoading = false;
       });
 
       //  Go back to the BMI History screen

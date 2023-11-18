@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-void removeProfilePicDialogue(BuildContext context) {
+void removeProfilePicDialogue(BuildContext context,
+    {required Function onRemove}) {
   showDialog(
     context: context,
     builder: (context) => AlertDialog(
@@ -10,11 +11,14 @@ void removeProfilePicDialogue(BuildContext context) {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: const Text('Cancel', style: TextStyle(color: Colors.white)),
         ),
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Remove'),
+          onPressed: () {
+            Navigator.of(context).pop();
+            onRemove();
+          },
+          child: const Text('Remove', style: TextStyle(color: Colors.white)),
         ),
       ],
     ),

@@ -91,6 +91,17 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
       setState(() {
         _isLoading = true;
       });
+      final trainer = await getThisUserData(widget.trainerDoc.id);
+      final trainerData = trainer.data() as Map<dynamic, dynamic>;
+      List<dynamic> currentClients = trainerData['currentClients'];
+      List<dynamic> trainingRequests = trainerData['trainingRequests'];
+      for (var client in currentClients) {
+        await updateThisUserData(
+            client, {'currentTrainer': '', 'isConfirmed': false});
+      }
+      for (var request in trainingRequests) {
+        await updateThisUserData(request, {'currentTrainer': ''});
+      }
       await updateThisUserData(widget.trainerDoc.id, {'isDeleted': true});
       setState(() {
         _isLoading = false;
@@ -281,6 +292,10 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
   }
 
   Widget _trainerTopHalf() {
+    var trainerAge = trainerData['profileDetails']['age'];
+    if (trainerAge.toString().isEmpty) {
+      trainerAge = 0;
+    }
     return Column(
       children: [
         Padding(
@@ -300,7 +315,11 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                                 Image.asset(
                                     'assets/images/icons/trainer_email.png',
                                     scale: 50),
-                                futuraText(trainerData['email']),
+                                SizedBox(
+                                    width: MediaQuery.of(context).size.width *
+                                        0.35,
+                                    child: futuraText(trainerData['email'],
+                                        textAlign: TextAlign.left)),
                               ]),
                               Row(
                                 children: [
@@ -332,7 +351,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                           trainerData['lastName'],
                           trainerData['currentClients'],
                           trainerData['profileDetails']['sex'],
-                          trainerData['profileDetails']['age']),
+                          trainerAge),
                       //ADMIN OPTIONS
                       if (isBeingViewedByAdmin)
                         ElevatedButton(
@@ -360,7 +379,13 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
                           children: [
                             roundedContainer(
                                 color: CustomColors.purpleSnail,
-                                child: Text('REQUEST PENDING')),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: Text(
+                                    'REQUEST PENDING',
+                                    style: whiteBoldStyle(size: 14),
+                                  ),
+                                )),
                             ElevatedButton(
                               onPressed: () => _cancelTrainer(),
                               style: ElevatedButton.styleFrom(
@@ -416,7 +441,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
         Padding(
             padding: EdgeInsets.all(15),
             child: Row(children: [
-              Column(children: [
+              Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 futuraText('INTERESTS', textStyle: blackBoldStyle()),
                 Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -429,6 +454,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
             child: Row(
               children: [
                 Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     futuraText('TRAINING SPECIALTY',
                         textStyle: blackBoldStyle()),

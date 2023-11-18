@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/utils/remove_pic_dialogue.dart';
@@ -287,8 +288,42 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       await updateCurrentUserData({
         'profileImageURL': downloadURL,
       });
+      setState(() {
+        _profileImageURL = downloadURL;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _removeProfilePic() async {
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+    try {
+      setState(() {
+        _isLoading = true;
+      });
+
+      await updateCurrentUserData({
+        'profileImageURL': '',
+      });
+
+      final storageRef = FirebaseStorage.instance
+          .ref()
+          .child('profilePics')
+          .child(FirebaseAuth.instance.currentUser!.uid);
+
+      await storageRef.delete();
 
       setState(() {
+        _imageFile = null;
+        _profileImageURL = '';
+        _isLoading = false;
+      });
+    } catch (error) {
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error removing profile pic: $error')));
+      setState(() {
+        _imageFile = null;
+        _profileImageURL = '';
         _isLoading = false;
       });
     }
@@ -355,11 +390,12 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
                           child: futuraText('UPLOAD',
                               textStyle: TextStyle(fontSize: 14)),
                         )),
-                    if (_imageFile == null && _profileImageURL != '')
+                    if (_profileImageURL.isNotEmpty)
                       SizedBox(
                         height: 25,
                         child: ElevatedButton(
-                            onPressed: () => removeProfilePicDialogue(context),
+                            onPressed: () => removeProfilePicDialogue(context,
+                                onRemove: _removeProfilePic),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.red,
                                 shape: RoundedRectangleBorder(
