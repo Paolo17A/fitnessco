@@ -1,11 +1,14 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/utils/color_utils.dart';
 import 'package:fitnessco/utils/firebase_util.dart';
+import 'package:fitnessco/utils/log_out_util.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_button_widgets.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
 import 'package:fitnessco/widgets/custom_text_widgets.dart';
 import 'package:fitnessco/widgets/fitnessco_textfield_widget.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../widgets/dropdown_widget.dart';
 
@@ -218,6 +221,16 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
+        if (currentPhase == ProfileScreenPhases.BIOMETRICS) {
+          showLogOutDialog(context, () async {
+            await FirebaseAuth.instance.signOut();
+            SharedPreferences sharedPreferences =
+                await SharedPreferences.getInstance();
+            sharedPreferences.remove('email');
+            sharedPreferences.remove('password');
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          });
+        }
         setState(() {
           if (currentPhase == ProfileScreenPhases.WORKOUT) {
             currentPhase = ProfileScreenPhases.HEALTH;

@@ -70,10 +70,8 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
         length: 3,
         child: Scaffold(
             extendBodyBehindAppBar: true,
-            appBar: homeAppBar(
-              context,
-              title: _profileInfoHeader(),
-            ),
+            appBar: homeAppBar(context,
+                title: _profileInfoHeader(), onRefresh: () => _fetchUserData()),
             body: switchedLoadingContainer(
                 _isLoading,
                 homeBackgroundContainer(context,
@@ -94,7 +92,7 @@ class _TrainerHomeScreenState extends State<TrainerHomeScreen> {
 
   Widget _profileInfoHeader() {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+      //SizedBox(width: MediaQuery.of(context).size.width * 0.1),
       Column(children: [
         futuraText('$_firstName $_lastName', textStyle: blackBoldStyle()),
         futuraText(

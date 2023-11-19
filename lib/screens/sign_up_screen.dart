@@ -34,6 +34,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
       showErrorMessage(context, label: "Passwords do not match");
       return;
     }
+    if (_passwordTextController.text.length < 8) {
+      showErrorMessage(context,
+          label: 'Password must be at leat 8 characters long');
+      return;
+    }
     try {
       setState(() {
         _isLoading = true;
@@ -61,6 +66,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         'workoutHistory': [],
         'gymHistory': [],
         'expiryDate': DateTime.now().add(Duration(days: 1)),
+        'dateEmailVerificationSent': DateTime.now(),
         'paymentInterval': 'DAILY',
         'pushTokens': [],
         'profileDetails': {

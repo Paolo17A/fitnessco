@@ -40,7 +40,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         _isLoading = true;
       });
       Random rand = new Random();
-      int otp = rand.nextInt(999999);
+      int otp = rand.nextInt(900000) + 100000;
       sentOTP = otp.toString();
       await EmailJS.send(
           'service_0qlz3p8',

@@ -133,7 +133,13 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
             length: 2,
             child: Scaffold(
                 extendBodyBehindAppBar: true,
-                appBar: homeAppBar(context, title: _profileInfoHeader()),
+                appBar: homeAppBar(context, title: _profileInfoHeader(),
+                    onRefresh: () {
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  fetchUserData();
+                }),
                 body: switchedLoadingContainer(
                     _isLoading,
                     homeBackgroundContainer(context,
@@ -151,7 +157,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
 
   Widget _profileInfoHeader() {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-      SizedBox(width: MediaQuery.of(context).size.width * 0.1),
+      //SizedBox(width: MediaQuery.of(context).size.width * 0.1),
       Column(children: [
         futuraText('$_firstName $_lastName', textStyle: blackBoldStyle()),
         futuraText(_paymentInterval, textStyle: blackBoldStyle(size: 15))

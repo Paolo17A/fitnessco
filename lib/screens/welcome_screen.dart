@@ -58,13 +58,48 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
       }
 
       if (dataMap['accountType'] == "CLIENT") {
+        //  The user's email has not yet been verified
         if (userCredential.user!.emailVerified == false) {
-          showErrorMessage(context,
-              label: 'Please verify your email before signing in');
-          setState(() {
-            _isLoading = false;
-          });
-          await userCredential.user!.sendEmailVerification();
+          //  The user's data in Firestore has a dateEmailVerificationSent paramter.
+          if (dataMap.containsKey('dateEmailVerificationSent')) {
+            DateTime dateEmailVerificationSent =
+                (dataMap['dateEmailVerificationSent'] as Timestamp).toDate();
+            if (DateTime.now().difference(dateEmailVerificationSent).inMinutes <
+                50) {
+              showErrorMessage(context,
+                  label:
+                      'Please check your email for the email verification link.');
+              setState(() {
+                _isLoading = false;
+              });
+            } else {
+              showErrorMessage(context,
+                  label:
+                      'A new email verification link has been sent to your email.');
+              FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(userCredential.user!.uid)
+                  .update({'dateEmailVerificationSent': DateTime.now()});
+              await userCredential.user!.sendEmailVerification();
+              setState(() {
+                _isLoading = false;
+              });
+            }
+          }
+          //  A dateEmailVerificationSent parameter does NOT yet exist.
+          else {
+            FirebaseFirestore.instance
+                .collection('users')
+                .doc(userCredential.user!.uid)
+                .update({'dateEmailVerificationSent': DateTime.now()});
+            showErrorMessage(context,
+                label:
+                    'Please check your email for the email verification link.');
+            await userCredential.user!.sendEmailVerification();
+            setState(() {
+              _isLoading = false;
+            });
+          }
           return;
         }
         _goToClientHomeScreen();

@@ -32,9 +32,9 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
       showErrorMessage(context, label: 'Please fill up all the fields');
       return;
     }
-    if (_passwordTextController.text.length < 6) {
+    if (_passwordTextController.text.length < 8) {
       showErrorMessage(context,
-          label: 'Password must be at least six characters long');
+          label: 'Password must be at least eight characters long');
       return;
     }
     try {

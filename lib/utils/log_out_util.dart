@@ -21,9 +21,11 @@ void showLogOutModal(BuildContext context) {
                           topRight: Radius.circular(30))),
                   title: Center(
                     child: futuraText('LOG-OUT',
-                        textStyle: TextStyle(color: CustomColors.plasmaTrail)),
+                        textStyle: TextStyle(
+                            color: CustomColors.plasmaTrail,
+                            fontWeight: FontWeight.bold)),
                   ),
-                  onTap: () => _showLogOutDialog(context, () async {
+                  onTap: () => showLogOutDialog(context, () async {
                         await FirebaseAuth.instance.signOut();
                         SharedPreferences sharedPreferences =
                             await SharedPreferences.getInstance();
@@ -37,9 +39,11 @@ void showLogOutModal(BuildContext context) {
                   shape: RoundedRectangleBorder(),
                   title: Center(
                     child: futuraText('LOG-OUT AND EXIT',
-                        textStyle: TextStyle(color: CustomColors.plasmaTrail)),
+                        textStyle: TextStyle(
+                            color: CustomColors.plasmaTrail,
+                            fontWeight: FontWeight.bold)),
                   ),
-                  onTap: () => _showLogOutDialog(context, () async {
+                  onTap: () => showLogOutDialog(context, () async {
                         await FirebaseAuth.instance.signOut();
                         SharedPreferences sharedPreferences =
                             await SharedPreferences.getInstance();
@@ -51,7 +55,7 @@ void showLogOutModal(BuildContext context) {
           ));
 }
 
-void _showLogOutDialog(BuildContext context, Function onPress) {
+void showLogOutDialog(BuildContext context, Function onPress) {
   showDialog(
       context: context,
       builder: (context) => AlertDialog(

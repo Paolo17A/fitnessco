@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitnessco/utils/pop_up_util.dart';
 import 'package:fitnessco/widgets/custom_container_widget.dart';
@@ -19,7 +20,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final TextEditingController _emailTextController = TextEditingController();
 
   void _sendEmailReset() async {
-    _isLoading = true;
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
@@ -30,9 +30,46 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       return;
     }
     try {
+      setState(() {
+        _isLoading = true;
+      });
+      final validAccounts = await FirebaseFirestore.instance
+          .collection('users')
+          .where('email', isEqualTo: _emailTextController.text.trim())
+          .get();
+
+      if (validAccounts.docs.isEmpty) {
+        showErrorMessage(context,
+            label: 'There is no account with this email address.');
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
+      final validAccountData = validAccounts.docs.first.data();
+      String password = validAccountData['password'];
+
+      final currentCred = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: _emailTextController.text, password: password);
+      if (!currentCred.user!.emailVerified) {
+        showErrorMessage(context,
+            label:
+                'Please verify your email address first before changing your password.');
+        setState(() {
+          _isLoading = false;
+        });
+        return;
+      }
+
       await FirebaseAuth.instance
           .sendPasswordResetEmail(email: _emailTextController.text.trim());
 
+      await FirebaseAuth.instance.signOut();
+      setState(() {
+        _isLoading = false;
+      });
       scaffoldMessenger.showSnackBar(const SnackBar(
           content: Text('Reset Password Email Sent Successfully!')));
       navigator.pop();
