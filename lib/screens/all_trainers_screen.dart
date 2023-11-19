@@ -44,7 +44,7 @@ class AllTrainersScreenState extends State<AllTrainersScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: 'Error getting all trainers: $error');
+      showErrorMessage(context, label: 'Error getting all trainers');
     }
   }
 

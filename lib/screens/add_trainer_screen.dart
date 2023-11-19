@@ -94,7 +94,7 @@ class _AddTrainerScreenState extends State<AddTrainerScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: 'Error creating new trainer: $error');
+      showErrorMessage(context, label: 'Error creating new trainer');
     }
   }
 

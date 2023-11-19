@@ -111,7 +111,7 @@ class ManageGymScreenState extends State<ManageGymScreen> {
           data['commission_rate'].toStringAsFixed(2);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-        content: Text("Error saving membership status: $e"),
+        content: Text("Error fetching gym settings."),
         backgroundColor: Colors.purple,
       ));
     } finally {
@@ -154,7 +154,7 @@ class ManageGymScreenState extends State<ManageGymScreen> {
         const SnackBar(content: Text('Gym settings saved')),
       );
     } catch (e) {
-      showErrorMessage(context, label: 'Error saving gym settings: $e');
+      showErrorMessage(context, label: 'Error saving gym settings');
     }
   }
 

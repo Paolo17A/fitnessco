@@ -97,8 +97,8 @@ class _AddBMIEntryScreenState extends State<AddBMIEntryScreen> {
       navigator.pushReplacement(
           MaterialPageRoute(builder: ((context) => const BMIHistoryScreen())));
     } catch (error) {
-      scaffoldMessenger.showSnackBar(SnackBar(
-          content: Text('Error adding BMI entry: ${error.toString()}')));
+      scaffoldMessenger
+          .showSnackBar(SnackBar(content: Text('Error adding BMI entry')));
       setState(() {
         _isLoading = false;
         heightController.clear();

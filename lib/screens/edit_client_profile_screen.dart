@@ -136,7 +136,7 @@ class _EditClientProfileState extends State<EditClientProfile> {
     } catch (error) {
       setState(() {
         _isLoading = false;
-        showErrorMessage(context, label: 'Error getting user data: $error');
+        showErrorMessage(context, label: 'Error getting user data');
       });
     }
   }
@@ -205,7 +205,7 @@ class _EditClientProfileState extends State<EditClientProfile> {
     } catch (error) {
       setState(() {
         _isLoading = false;
-        showErrorMessage(context, label: 'Error updating user profile: $error');
+        showErrorMessage(context, label: 'Error updating user profile');
       });
     }
   }
@@ -264,8 +264,8 @@ class _EditClientProfileState extends State<EditClientProfile> {
         _isLoading = false;
       });
     } catch (error) {
-      scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Error removing profile pic: $error')));
+      scaffoldMessenger
+          .showSnackBar(SnackBar(content: Text('Error removing profile pic')));
       setState(() {
         _imageFile = null;
         _profileImageURL = '';

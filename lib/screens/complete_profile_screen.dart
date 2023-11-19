@@ -210,7 +210,7 @@ class _CompleteProfileScreenState extends State<CompleteProfileScreen> {
       });
       Navigator.of(context).pushReplacementNamed('/profileCompleted');
     } catch (error) {
-      showErrorMessage(context, label: 'Error uploading profile data: $error');
+      showErrorMessage(context, label: 'Error uploading profile data.');
       setState(() {
         _isLoading = false;
       });

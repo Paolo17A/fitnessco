@@ -96,7 +96,7 @@ class _PrescribeWorkoutScreenState extends State<PrescribeWorkoutScreen> {
           'workoutDate': widget.dateTime
         };
       } else {
-        print('ADDING NEW ENTRY');
+        //print('ADDING NEW ENTRY');
         String workoutID = DateTime.now().millisecondsSinceEpoch.toString();
         prescribedWorkouts[workoutID] = {
           'workout': currentWorkoutSelection,
@@ -127,8 +127,7 @@ class _PrescribeWorkoutScreenState extends State<PrescribeWorkoutScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context,
-          label: 'Error adding workout: ${error.toString()}');
+      showErrorMessage(context, label: 'Error adding workout.');
     }
   }
 

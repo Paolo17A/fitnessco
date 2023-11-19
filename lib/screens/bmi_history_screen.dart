@@ -25,7 +25,6 @@ class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
 
   @override
   void didChangeDependencies() {
-    print('changing dependencies');
     super.didChangeDependencies();
     if (!_isInitialized) _getBMIHistory();
   }
@@ -62,8 +61,7 @@ class _BMIHistoryScreenState extends State<BMIHistoryScreen> {
         _isInitialized = true;
       });
     } catch (error) {
-      showErrorMessage(context,
-          label: 'Error getting BMI History: ${error.toString()}');
+      showErrorMessage(context, label: 'Error getting BMI History');
       setState(() {
         _isLoading = false;
       });

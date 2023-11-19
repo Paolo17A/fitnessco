@@ -78,7 +78,7 @@ class ClientHomeScreenState extends State<ClientHomeScreen> {
         _isLoading = false;
       });
     } catch (error) {
-      showErrorMessage(context, label: 'Error getting user data: $error');
+      showErrorMessage(context, label: 'Error getting client data.');
       setState(() {
         _isLoading = false;
       });

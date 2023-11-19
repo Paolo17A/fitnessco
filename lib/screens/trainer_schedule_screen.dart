@@ -61,8 +61,7 @@ class _TrainerScheduleScreenState extends State<TrainerScheduleScreen> {
         _isLoading = false;
       });
     } catch (error) {
-      showErrorMessage(context,
-          label: 'Error getting client appointments: $error');
+      showErrorMessage(context, label: 'Error getting client appointments');
     }
   }
 
@@ -85,7 +84,7 @@ class _TrainerScheduleScreenState extends State<TrainerScheduleScreen> {
         }
       }
     }
-    print('WORKOUTS FOR TODAY: $workoutsForSelectedDate');
+    //print('WORKOUTS FOR TODAY: $workoutsForSelectedDate');
   }
 
   bool _isDateEqual(DateTime _selectedDate, DateTime _workoutDate) {

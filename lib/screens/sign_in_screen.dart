@@ -117,7 +117,7 @@ class _SignInScreenState extends State<SignInScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: "Error logging in: $error");
+      showErrorMessage(context, label: "Error logging in");
     }
   }
 
@@ -213,11 +213,11 @@ class _SignInScreenState extends State<SignInScreen> {
                         child: Padding(
                           padding: EdgeInsets.all(20),
                           child: Column(children: [
-                            fitnesscoTextField(
-                                "Enter Email Address",
-                                TextInputType.emailAddress,
-                                _emailTextController,
-                                icon: Icons.email_outlined),
+                            FitnesscoTextField(
+                                text: "Enter   Email Address",
+                                controller: _emailTextController,
+                                textInputType: TextInputType.emailAddress,
+                                displayPrefixIcon: Icon(Icons.email_outlined)),
                             _enterPassword(),
                             const SizedBox(height: 10),
                             _logInButton(),
@@ -235,11 +235,12 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Widget _enterPassword() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 20),
-      child: fitnesscoTextField("Enter Password", TextInputType.visiblePassword,
-          _passwordTextController,
-          icon: Icons.lock_outline),
-    );
+        padding: EdgeInsets.symmetric(vertical: 20),
+        child: FitnesscoTextField(
+            text: 'Enter Password',
+            controller: _passwordTextController,
+            textInputType: TextInputType.visiblePassword,
+            displayPrefixIcon: Icon(Icons.lock_outline)));
   }
 
   Widget _logInButton() {

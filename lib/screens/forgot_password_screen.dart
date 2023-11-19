@@ -77,8 +77,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context,
-          label: 'Error Sending Reset Password Email: ${error.toString()}');
+      showErrorMessage(context, label: 'Error Sending Reset Password Email');
     }
   }
 

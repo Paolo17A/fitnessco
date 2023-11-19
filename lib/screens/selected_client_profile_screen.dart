@@ -125,8 +125,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context,
-          label: 'Error getting selecter user data: $error');
+      showErrorMessage(context, label: 'Error getting selecter user data.');
     }
   }
 
@@ -166,8 +165,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context,
-          label: 'Error saving membership status: $error');
+      showErrorMessage(context, label: 'Error saving membership status.');
     }
   }
 
@@ -207,8 +205,8 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       Navigator.of(context).pop();
       Navigator.of(context).pushReplacementNamed('/trainerCurrentClients');
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error removing trainer: $error')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error removing trainer.')));
     }
   }
 
@@ -244,7 +242,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: 'Error timing client in: $error');
+      showErrorMessage(context, label: 'Error timing client in.');
     }
   }
 
@@ -274,7 +272,7 @@ class _SelectedClientProfileState extends State<SelectedClientProfile> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: 'Error timing client out: $error');
+      showErrorMessage(context, label: 'Error timing client out.');
     }
   }
 

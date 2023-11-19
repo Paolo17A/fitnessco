@@ -79,7 +79,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
         _isLoading = false;
       });
     } catch (e) {
-      showErrorMessage(context, label: "Error retrieving user data: $e");
+      showErrorMessage(context, label: "Error retrieving user data");
       setState(() {
         _isLoading = false;
       });
@@ -130,7 +130,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: "Error retrieving user data: $Error");
+      showErrorMessage(context, label: "Error retrieving user data");
     }
   }
 
@@ -149,7 +149,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
           label: 'Successfully added certification.',
           onPress: () => Navigator.of(context).pop());
     } catch (error) {
-      showErrorMessage(context, label: 'Error adding certification: $error');
+      showErrorMessage(context, label: 'Error adding certification');
       setState(() {
         _isLoading = false;
       });
@@ -165,7 +165,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       await _updateProfileDetails();
       Navigator.of(context).pop();
     } catch (error) {
-      showErrorMessage(context, label: 'Error deleting certification: $error');
+      showErrorMessage(context, label: 'Error deleting certification');
       setState(() {
         _isLoading = false;
       });
@@ -186,7 +186,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
           label: 'Successfully added interest.',
           onPress: () => Navigator.of(context).pop());
     } catch (error) {
-      showErrorMessage(context, label: 'Error adding interest: $error');
+      showErrorMessage(context, label: 'Error adding interest');
       setState(() {
         _isLoading = false;
       });
@@ -202,7 +202,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       await _updateProfileDetails();
       Navigator.of(context).pop();
     } catch (error) {
-      showErrorMessage(context, label: 'Error deleting interest: $error');
+      showErrorMessage(context, label: 'Error deleting interest');
       setState(() {
         _isLoading = false;
       });
@@ -223,7 +223,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
           label: 'Successfully added specialty.',
           onPress: () => Navigator.of(context).pop());
     } catch (error) {
-      showErrorMessage(context, label: 'Error adding specialty: $error');
+      showErrorMessage(context, label: 'Error adding specialty');
       setState(() {
         _isLoading = false;
       });
@@ -239,7 +239,7 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
       await _updateProfileDetails();
       Navigator.of(context).pop();
     } catch (error) {
-      showErrorMessage(context, label: 'Error deleting specialty: $error');
+      showErrorMessage(context, label: 'Error deleting specialty');
       setState(() {
         _isLoading = false;
       });
@@ -319,8 +319,8 @@ class _EditTrainerProfileState extends State<EditTrainerProfile> {
         _isLoading = false;
       });
     } catch (error) {
-      scaffoldMessenger.showSnackBar(
-          SnackBar(content: Text('Error removing profile pic: $error')));
+      scaffoldMessenger
+          .showSnackBar(SnackBar(content: Text('Error removing profile pic.')));
       setState(() {
         _imageFile = null;
         _profileImageURL = '';

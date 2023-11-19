@@ -58,7 +58,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
       });
     } catch (error) {
       showErrorMessage(context,
-          label: 'error Initializing selected trainer screen: $error');
+          label: 'error Initializing selected trainer screen');
     }
   }
 
@@ -112,8 +112,7 @@ class _SelectedTrainerProfileState extends State<SelectedTrainerProfile> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context,
-          label: 'Error saving membership status: $error');
+      showErrorMessage(context, label: 'Error saving membership status');
     }
   }
 

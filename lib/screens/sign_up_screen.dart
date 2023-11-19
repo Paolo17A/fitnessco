@@ -108,7 +108,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: error.toString());
+      showErrorMessage(context, label: 'Error creating new user.');
     }
   }
 
@@ -176,41 +176,51 @@ class _SignUpScreenState extends State<SignUpScreen> {
   Widget _firstName() {
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 15),
-        child: fitnesscoTextField(
-            "Enter First Name", TextInputType.name, _firstNameController,
-            icon: Icons.person_outline));
+        child: FitnesscoTextField(
+            text: 'Enter First Name',
+            controller: _firstNameController,
+            textInputType: TextInputType.name,
+            displayPrefixIcon: Icon(Icons.person_outline)));
   }
 
   Widget _lastName() {
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 15),
-        child: fitnesscoTextField(
-            "Enter Last Name", TextInputType.name, _lastNameController,
-            icon: Icons.person_outline));
+        child: FitnesscoTextField(
+            text: 'Enter Last Name',
+            controller: _lastNameController,
+            textInputType: TextInputType.name,
+            displayPrefixIcon: Icon(Icons.person_outline)));
   }
 
   Widget _emailAddress() {
     return Padding(
         padding: EdgeInsets.symmetric(vertical: 15),
-        child: fitnesscoTextField("Enter Email Address",
-            TextInputType.emailAddress, _emailTextController,
-            icon: Icons.email));
+        child: FitnesscoTextField(
+            text: 'Enter Email Address',
+            controller: _emailTextController,
+            textInputType: TextInputType.emailAddress,
+            displayPrefixIcon: Icon(Icons.email)));
   }
 
   Widget _password() {
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 15),
-        child: fitnesscoTextField(
-            "Password", TextInputType.visiblePassword, _passwordTextController,
-            icon: Icons.lock_outline));
+        child: FitnesscoTextField(
+            text: 'Password',
+            controller: _passwordTextController,
+            textInputType: TextInputType.visiblePassword,
+            displayPrefixIcon: Icon(Icons.lock_outline)));
   }
 
   Widget _confirmPassword() {
     return Padding(
         padding: const EdgeInsets.symmetric(vertical: 15),
-        child: fitnesscoTextField("Confirm Password",
-            TextInputType.visiblePassword, _confirmPasswordTextController,
-            icon: Icons.lock_outline));
+        child: FitnesscoTextField(
+            text: 'Confirm Password',
+            controller: _confirmPasswordTextController,
+            textInputType: TextInputType.visiblePassword,
+            displayPrefixIcon: Icon(Icons.lock_outline)));
   }
 
   Widget _registerButton() {

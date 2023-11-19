@@ -46,7 +46,7 @@ class _GymRatesScreenState extends State<GymRatesScreen> {
       setState(() {
         _isLoading = false;
       });
-      showErrorMessage(context, label: 'Error getting Gym Rates: $error');
+      showErrorMessage(context, label: 'Error getting Gym Rates');
     }
   }
 

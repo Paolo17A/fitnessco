@@ -79,7 +79,7 @@ class _ChatScreenState extends State<ChatScreen> {
       });
     }).onError((error, stackTrace) {
       ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error getting message thread: $error')));
+          SnackBar(content: Text('Error getting message thread')));
       Navigator.pop(context);
       return;
     });
@@ -122,8 +122,8 @@ class _ChatScreenState extends State<ChatScreen> {
       //  call the callback widget and return to the client home screen
       widget.onCallback!();
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error removing trainer: $error')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error removing trainer')));
     }
   }
 

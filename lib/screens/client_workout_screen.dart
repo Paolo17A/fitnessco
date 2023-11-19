@@ -54,8 +54,7 @@ class ClientWorkoutsScreenState extends State<ClientWorkoutsScreen> {
       });
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text(
-              'Error getting client\'s prescribed workout: ${error.toString()}')));
+          content: Text('Error getting client\'s prescribed workout.')));
     }
   }
 

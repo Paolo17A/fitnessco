@@ -1035,8 +1035,8 @@ class _CameraWorkoutScreenState extends State<CameraWorkoutScreen> {
         isAlreadyUpdating = false;
       }
     } catch (error) {
-      scaffoldMessenger.showSnackBar(SnackBar(
-          content: Text('Error adding workout history: ${error.toString()}')));
+      scaffoldMessenger.showSnackBar(
+          SnackBar(content: Text('Error adding workout history')));
     }
   }
   //===============================================================================================

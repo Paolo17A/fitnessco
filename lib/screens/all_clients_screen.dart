@@ -37,7 +37,7 @@ class AllClientsScreenState extends State<AllClientsScreen> {
         _isLoading = false;
       });
     } catch (error) {
-      showErrorMessage(context, label: 'Error getting all Clients: $error');
+      showErrorMessage(context, label: 'Error getting all Clients');
       setState(() {
         _isLoading = false;
       });

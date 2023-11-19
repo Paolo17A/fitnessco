@@ -54,7 +54,7 @@ class _SendOTPScreenState extends State<SendOTPScreen> {
         _otpSentToEmail = true;
       });
     } catch (error) {
-      showErrorMessage(context, label: 'Error sending OTP to email" $error');
+      showErrorMessage(context, label: 'Error sending OTP to email"');
       setState(() {
         _isLoading = false;
       });
